@@ -2,10 +2,12 @@
 
 [!] Note that main branch is under maintenance. Use "2022-version" named branch instead.
 
-## Sponsored by Stream!
-If you want to read an article about this project, there is an aritcle that is written by me and sponsored by Stream. Here is the link: https://gstrm.io/sahinefe
+## Sponsored by Stream
 
-<img width="500" height="250" alt="r1" src="https://user-images.githubusercontent.com/67283777/214430512-e987c9ba-f6e6-4b43-abe9-efe0c375ef7c.png"> <img width="500" height="250" alt="2" src="https://user-images.githubusercontent.com/67283777/214430646-a7165df6-467b-4ecf-b9ed-14f3daa126c8.jpeg">
+> If you want to read an article about this project, there is an article that is written by me and sponsored by [Stream](https://getstream.io/chat/flutter/tutorial/?utm_source=GitHub&utm_medium=referral&utm_content=&utm_campaign=flutter_social_chat). Here is the link: https://gstrm.io/sahinefe
+
+![flutter_chat_preview](https://user-images.githubusercontent.com/67283777/214430512-e987c9ba-f6e6-4b43-abe9-efe0c375ef7c.png)
+![Stream](assets/images/stream-logo.png)
 
 ## Distinctive features gathered in a Single App
 * BLoC for state management
