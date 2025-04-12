@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_social_chat/presentation/design_system/colors.dart';
+import 'package:flutter_social_chat/presentation/design_system/dimens.dart';
 
 class CustomTextField extends StatelessWidget {
   const CustomTextField({
@@ -9,44 +9,54 @@ class CustomTextField extends StatelessWidget {
     required this.hintText,
     required this.icon,
     this.validator,
+    this.obscureText = false,
+    this.keyboardType,
+    this.textInputAction,
+    this.controller,
   });
+
   final Function(String) onChanged;
   final String labelText;
   final String hintText;
   final IconData icon;
   final String? Function(String?)? validator;
+  final bool obscureText;
+  final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
+  final TextEditingController? controller;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(15),
+      padding: const EdgeInsets.all(Dimens.padding16),
       child: TextFormField(
+        controller: controller,
         validator: validator,
         autocorrect: false,
-        cursorColor: black,
+        obscureText: obscureText,
+        keyboardType: keyboardType,
+        textInputAction: textInputAction,
         onChanged: onChanged,
+        cursorColor: Theme.of(context).primaryColor,
         decoration: InputDecoration(
           enabledBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(25.0)),
+            borderRadius: BorderRadius.all(Radius.circular(Dimens.borderRadius25)),
           ),
           focusedBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(25.0)),
+            borderRadius: BorderRadius.all(Radius.circular(Dimens.borderRadius25)),
           ),
           border: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(25.0)),
+            borderRadius: BorderRadius.all(Radius.circular(Dimens.borderRadius25)),
           ),
           focusedErrorBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(25.0)),
+            borderRadius: BorderRadius.all(Radius.circular(Dimens.borderRadius25)),
           ),
           errorBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(25.0)),
+            borderRadius: BorderRadius.all(Radius.circular(Dimens.borderRadius25)),
           ),
           labelText: labelText,
           hintText: hintText,
-          iconColor: black,
-          hintStyle: const TextStyle(color: black),
-          labelStyle: const TextStyle(color: black),
-          prefixIcon: Icon(icon, color: black),
+          prefixIcon: Icon(icon, color: Theme.of(context).iconTheme.color),
         ),
       ),
     );

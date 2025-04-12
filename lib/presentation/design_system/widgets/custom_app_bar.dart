@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
+import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   CustomAppBar({
@@ -9,10 +9,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.backgroundColor,
     this.leading,
     this.isTitleCentered = true,
-    this.titleColor = black,
+    this.titleColor = primaryTextColor,
     this.titleFontSize = 20,
     this.titleFontWeight = FontWeight.w500,
-  }) : preferredSize = const Size.fromHeight(70.0);
+    this.actions,
+    this.elevation,
+  }) : preferredSize = const Size.fromHeight(kToolbarHeight + 10);
 
   @override
   final Size preferredSize;
@@ -23,25 +25,29 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double? titleFontSize;
   final FontWeight? titleFontWeight;
   final Widget? leading;
+  final List<Widget>? actions;
+  final double? elevation;
 
   @override
   Widget build(BuildContext context) {
-    final scaffoldBackgroundColor = Theme.of(context).scaffoldBackgroundColor;
+    final theme = Theme.of(context);
+    final scaffoldBackgroundColor = theme.scaffoldBackgroundColor;
 
     final appBarTitle = CustomText(
-      color: titleColor ?? black,
-      fontSize: titleFontSize ?? 20,
+      color: titleColor,
+      fontSize: titleFontSize,
       text: title!,
-      fontWeight: titleFontWeight ?? FontWeight.w500,
+      fontWeight: titleFontWeight,
     );
 
     return AppBar(
       centerTitle: isTitleCentered,
       backgroundColor: backgroundColor ?? scaffoldBackgroundColor,
-      toolbarHeight: 80,
-      elevation: 0,
+      toolbarHeight: kToolbarHeight + 10,
+      elevation: elevation ?? 0,
       leadingWidth: 90,
       leading: leading,
+      actions: actions,
       surfaceTintColor: backgroundColor,
       shadowColor: transparent,
       title: title != null ? appBarTitle : null,

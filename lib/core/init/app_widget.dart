@@ -9,7 +9,7 @@ import 'package:flutter_social_chat/presentation/blocs/chat/chat_management/chat
 import 'package:flutter_social_chat/presentation/blocs/chat/chat_setup/chat_setup_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/connectivity/connectivity_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/connectivity/connectivity_state.dart';
-import 'package:flutter_social_chat/presentation/design_system/colors.dart';
+import 'package:flutter_social_chat/presentation/design_system/theme.dart';
 import 'package:flutter_social_chat/core/di/dependency_injector.dart';
 import 'package:flutter_social_chat/core/init/router/app_router.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_cubit.dart';
@@ -71,15 +71,7 @@ class AppWidget extends StatelessWidget {
             }
           },
           child: MaterialApp.router(
-            theme: ThemeData(
-              useMaterial3: true,
-              colorScheme: ColorScheme.fromSeed(seedColor: customIndigoColor),
-              textSelectionTheme: const TextSelectionThemeData(
-                cursorColor: customIndigoColor,
-                selectionColor: customIndigoColor,
-                selectionHandleColor: customIndigoColor,
-              ),
-            ),
+            theme: AppTheme.lightTheme,
             debugShowCheckedModeBanner: false,
             routerConfig: appRouter.router,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
