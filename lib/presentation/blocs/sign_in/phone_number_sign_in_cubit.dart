@@ -6,15 +6,17 @@ import 'package:flutter_social_chat/core/constants/enums/auth_failure_enum.dart'
 import 'package:flutter_social_chat/core/interfaces/i_auth_repository.dart';
 import 'package:fpdart/fpdart.dart';
 
+/// Manages phone number sign-in flow
 class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
   final IAuthRepository _authService;
-
   StreamSubscription<Either<AuthFailureEnum, (String, int?)>>? _phoneNumberSignInSubscription;
+  
+  // Timeout for SMS verification code
+  final Duration verificationCodeTimeout = const Duration(seconds: 60);
 
   PhoneNumberSignInCubit(this._authService) : super(PhoneNumberSignInState.empty());
 
-  final Duration verificationCodeTimeout = const Duration(seconds: 60);
-
+  /// Updates phone number in state when user types
   void phoneNumberChanged({required String phoneNumber}) {
     emit(state.copyWith(phoneNumber: phoneNumber, isPhoneNumberInputValidated: false));
   }
@@ -23,10 +25,12 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
     emit(state.copyWith(isPhoneNumberInputValidated: isPhoneNumberInputValidated));
   }
 
+  /// Updates SMS code in state when user types
   void smsCodeChanged({required String smsCode}) {
     emit(state.copyWith(smsCode: smsCode));
   }
 
+  /// Resets the state to initial values
   void reset() {
     emit(
       state.copyWith(
@@ -48,6 +52,7 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
     return super.close();
   }
 
+  /// Verifies the SMS code entered by user
   void verifySmsCode() {
     if (state.isInProgress) {
       return;
@@ -55,7 +60,7 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
 
     state.verificationIdOption.fold(
       () {
-        //Verification id does not exist. This should not happen.
+        // Verification id does not exist. This should not happen.
       },
       (String verificationId) async {
         emit(state.copyWith(isInProgress: true, failureMessageOption: none(), authFailureOrSuccessOption: none()));
@@ -83,6 +88,7 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
     );
   }
 
+  /// Initiates phone number sign-in process
   void signInWithPhoneNumber() {
     if (state.isInProgress) {
       return;
@@ -90,6 +96,7 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
 
     emit(state.copyWith(isInProgress: true, failureMessageOption: none(), authFailureOrSuccessOption: none()));
 
+    // Cancel any existing subscription
     _phoneNumberSignInSubscription?.cancel();
 
     _phoneNumberSignInSubscription = _authService

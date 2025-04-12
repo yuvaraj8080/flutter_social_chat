@@ -20,7 +20,7 @@ class CameraCubit extends Cubit<CameraState> {
   @override
   Future<void> close() async {
     await _cameraPermissionSubscription?.cancel();
-    super.close();
+    return super.close();
   }
 
   /// Resets the state to remove any previously taken photo
@@ -106,15 +106,17 @@ class CameraCubit extends Cubit<CameraState> {
       }
 
       final sizeOfTheTakenPhoto = await file.length();
-      String pathOfTheTakenPhoto;
+      String pathOfTheTakenPhoto = file.path;
 
-      // Process image differently based on camera lens direction
+      // Only process front camera images, back camera can use the file directly
       if (cameraLensDirection == CameraLensDirection.front) {
-        // For front camera, flip the image horizontally (mirror effect)
-        pathOfTheTakenPhoto = await compute(_processFrontCameraImage, file.path);
-      } else {
-        // For back camera, use directly
-        pathOfTheTakenPhoto = file.path;
+        try {
+          // For front camera, flip the image horizontally (mirror effect)
+          pathOfTheTakenPhoto = await compute(_processFrontCameraImage, file.path);
+        } catch (e) {
+          debugPrint('Failed to process front camera image, using original: $e');
+          // Continue with the original image if processing fails
+        }
       }
 
       emit(

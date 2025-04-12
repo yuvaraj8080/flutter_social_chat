@@ -102,8 +102,6 @@ class AuthManagementCubit extends Cubit<AuthManagementState> {
           photoURL: photoUrl,
           isOnboardingCompleted: true,
         ),
-
-        // Get the document reference first, then set the data
         _firebaseFirestore.collection('users').doc(uid).set(
           {
             'photoUrl': photoUrl,
