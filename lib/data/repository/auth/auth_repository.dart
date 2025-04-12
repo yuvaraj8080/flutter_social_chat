@@ -18,13 +18,12 @@ class AuthRepository implements IAuthRepository {
   @override
   Stream<AuthUserModel> get authStateChanges {
     return _firebaseAuth.authStateChanges().map(
-      (User? user) => user?.toDomain() ?? AuthUserModel.empty(),
-    );
+          (User? user) => user?.toDomain() ?? AuthUserModel.empty(),
+        );
   }
 
   @override
-  Future<Option<AuthUserModel>> getSignedInUser() async => 
-      optionOf(_firebaseAuth.currentUser?.toDomain());
+  Future<Option<AuthUserModel>> getSignedInUser() async => optionOf(_firebaseAuth.currentUser?.toDomain());
 
   @override
   Future<void> signOut() async {
@@ -44,6 +43,16 @@ class AuthRepository implements IAuthRepository {
   }) async* {
     final StreamController<Either<AuthFailureEnum, (String, int?)>> streamController =
         StreamController<Either<AuthFailureEnum, (String, int?)>>();
+    
+    // Add cleanup to prevent memory leaks
+    Future<void> cleanUp() async {
+      if (!streamController.isClosed) {
+        await streamController.close();
+      }
+    }
+    
+    // Ensure cleanup when the stream is no longer listened to
+    streamController.onCancel = cleanUp;
 
     try {
       await _firebaseAuth.verifyPhoneNumber(
@@ -62,7 +71,8 @@ class AuthRepository implements IAuthRepository {
           streamController.add(right((verificationId, resendToken)));
         },
         codeAutoRetrievalTimeout: (String verificationId) {
-          // We don't need to do anything here as the timeout is handled by Firebase
+          // Add timeout handling with proper enum value
+          streamController.add(left(AuthFailureEnum.smsTimeout));
         },
         verificationFailed: (FirebaseAuthException e) {
           late final Either<AuthFailureEnum, (String, int?)> result;
@@ -89,7 +99,7 @@ class AuthRepository implements IAuthRepository {
   Future<void> updateDisplayName({required String displayName}) async {
     final user = _firebaseAuth.currentUser;
     if (user == null) return;
-    
+
     await user.updateDisplayName(displayName);
     await _updateUserDataInFirestore({'userName': displayName});
   }
@@ -98,7 +108,7 @@ class AuthRepository implements IAuthRepository {
   Future<void> updatePhotoURL({required String photoURL}) async {
     final user = _firebaseAuth.currentUser;
     if (user == null) return;
-    
+
     await user.updatePhotoURL(photoURL);
     await _updateUserDataInFirestore({'photoUrl': photoURL});
   }
@@ -113,37 +123,37 @@ class AuthRepository implements IAuthRepository {
     if (user == null) return;
 
     final Map<String, dynamic> firestoreData = {};
-    
+
     if (displayName != null) {
       await user.updateDisplayName(displayName);
       firestoreData['userName'] = displayName;
     }
-    
+
     if (photoURL != null) {
       await user.updatePhotoURL(photoURL);
       firestoreData['photoUrl'] = photoURL;
     }
-    
+
     if (isOnboardingCompleted != null) {
       firestoreData['isOnboardingCompleted'] = isOnboardingCompleted;
     }
-    
+
     if (firestoreData.isNotEmpty) {
       await _updateUserDataInFirestore(firestoreData);
     }
   }
-  
+
   Future<void> _updateUserDataInFirestore(Map<String, dynamic> data) async {
     final user = _firebaseAuth.currentUser;
     if (user == null) return;
-    
+
     final userDoc = _firestore.collection('users').doc(user.uid);
-    
+
     try {
       // Optimized: Use transaction to ensure atomic operations
       await _firestore.runTransaction((transaction) async {
         final docSnapshot = await transaction.get(userDoc);
-        
+
         if (docSnapshot.exists) {
           transaction.update(userDoc, data);
         } else {
@@ -186,7 +196,7 @@ class AuthRepository implements IAuthRepository {
           'lastLogin': FieldValue.serverTimestamp(),
         });
       }
-      
+
       return right(unit);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'session-expired') {
