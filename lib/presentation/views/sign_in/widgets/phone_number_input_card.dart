@@ -6,12 +6,12 @@ import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/dimens.dart';
+import 'package:flutter_social_chat/presentation/design_system/text_styles.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
 import 'package:flutter_social_chat/presentation/views/sign_in/widgets/phone_number_sign_in_section.dart';
 import 'package:flutter_social_chat/core/init/router/codec.dart';
 import 'package:go_router/go_router.dart';
 
-/// Card widget that contains the phone number input field and submit button
 class PhoneNumberInputCard extends StatelessWidget {
   const PhoneNumberInputCard({super.key});
 
@@ -20,6 +20,7 @@ class PhoneNumberInputCard extends StatelessWidget {
     final Size size = MediaQuery.of(context).size;
 
     return BlocBuilder<PhoneNumberSignInCubit, PhoneNumberSignInState>(
+      buildWhen: (previous, current) => previous.isPhoneNumberInputValidated != current.isPhoneNumberInputValidated,
       builder: (context, state) {
         return Container(
           width: size.width,
@@ -30,18 +31,20 @@ class PhoneNumberInputCard extends StatelessWidget {
             bottom: Dimens.padding24,
           ),
           child: Card(
-            color: surfaceColor,
+            color: white,
             elevation: 4,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(Dimens.borderRadius16),
             ),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildTitle(context),
+                // Use intrinsic height instead of fixed height
                 PhoneNumberInputField(state: state),
                 _buildInfoText(context),
-                _buildSubmitButton(context, state),
+                _buildContinueButton(context, state),
               ],
             ),
           ),
@@ -58,7 +61,7 @@ class PhoneNumberInputCard extends StatelessWidget {
       padding: const EdgeInsets.only(top: 28, left: 28),
       child: CustomText(
         text: signInWithPhoneNumber,
-        fontWeight: FontWeight.w600,
+        style: AppTextStyles.heading3,
       ),
     );
   }
@@ -71,51 +74,90 @@ class PhoneNumberInputCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
       child: CustomText(
         text: smsInformationMessage,
-        fontSize: 16,
-        fontWeight: FontWeight.w400,
+        style: AppTextStyles.bodySmall,
       ),
     );
   }
 
-  /// Builds the submit button for the form
-  Widget _buildSubmitButton(BuildContext context, PhoneNumberSignInState state) {
+  /// Builds the continue button with smooth color transition animation
+  Widget _buildContinueButton(BuildContext context, PhoneNumberSignInState state) {
     final bool isEnabled = state.isPhoneNumberInputValidated;
+    final String continueText = AppLocalizations.of(context)?.continueText ?? '';
 
-    return Center(
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: Dimens.padding24),
-        child: Material(
-          color: transparent,
-          child: InkWell(
-            onTap: isEnabled ? () => _handleSubmit(context, state) : null,
-            borderRadius: BorderRadius.circular(Dimens.borderRadius25),
-            child: Ink(
-              decoration: BoxDecoration(
-                color: isEnabled ? customIndigoColor : customGreyColor400,
-                borderRadius: BorderRadius.circular(Dimens.borderRadius25),
-                boxShadow: isEnabled 
-                  ? [
-                      BoxShadow(
-                        color: customIndigoColor.withOpacity(0.3),
-                        spreadRadius: 1,
-                        blurRadius: 8,
-                        offset: const Offset(0, 3),
-                      )
-                    ] 
-                  : null,
-              ),
-              height: 56,
-              width: 56,
-              child: const Center(
-                child: Icon(
-                  Icons.arrow_forward,
-                  color: white,
-                  size: Dimens.iconSize24,
+    // Create button text style
+    final buttonTextStyle = AppTextStyles.buttonMedium.copyWith(
+      letterSpacing: 1.2,
+      fontWeight: FontWeight.w600,
+    );
+
+    // Extract constant for reuse
+    const double borderRadius = 27;
+
+    return Padding(
+      padding: const EdgeInsets.all(28.0),
+      child: TweenAnimationBuilder<double>(
+        tween: Tween<double>(begin: 0, end: isEnabled ? 1.0 : 0.0),
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+        builder: (context, value, _) {
+          // Interpolate between inactive and active colors for gradient
+          final startColor = Color.lerp(buttonGradientInactiveStart, buttonGradientActiveStart, value)!;
+          final endColor = Color.lerp(buttonGradientInactiveEnd, buttonGradientActiveEnd, value)!;
+
+          // Get shadow color with animated opacity
+          final shadowColor = getCustomIndigoShadowColorWithOpacity(0.3 * value);
+
+          // Interpolate for circle background
+          final circleColor = Color.lerp(whiteWithOpacity10, whiteWithOpacity30, value)!;
+
+          return Material(
+            color: transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(borderRadius),
+              splashColor: isEnabled ? whiteWithOpacity12 : transparent,
+              highlightColor: isEnabled ? whiteWithOpacity10 : transparent,
+              onTap: isEnabled ? () => _handleSubmit(context, state) : null,
+              child: Container(
+                width: double.infinity,
+                height: 54,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [startColor, endColor],
+                  ),
+                  borderRadius: BorderRadius.circular(borderRadius),
+                  boxShadow: [
+                    BoxShadow(
+                      color: shadowColor,
+                      blurRadius: 10 * value, // Animate blur radius
+                      offset: Offset(0, 4 * value), // Animate offset
+                    ),
+                  ],
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      continueText.toUpperCase(),
+                      style: buttonTextStyle,
+                    ),
+                    Container(
+                      height: 38,
+                      width: 38,
+                      decoration: BoxDecoration(
+                        color: circleColor,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Center(
+                        child: Icon(Icons.arrow_forward, color: white, size: 22),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

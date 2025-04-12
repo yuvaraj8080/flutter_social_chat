@@ -5,6 +5,8 @@ import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/dimens.dart';
+import 'package:flutter_social_chat/presentation/design_system/styles/input_styles.dart';
+import 'package:flutter_social_chat/presentation/design_system/text_styles.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
 class PhoneNumberInputField extends StatefulWidget {
@@ -20,7 +22,10 @@ class _PhoneNumberInputFieldState extends State<PhoneNumberInputField> {
   /// Initial phone number with default country code
   final PhoneNumber initialPhone = PhoneNumber(isoCode: 'TR');
   final TextEditingController _phoneController = TextEditingController();
-
+  bool _hasAttemptedValidation = false;
+  bool _isInputValid = true;
+  String _errorText = '';
+  
   @override
   void initState() {
     super.initState();
@@ -43,61 +48,103 @@ class _PhoneNumberInputFieldState extends State<PhoneNumberInputField> {
   @override
   Widget build(BuildContext context) {
     final String hintText = AppLocalizations.of(context)?.phoneNumber ?? '';
-
-    return Container(
-      width: double.infinity,
-      height: Dimens.inputHeight + 20,
-      padding: const EdgeInsets.symmetric(horizontal: Dimens.padding24),
-      child: InternationalPhoneNumberInput(
-        textFieldController: _phoneController,
-        onInputChanged: (PhoneNumber phoneNumber) {
-          context.read<PhoneNumberSignInCubit>().phoneNumberChanged(
-                phoneNumber: phoneNumber.phoneNumber!,
-              );
-        },
-        onInputValidated: (bool isPhoneNumberInputValidated) {
-          context.read<PhoneNumberSignInCubit>().updateNextButtonStatus(
-                isPhoneNumberInputValidated: isPhoneNumberInputValidated,
-              );
-        },
-        spaceBetweenSelectorAndTextField: 0,
-        selectorButtonOnErrorPadding: 0,
-        inputDecoration: InputDecoration(
-          hintText: hintText,
-          contentPadding: const EdgeInsets.symmetric(
-            vertical: Dimens.padding12,
-            horizontal: Dimens.padding8,
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: Dimens.padding24),
+          child: Theme(
+            // Remove splashes from country selector
+            data: Theme.of(context).copyWith(
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
+            ),
+            child: InternationalPhoneNumberInput(
+              textFieldController: _phoneController,
+              onInputChanged: (PhoneNumber phoneNumber) {
+                final newPhoneNumber = phoneNumber.phoneNumber ?? '';
+                
+                // Only update if phone number changed - reduce unnecessary state updates
+                if (widget.state.phoneNumber != newPhoneNumber) {
+                  context.read<PhoneNumberSignInCubit>().phoneNumberChanged(
+                        phoneNumber: newPhoneNumber,
+                      );
+                }
+                
+                // Mark that user has started typing, so we can show validation errors
+                if (newPhoneNumber.isNotEmpty && !_hasAttemptedValidation) {
+                  setState(() {
+                    _hasAttemptedValidation = true;
+                  });
+                }
+              },
+              onInputValidated: (bool isPhoneNumberInputValidated) {
+                if (_isInputValid != isPhoneNumberInputValidated) {
+                  setState(() {
+                    _isInputValid = isPhoneNumberInputValidated;
+                    _updateErrorText();
+                  });
+                  
+                  // Only update state if validation status changed
+                  if (widget.state.isPhoneNumberInputValidated != isPhoneNumberInputValidated) {
+                    context.read<PhoneNumberSignInCubit>().updateNextButtonStatus(
+                          isPhoneNumberInputValidated: isPhoneNumberInputValidated,
+                        );
+                  }
+                }
+              },
+              spaceBetweenSelectorAndTextField: 0,
+              selectorButtonOnErrorPadding: 0,
+              inputDecoration: InputStyles.phoneNumberInputDecoration(
+                hintText: hintText,
+              ),
+              selectorConfig: const SelectorConfig(
+                selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
+                useBottomSheetSafeArea: true,
+                setSelectorButtonAsPrefixIcon: true,
+              ),
+              textStyle: AppTextStyles.bodyMedium,
+              autoValidateMode: AutovalidateMode.onUserInteraction,
+              initialValue: initialPhone,
+              inputBorder: InputBorder.none,
+              cursorColor: customIndigoColor,
+              keyboardType: const TextInputType.numberWithOptions(signed: true),
+              validator: (_) {
+                // We're handling error display manually
+                _updateErrorText();
+                return null; // Always return null to prevent TextField's error display
+              },
+            ),
           ),
-          hintStyle: const TextStyle(
-            color: secondaryTextColor,
-            fontSize: 16,
-          ),
-          enabledBorder: _createBorder(customGreyColor400, 1),
-          focusedBorder: _createBorder(customIndigoColor, 2),
-          errorBorder: _createBorder(errorColor, 1),
-          focusedErrorBorder: _createBorder(errorColor, 2),
         ),
-        selectorConfig: const SelectorConfig(
-          selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
-          useBottomSheetSafeArea: true,
-          setSelectorButtonAsPrefixIcon: true,
+        // Custom error message that doesn't affect layout
+        AnimatedSize(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+          child: _hasAttemptedValidation && !_isInputValid
+              ? Padding(
+                  padding: const EdgeInsets.only(left: Dimens.padding24, top: 4),
+                  child: Text(
+                    _errorText,
+                    style: AppTextStyles.withColor(AppTextStyles.caption, errorColor),
+                  ),
+                )
+              : const SizedBox.shrink(),
         ),
-        textStyle: const TextStyle(
-          color: primaryTextColor,
-          fontSize: 16,
-        ),
-        autoValidateMode: AutovalidateMode.onUserInteraction,
-        initialValue: initialPhone,
-        inputBorder: InputBorder.none,
-        cursorColor: customIndigoColor,
-      ),
+      ],
     );
   }
 
-  // Helper method to create underline borders
-  UnderlineInputBorder _createBorder(Color color, double width) {
-    return UnderlineInputBorder(
-      borderSide: BorderSide(color: color, width: width),
-    );
+  // Updates the error text based on current validation state
+  void _updateErrorText() {
+    if (_phoneController.text.isEmpty) {
+      _errorText = 'Phone number is required';
+    } else if (!_isInputValid) {
+      _errorText = 'Please enter a valid phone number';
+    } else {
+      _errorText = '';
+    }
   }
 }

@@ -7,18 +7,18 @@ class ChatPageBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       children: [
-        const Expanded(
+        Expanded(
           child: StreamMessageListView(),
         ),
         StreamMessageInput(
           autoCorrect: false,
           idleSendButton: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
+            padding: EdgeInsets.symmetric(horizontal: 8),
             child: Icon(Icons.send, size: 30, color: customGreyColor600),
           ),
-          activeSendButton: const Padding(
+          activeSendButton: Padding(
             padding: EdgeInsets.symmetric(horizontal: 8),
             child: Icon(Icons.send, size: 30, color: customIndigoColor),
           ),

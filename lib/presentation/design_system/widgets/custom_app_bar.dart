@@ -9,7 +9,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.backgroundColor,
     this.leading,
     this.isTitleCentered = true,
-    this.titleColor = primaryTextColor,
+    this.titleColor = black,
     this.titleFontSize = 20,
     this.titleFontWeight = FontWeight.w500,
     this.actions,

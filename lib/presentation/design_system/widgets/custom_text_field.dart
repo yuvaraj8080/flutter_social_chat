@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_social_chat/presentation/design_system/dimens.dart';
 
 class CustomTextField extends StatelessWidget {
   const CustomTextField({
@@ -28,7 +27,7 @@ class CustomTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(Dimens.padding16),
+      padding: const EdgeInsets.all(16),
       child: TextFormField(
         controller: controller,
         validator: validator,
@@ -40,19 +39,19 @@ class CustomTextField extends StatelessWidget {
         cursorColor: Theme.of(context).primaryColor,
         decoration: InputDecoration(
           enabledBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(Dimens.borderRadius25)),
+            borderRadius: BorderRadius.all(Radius.circular(24)),
           ),
           focusedBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(Dimens.borderRadius25)),
+            borderRadius: BorderRadius.all(Radius.circular(24)),
           ),
           border: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(Dimens.borderRadius25)),
+            borderRadius: BorderRadius.all(Radius.circular(24)),
           ),
           focusedErrorBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(Dimens.borderRadius25)),
+            borderRadius: BorderRadius.all(Radius.circular(24)),
           ),
           errorBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(Dimens.borderRadius25)),
+            borderRadius: BorderRadius.all(Radius.circular(24)),
           ),
           labelText: labelText,
           hintText: hintText,

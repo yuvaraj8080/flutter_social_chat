@@ -94,5 +94,7 @@
 
     "sessionExpired": "Session Expired!",
 
-    "invalidVerificationCode": "Invalid Verification Code!"
+    "invalidVerificationCode": "Invalid Verification Code!",
+
+    "continueText": "Continue"
 }

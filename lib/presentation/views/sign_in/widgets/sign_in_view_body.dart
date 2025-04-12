@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/dimens.dart';
+import 'package:flutter_social_chat/presentation/design_system/widgets/keyboard_dismiss_wrapper.dart';
 import 'package:flutter_social_chat/presentation/views/sign_in/widgets/phone_number_input_card.dart';
 
 /// Main body of the sign-in screen
@@ -17,13 +18,15 @@ class SignInViewBody extends StatelessWidget {
     
     // We don't need to rebuild this widget when the state changes
     // since none of its UI depends on the sign-in state
-    return Stack(
-      alignment: Alignment.topCenter,
-      children: [
-        _buildHeaderBackground(size),
-        _buildSignInStepsIcons(),
-        const PhoneNumberInputCard(),
-      ],
+    return KeyboardDismissWrapper(
+      child: Stack(
+        alignment: Alignment.topCenter,
+        children: [
+          _buildHeaderBackground(size),
+          _buildSignInStepsIcons(),
+          const PhoneNumberInputCard(),
+        ],
+      ),
     );
   }
 

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_social_chat/core/constants/enums/button_size_enum.dart';
 import 'package:flutter_social_chat/core/constants/enums/button_type_enum.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
-import 'package:flutter_social_chat/presentation/design_system/dimens.dart';
 import 'package:flutter_social_chat/presentation/design_system/text_styles.dart';
 
 class CustomButton extends StatelessWidget {
@@ -45,11 +44,11 @@ class CustomButton extends StatelessWidget {
           foregroundColor: white,
           elevation: 0,
           padding: const EdgeInsets.symmetric(
-            horizontal: Dimens.padding20,
+            horizontal: 20,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(
-              borderRadius ?? Dimens.borderRadius25,
+              borderRadius ?? 24,
             ),
           ),
         ),
@@ -58,11 +57,11 @@ class CustomButton extends StatelessWidget {
           foregroundColor: theme.primaryColor,
           elevation: 0,
           padding: const EdgeInsets.symmetric(
-            horizontal: Dimens.padding20,
+            horizontal: 20,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(
-              borderRadius ?? Dimens.borderRadius25,
+              borderRadius ?? 24,
             ),
             side: BorderSide(color: theme.primaryColor),
           ),
@@ -70,11 +69,11 @@ class CustomButton extends StatelessWidget {
       ButtonTypeEnum.text => TextButton.styleFrom(
           foregroundColor: theme.primaryColor,
           padding: const EdgeInsets.symmetric(
-            horizontal: Dimens.padding20,
+            horizontal: 20,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(
-              borderRadius ?? Dimens.borderRadius25,
+              borderRadius ?? 24,
             ),
           ),
         ),
@@ -82,7 +81,7 @@ class CustomButton extends StatelessWidget {
 
     // Text style based on size
     TextStyle textStyle = switch (buttonSize) {
-      ButtonSizeEnum.small => AppTextStyles.buttonMedium.copyWith(fontSize: 14),
+      ButtonSizeEnum.small => AppTextStyles.buttonMedium.copyWith(fontSize: 12),
       ButtonSizeEnum.medium => AppTextStyles.buttonMedium,
       ButtonSizeEnum.large => AppTextStyles.buttonLarge,
     };
@@ -109,7 +108,7 @@ class CustomButton extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   icon!,
-                  const SizedBox(width: Dimens.padding8),
+                  const SizedBox(width: 8),
                   Text(
                     text,
                     style: textStyle.copyWith(color: textColor),

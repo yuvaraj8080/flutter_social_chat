@@ -17,25 +17,25 @@ class SignInView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<PhoneNumberSignInCubit, PhoneNumberSignInState>(
+    return BlocConsumer<PhoneNumberSignInCubit, PhoneNumberSignInState>(
+      listenWhen: (previous, current) => 
+          previous.failureMessageOption != current.failureMessageOption && 
+          current.failureMessageOption.isSome(),
+      listener: (context, state) {
+        state.failureMessageOption.fold(
+          () {},
+          (authFailure) {
+            _showErrorToast(context, authFailure);
+            context.read<PhoneNumberSignInCubit>().reset();
+            context.pop();
+          },
+        );
+      },
+      buildWhen: (previous, current) => previous.isInProgress != current.isInProgress,
       builder: (context, state) {
         if (state.isInProgress) {
-          return BlocListener<PhoneNumberSignInCubit, PhoneNumberSignInState>(
-            listenWhen: (previous, current) => 
-                previous.failureMessageOption != current.failureMessageOption,
-            listener: (context, state) {
-              state.failureMessageOption.fold(
-                () {},
-                (authFailure) {
-                  _showErrorToast(context, authFailure);
-                  context.read<PhoneNumberSignInCubit>().reset();
-                  context.pop();
-                },
-              );
-            },
-            child: const PopScopeScaffold(
-              body: Center(child: CustomProgressIndicator()),
-            ),
+          return const PopScopeScaffold(
+            body: Center(child: CustomProgressIndicator()),
           );
         } else {
           final String appBarTitle = AppLocalizations.of(context)?.signIn ?? '';
