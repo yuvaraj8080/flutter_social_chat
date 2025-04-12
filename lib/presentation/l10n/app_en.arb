@@ -96,5 +96,9 @@
 
     "invalidVerificationCode": "Invalid Verification Code!",
 
-    "continueText": "Continue"
+    "continueText": "Continue",
+    
+    "phoneNumberRequired": "Phone number is required",
+    
+    "invalidPhoneNumber": "Please enter a valid phone number"
 }

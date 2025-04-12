@@ -25,7 +25,7 @@ class _PhoneNumberInputFieldState extends State<PhoneNumberInputField> {
   bool _hasAttemptedValidation = false;
   bool _isInputValid = true;
   String _errorText = '';
-  
+
   @override
   void initState() {
     super.initState();
@@ -48,7 +48,7 @@ class _PhoneNumberInputFieldState extends State<PhoneNumberInputField> {
   @override
   Widget build(BuildContext context) {
     final String hintText = AppLocalizations.of(context)?.phoneNumber ?? '';
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -65,14 +65,14 @@ class _PhoneNumberInputFieldState extends State<PhoneNumberInputField> {
               textFieldController: _phoneController,
               onInputChanged: (PhoneNumber phoneNumber) {
                 final newPhoneNumber = phoneNumber.phoneNumber ?? '';
-                
+
                 // Only update if phone number changed - reduce unnecessary state updates
                 if (widget.state.phoneNumber != newPhoneNumber) {
                   context.read<PhoneNumberSignInCubit>().phoneNumberChanged(
                         phoneNumber: newPhoneNumber,
                       );
                 }
-                
+
                 // Mark that user has started typing, so we can show validation errors
                 if (newPhoneNumber.isNotEmpty && !_hasAttemptedValidation) {
                   setState(() {
@@ -86,7 +86,7 @@ class _PhoneNumberInputFieldState extends State<PhoneNumberInputField> {
                     _isInputValid = isPhoneNumberInputValidated;
                     _updateErrorText();
                   });
-                  
+
                   // Only update state if validation status changed
                   if (widget.state.isPhoneNumberInputValidated != isPhoneNumberInputValidated) {
                     context.read<PhoneNumberSignInCubit>().updateNextButtonStatus(
@@ -97,9 +97,7 @@ class _PhoneNumberInputFieldState extends State<PhoneNumberInputField> {
               },
               spaceBetweenSelectorAndTextField: 0,
               selectorButtonOnErrorPadding: 0,
-              inputDecoration: InputStyles.phoneNumberInputDecoration(
-                hintText: hintText,
-              ),
+              inputDecoration: InputStyles.phoneNumberInputDecoration(hintText: hintText),
               selectorConfig: const SelectorConfig(
                 selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
                 useBottomSheetSafeArea: true,
@@ -110,7 +108,7 @@ class _PhoneNumberInputFieldState extends State<PhoneNumberInputField> {
               initialValue: initialPhone,
               inputBorder: InputBorder.none,
               cursorColor: customIndigoColor,
-              keyboardType: const TextInputType.numberWithOptions(signed: true),
+              keyboardType: TextInputType.number,
               validator: (_) {
                 // We're handling error display manually
                 _updateErrorText();
@@ -140,9 +138,9 @@ class _PhoneNumberInputFieldState extends State<PhoneNumberInputField> {
   // Updates the error text based on current validation state
   void _updateErrorText() {
     if (_phoneController.text.isEmpty) {
-      _errorText = 'Phone number is required';
+      _errorText = AppLocalizations.of(context)?.phoneNumberRequired ?? '';
     } else if (!_isInputValid) {
-      _errorText = 'Please enter a valid phone number';
+      _errorText = AppLocalizations.of(context)?.invalidPhoneNumber ?? '';
     } else {
       _errorText = '';
     }
