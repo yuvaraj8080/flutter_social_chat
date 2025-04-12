@@ -3,17 +3,17 @@ import 'dart:async';
 import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_state.dart';
 import 'package:flutter_social_chat/domain/models/auth/auth_user_model.dart';
 import 'package:flutter_social_chat/core/interfaces/i_auth_repository.dart';
-import 'package:flutter_social_chat/core/interfaces/i_getstream_chat_repository.dart';
+import 'package:flutter_social_chat/core/interfaces/i_chat_repository.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 
 class AuthCubit extends HydratedCubit<AuthState> {
   final IAuthRepository _authService;
-  final IGetstreamChatRepository _chatService;
+  final IChatRepository _chatService;
   StreamSubscription<AuthUserModel>? _authUserSubscription;
 
   AuthCubit({
     required IAuthRepository authService,
-    required IGetstreamChatRepository chatService,
+    required IChatRepository chatService,
   })  : _authService = authService,
         _chatService = chatService,
         super(AuthState.empty()) {

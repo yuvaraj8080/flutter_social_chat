@@ -1,72 +1,70 @@
-// ignore_for_file: depend_on_referenced_packages
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter_social_chat/core/interfaces/i_auth_repository.dart';
 import 'package:flutter_social_chat/domain/models/chat/chat_user_model.dart';
-import 'package:flutter_social_chat/core/interfaces/i_getstream_chat_repository.dart';
+import 'package:flutter_social_chat/core/interfaces/i_chat_repository.dart';
 import 'package:flutter_social_chat/data/extensions/chat/chat_user_extensions.dart';
 import 'package:flutter_social_chat/core/constants/enums/chat_failure_enum.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide Unit;
-import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-class GetstreamChatRepository implements IGetstreamChatRepository {
-  GetstreamChatRepository(this._firebaseAuth, this.streamChatClient);
+class ChatRepository implements IChatRepository {
+  ChatRepository(this._authRepository, this._streamChatClient);
 
-  final IAuthRepository _firebaseAuth;
-  final StreamChatClient streamChatClient;
+  final IAuthRepository _authRepository;
+  final StreamChatClient _streamChatClient;
 
   @override
   Stream<ChatUserModel> get chatAuthStateChanges {
-    return streamChatClient.state.currentUserStream.map(
-      (OwnUser? user) {
-        if (user == null) {
-          return ChatUserModel.empty();
-        } else {
-          return user.toDomain();
-        }
-      },
+    return _streamChatClient.state.currentUserStream.map(
+      (OwnUser? user) => user?.toDomain() ?? ChatUserModel.empty(),
     );
   }
 
   @override
   Future<Either<ChatFailureEnum, Unit>> disconnectUser() async {
     try {
-      await streamChatClient.disconnectUser();
+      await _streamChatClient.disconnectUser();
       return right(unit);
     } catch (e) {
+      debugPrint('Error disconnecting user: $e');
       return left(ChatFailureEnum.serverError);
     }
   }
 
   @override
   Stream<List<Channel>> get channelsThatTheUserIsIncluded {
-    return streamChatClient
-        .queryChannels(
-      filter: Filter.in_(
-        'members',
-        [streamChatClient.state.currentUser!.id],
-      ),
-    )
-        .map((listOfChannels) {
-      return listOfChannels;
-    });
+    try {
+      final currentUser = _streamChatClient.state.currentUser;
+      if (currentUser == null) {
+        return Stream.value([]);
+      }
+
+      return _streamChatClient
+          .queryChannels(
+            filter: Filter.in_('members', [currentUser.id]),
+          )
+          .map((channels) => channels);
+    } catch (e) {
+      debugPrint('Error fetching channels: $e');
+      return Stream.value([]);
+    }
   }
 
   @override
   Future<Either<ChatFailureEnum, Unit>> connectTheCurrentUser() async {
     try {
-      final signedInUserOption = await _firebaseAuth.getSignedInUser();
-  
+      final signedInUserOption = await _authRepository.getSignedInUser();
+
       final signedInUser = signedInUserOption.fold(
-        () => throw Exception('Not authanticated'),
+        () => throw Exception('User not authenticated'),
         (user) => user,
       );
-  
+
       // devToken, get info from readme.md file
-      final String devToken =
+      const String devToken =
           'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZWZlIn0.WfcPNsvL16TFOc0ced5eIrjzCukZBHIVyCz3DHBSWKI';
-  
-      await streamChatClient.connectUser(
+
+      await _streamChatClient.connectUser(
         User(
           id: signedInUser.id,
           name: signedInUser.userName,
@@ -76,6 +74,7 @@ class GetstreamChatRepository implements IGetstreamChatRepository {
       );
       return right(unit);
     } catch (e) {
+      debugPrint('Error connecting user: $e');
       return left(ChatFailureEnum.connectionFailure);
     }
   }
@@ -87,19 +86,25 @@ class GetstreamChatRepository implements IGetstreamChatRepository {
     required String channelImageUrl,
   }) async {
     try {
+      if (listOfMemberIDs.isEmpty) {
+        return left(ChatFailureEnum.channelCreateFailure);
+      }
+
       final randomId = const Uuid().v1();
-  
-      await streamChatClient.createChannel(
+
+      await _streamChatClient.createChannel(
         'messaging',
         channelId: randomId,
         channelData: {
           'members': listOfMemberIDs,
           'name': channelName,
           'image': channelImageUrl,
+          'created_at': DateTime.now().toIso8601String(),
         },
       );
       return right(unit);
     } catch (e) {
+      debugPrint('Error creating channel: $e');
       return left(ChatFailureEnum.channelCreateFailure);
     }
   }
@@ -110,17 +115,22 @@ class GetstreamChatRepository implements IGetstreamChatRepository {
     required int sizeOfTheTakenPhoto,
     required String pathOfTheTakenPhoto,
   }) async {
+    if (channelId.isEmpty || pathOfTheTakenPhoto.isEmpty) {
+      return left(ChatFailureEnum.imageUploadFailure);
+    }
+
     try {
       final randomMessageId = const Uuid().v1();
-  
-      final signedInUserOption = await _firebaseAuth.getSignedInUser();
+
+      final signedInUserOption = await _authRepository.getSignedInUser();
       final signedInUser = signedInUserOption.fold(
-        () => throw Exception('Not authanticated'),
+        () => throw Exception('User not authenticated'),
         (user) => user,
       );
       final user = User(id: signedInUser.id);
-  
-      final response = await streamChatClient.sendImage(
+
+      // Upload the image first
+      final response = await _streamChatClient.sendImage(
         AttachmentFile(
           size: sizeOfTheTakenPhoto,
           path: pathOfTheTakenPhoto,
@@ -128,25 +138,25 @@ class GetstreamChatRepository implements IGetstreamChatRepository {
         channelId,
         'messaging',
       );
-      
-      // Successful upload, you can now attach this image
-      // to an message that you then send to a channel
+
+      // Create and send the message with the image
       final imageUrl = response.file;
       final image = Attachment(
         type: 'image',
         imageUrl: imageUrl,
       );
-  
+
       final message = Message(
         user: user,
         id: randomMessageId,
         createdAt: DateTime.now(),
         attachments: [image],
       );
-  
-      await streamChatClient.sendMessage(message, channelId, 'messaging');
+
+      await _streamChatClient.sendMessage(message, channelId, 'messaging');
       return right(unit);
     } catch (e) {
+      debugPrint('Error sending photo message: $e');
       return left(ChatFailureEnum.imageUploadFailure);
     }
   }

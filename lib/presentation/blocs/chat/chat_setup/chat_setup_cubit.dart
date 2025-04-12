@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:flutter_social_chat/presentation/blocs/chat/chat_setup/chat_setup_state.dart';
 import 'package:flutter_social_chat/domain/models/chat/chat_user_model.dart';
-import 'package:flutter_social_chat/core/interfaces/i_getstream_chat_repository.dart';
+import 'package:flutter_social_chat/core/interfaces/i_chat_repository.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 
 class ChatSetupCubit extends HydratedCubit<ChatSetupState> {
   late final StreamSubscription<ChatUserModel>? _chatUserSubscription;
-  final IGetstreamChatRepository _chatService;
+  final IChatRepository _chatService;
 
   ChatSetupCubit(this._chatService) : super(ChatSetupState.empty()) {
     _chatUserSubscription = _chatService.chatAuthStateChanges.listen(_listenChatUserAuthStateChangesStream);
