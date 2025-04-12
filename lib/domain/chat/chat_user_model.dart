@@ -1,17 +1,15 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:equatable/equatable.dart';
 
-part 'chat_user_model.freezed.dart';
-part 'chat_user_model.g.dart';
+class ChatUserModel extends Equatable {
+  final String createdAt;
+  final String userRole;
+  final bool isUserBanned;
 
-@freezed
-class ChatUserModel with _$ChatUserModel {
-  const factory ChatUserModel({
-    required String createdAt,
-    required String userRole,
-    required bool isUserBanned,
-  }) = _ChatUserModel;
-
-  const ChatUserModel._();
+  const ChatUserModel({
+    required this.createdAt,
+    required this.userRole,
+    required this.isUserBanned,
+  });
 
   factory ChatUserModel.empty() => const ChatUserModel(
         createdAt: '',
@@ -19,5 +17,18 @@ class ChatUserModel with _$ChatUserModel {
         isUserBanned: false,
       );
 
-  factory ChatUserModel.fromJson(Map<String, dynamic> json) => _$ChatUserModelFromJson(json);
+  Map<String, dynamic> toJson() => {
+        'createdAt': createdAt,
+        'userRole': userRole,
+        'isUserBanned': isUserBanned,
+      };
+
+  factory ChatUserModel.fromJson(Map<String, dynamic> json) => ChatUserModel(
+        createdAt: json['createdAt'] as String? ?? '',
+        userRole: json['userRole'] as String? ?? '',
+        isUserBanned: json['isUserBanned'] as bool? ?? false,
+      );
+
+  @override
+  List<Object?> get props => [createdAt, userRole, isUserBanned];
 }

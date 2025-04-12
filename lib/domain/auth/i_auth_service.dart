@@ -1,4 +1,4 @@
-import 'package:flutter_social_chat/domain/auth/auth_failure.dart';
+import 'package:flutter_social_chat/core/constants/enums/auth_failure_enum.dart';
 import 'package:flutter_social_chat/domain/auth/auth_user_model.dart';
 import 'package:fpdart/fpdart.dart';
 
@@ -9,13 +9,13 @@ abstract class IAuthService {
 
   Future<void> signOut();
 
-  Stream<Either<AuthFailure, (String, int?)>> signInWithPhoneNumber({
+  Stream<Either<AuthFailureEnum, (String, int?)>> signInWithPhoneNumber({
     required String phoneNumber,
     required Duration timeout,
     required int? resendToken,
   });
 
-  Future<Either<AuthFailure, Unit>> verifySmsCode({
+  Future<Either<AuthFailureEnum, Unit>> verifySmsCode({
     required String smsCode,
     required String verificationId,
   });

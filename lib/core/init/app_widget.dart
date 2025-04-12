@@ -5,14 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_social_chat/presentation/blocs/auth_management/auth_management_cubit.dart';
-import 'package:flutter_social_chat/presentation/views/sms_verification/cubit/auth_cubit.dart';
-import 'package:flutter_social_chat/presentation/views/sign_in/cubit/phone_number_sign_in_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat/chat_management/chat_management_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/connectivity/connectivity_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/connectivity/connectivity_state.dart';
 import 'package:flutter_social_chat/core/constants/colors.dart';
 import 'package:flutter_social_chat/core/di/dependency_injector.dart';
 import 'package:flutter_social_chat/core/init/router/app_router.dart';
+import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_cubit.dart';
+import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_cubit.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class AppWidget extends StatelessWidget {

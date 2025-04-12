@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter_social_chat/domain/auth/auth_failure.dart';
+import 'package:flutter_social_chat/core/constants/enums/auth_failure_enum.dart';
 import 'package:fpdart/fpdart.dart';
 
 class PhoneNumberSignInState extends Equatable {
@@ -16,7 +16,7 @@ class PhoneNumberSignInState extends Equatable {
   final String phoneNumber;
   final String smsCode;
   final Option<String> verificationIdOption;
-  final Option<AuthFailure> failureMessageOption;
+  final Option<AuthFailureEnum> failureMessageOption;
   final bool isInProgress;
   final bool isPhoneNumberInputValidated;
   final (String, int?) phoneNumberAndResendTokenPair;
@@ -36,7 +36,7 @@ class PhoneNumberSignInState extends Equatable {
     String? phoneNumber,
     String? smsCode,
     Option<String>? verificationIdOption,
-    Option<AuthFailure>? failureMessageOption,
+    Option<AuthFailureEnum>? failureMessageOption,
     bool? isInProgress,
     bool? isPhoneNumberInputValidated,
     (String, int?)? phoneNumberAndResendTokenPair,

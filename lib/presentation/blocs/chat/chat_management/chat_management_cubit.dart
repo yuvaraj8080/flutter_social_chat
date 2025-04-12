@@ -1,12 +1,9 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat/chat_management/chat_management_state.dart';
-import 'package:flutter_social_chat/domain/auth/i_auth_service.dart';
 import 'package:flutter_social_chat/domain/chat/i_chat_service.dart';
 import 'package:flutter_social_chat/data/repository/core/firestore_helpers.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';

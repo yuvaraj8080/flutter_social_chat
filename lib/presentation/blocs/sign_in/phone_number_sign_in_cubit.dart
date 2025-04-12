@@ -2,14 +2,14 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_state.dart';
-import 'package:flutter_social_chat/domain/auth/auth_failure.dart';
+import 'package:flutter_social_chat/core/constants/enums/auth_failure_enum.dart';
 import 'package:flutter_social_chat/domain/auth/i_auth_service.dart';
 import 'package:fpdart/fpdart.dart';
 
 class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
   PhoneNumberSignInCubit(this._authService) : super(PhoneNumberSignInState.empty());
 
-  StreamSubscription<Either<AuthFailure, (String, int?)>>? _phoneNumberSignInSubscription;
+  StreamSubscription<Either<AuthFailureEnum, (String, int?)>>? _phoneNumberSignInSubscription;
   final Duration verificationCodeTimeout = const Duration(seconds: 60);
 
   final IAuthService _authService;
@@ -57,13 +57,13 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
       (String verificationId) async {
         emit(state.copyWith(isInProgress: true, failureMessageOption: none()));
 
-        final Either<AuthFailure, Unit> failureOrSuccess = await _authService.verifySmsCode(
+        final Either<AuthFailureEnum, Unit> failureOrSuccess = await _authService.verifySmsCode(
           smsCode: state.smsCode,
           verificationId: verificationId,
         );
 
         failureOrSuccess.fold(
-          (AuthFailure failure) {
+          (AuthFailureEnum failure) {
             emit(state.copyWith(failureMessageOption: some(failure), isInProgress: false));
           },
           (Unit _) {
@@ -92,8 +92,8 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
               : state.phoneNumberAndResendTokenPair.$2,
         )
         .listen(
-          (Either<AuthFailure, (String, int?)> failureOrVerificationId) => failureOrVerificationId.fold(
-            (AuthFailure failure) {
+          (Either<AuthFailureEnum, (String, int?)> failureOrVerificationId) => failureOrVerificationId.fold(
+            (AuthFailureEnum failure) {
               emit(state.copyWith(failureMessageOption: some(failure), isInProgress: false));
             },
             ((String, int?) verificationIdResendTokenPair) {

@@ -2,9 +2,10 @@ import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_social_chat/core/constants/colors.dart';
+import 'package:flutter_social_chat/core/constants/enums/auth_failure_enum.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_state.dart';
-import 'package:flutter_social_chat/core/constants/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/custom_app_bar.dart';
 import 'package:flutter_social_chat/presentation/design_system/custom_progress_indicator.dart';
 import 'package:flutter_social_chat/presentation/design_system/popscope_scaffold.dart';
@@ -33,14 +34,14 @@ class SignInView extends StatelessWidget {
                 () {},
                 (authFailure) {
                   BotToast.showText(
-                    text: authFailure.when(
-                      serverError: () => serverErrorText,
-                      tooManyRequests: () => tooManyRequestsText,
-                      deviceNotSupported: () => deviceNotSupportedText,
-                      smsTimeout: () => smsTimeoutText,
-                      sessionExpired: () => sessionExpiredText,
-                      invalidVerificationCode: () => invalidVerificationCodeText,
-                    ),
+                    text: switch (authFailure) {
+                      AuthFailureEnum.serverError => serverErrorText,
+                      AuthFailureEnum.tooManyRequests => tooManyRequestsText,
+                      AuthFailureEnum.deviceNotSupported => deviceNotSupportedText,
+                      AuthFailureEnum.smsTimeout => smsTimeoutText,
+                      AuthFailureEnum.sessionExpired => sessionExpiredText,
+                      AuthFailureEnum.invalidVerificationCode => invalidVerificationCodeText,
+                    },
                   );
 
                   context.read<PhoneNumberSignInCubit>().reset();

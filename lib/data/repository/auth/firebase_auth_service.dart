@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_social_chat/domain/auth/auth_failure.dart';
+import 'package:flutter_social_chat/core/constants/enums/auth_failure_enum.dart';
 import 'package:flutter_social_chat/domain/auth/auth_user_model.dart';
 import 'package:flutter_social_chat/domain/auth/i_auth_service.dart';
 import 'package:flutter_social_chat/data/repository/core/firebase_helpers.dart';
@@ -38,13 +38,13 @@ class FirebaseAuthService implements IAuthService {
   }
 
   @override
-  Stream<Either<AuthFailure, (String, int?)>> signInWithPhoneNumber({
+  Stream<Either<AuthFailureEnum, (String, int?)>> signInWithPhoneNumber({
     required String phoneNumber,
     required Duration timeout,
     required int? resendToken,
   }) async* {
-    final StreamController<Either<AuthFailure, (String, int?)>> streamController =
-        StreamController<Either<AuthFailure, (String, int?)>>();
+    final StreamController<Either<AuthFailureEnum, (String, int?)>> streamController =
+        StreamController<Either<AuthFailureEnum, (String, int?)>>();
 
     await _firebaseAuth.verifyPhoneNumber(
       forceResendingToken: resendToken,
@@ -59,13 +59,13 @@ class FirebaseAuthService implements IAuthService {
       },
       codeAutoRetrievalTimeout: (String verificationId) {},
       verificationFailed: (FirebaseAuthException e) {
-        late final Either<AuthFailure, (String, int?)> result;
+        late final Either<AuthFailureEnum, (String, int?)> result;
         if (e.code == 'too-many-requests') {
-          result = left(const AuthFailure.tooManyRequests());
+          result = left(AuthFailureEnum.tooManyRequests);
         } else if (e.code == 'app-not-authorized') {
-          result = left(const AuthFailure.deviceNotSupported());
+          result = left(AuthFailureEnum.deviceNotSupported);
         } else {
-          result = left(const AuthFailure.serverError());
+          result = left(AuthFailureEnum.serverError);
         }
         streamController.add(result);
       },
@@ -85,7 +85,7 @@ class FirebaseAuthService implements IAuthService {
   }
 
   @override
-  Future<Either<AuthFailure, Unit>> verifySmsCode({
+  Future<Either<AuthFailureEnum, Unit>> verifySmsCode({
     required String smsCode,
     required String verificationId,
   }) async {
@@ -113,11 +113,11 @@ class FirebaseAuthService implements IAuthService {
       return right(unit);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'session-expired') {
-        return left(const AuthFailure.sessionExpired());
+        return left(AuthFailureEnum.sessionExpired);
       } else if (e.code == 'ınvalıd-verıfıcatıon-code' || e.code == 'invalid-verification-code') {
-        return left(const AuthFailure.invalidVerificationCode());
+        return left(AuthFailureEnum.invalidVerificationCode);
       }
-      return left(const AuthFailure.serverError());
+      return left(AuthFailureEnum.serverError);
     }
   }
 }

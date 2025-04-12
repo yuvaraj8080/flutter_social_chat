@@ -7,8 +7,8 @@ import 'package:flutter_social_chat/data/repository/connectivity/connectivity_se
 import 'package:flutter_social_chat/data/repository/microphone/microphone_service.dart';
 import 'package:flutter_social_chat/infrastructure/chat/getstream_chat_service.dart';
 import 'package:flutter_social_chat/presentation/blocs/auth_management/auth_management_cubit.dart';
+import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_cubit.dart';
-import 'package:flutter_social_chat/presentation/views/sign_in/cubit/phone_number_sign_in_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/camera/camera_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat/chat_management/chat_management_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat/chat_setup/chat_setup_cubit.dart';
