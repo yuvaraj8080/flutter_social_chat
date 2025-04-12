@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_state.dart';
-import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_progress_indicator.dart';
 import 'package:flutter_social_chat/presentation/views/sms_verification/widgets/confirmation_info_text_with_icon.dart';
 import 'package:flutter_social_chat/presentation/views/sms_verification/widgets/confirmation_text_with_icon.dart';
@@ -11,6 +10,9 @@ import 'package:flutter_social_chat/presentation/views/sms_verification/widgets/
 import 'package:flutter_social_chat/presentation/views/sms_verification/widgets/sms_verification_pin_field.dart';
 import 'package:flutter_social_chat/presentation/views/sms_verification/widgets/wave_animation.dart';
 
+/// The main body of the SMS verification screen
+///
+/// Displays the PIN entry fields, confirmation button, and wave animation
 class SmsVerificationViewBody extends StatelessWidget {
   const SmsVerificationViewBody({super.key, required this.phoneNumber});
 
@@ -18,31 +20,39 @@ class SmsVerificationViewBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return BlocBuilder<PhoneNumberSignInCubit, PhoneNumberSignInState>(
       builder: (context, state) {
         return Stack(
           children: [
             const CustomWaveAnimation(),
-            if (state.isInProgress)
-              const CustomProgressIndicator(progressIndicatorColor: white)
-            else
-              Padding(
-                padding: const EdgeInsets.only(top: 160),
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      const ConfirmationTextWithIcon(),
-                      ConfirmationInfoTextWithIcon(phoneNumber: phoneNumber),
-                      const SmsVerificationPinField(),
-                      const ResendCodeButton(),
-                      VerificationConfirmButton(state: state),
-                    ],
-                  ),
-                ),
-              ),
+            _buildContent(context, state, theme),
           ],
         );
       },
+    );
+  }
+
+  /// Builds the main content based on the current state
+  Widget _buildContent(BuildContext context, PhoneNumberSignInState state, ThemeData theme) {
+    if (state.isInProgress) {
+      return CustomProgressIndicator(progressIndicatorColor: theme.colorScheme.onPrimary);
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 160),
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            const ConfirmationTextWithIcon(),
+            ConfirmationInfoTextWithIcon(phoneNumber: phoneNumber),
+            const SmsVerificationPinField(),
+            const ResendCodeButton(),
+            VerificationConfirmButton(state: state),
+          ],
+        ),
+      ),
     );
   }
 }

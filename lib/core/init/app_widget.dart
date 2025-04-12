@@ -23,7 +23,30 @@ class AppWidget extends StatelessWidget {
     final botToastBuilder = BotToastInit();
 
     return MultiBlocProvider(
-      providers: _buildBlocProviders(),
+      providers: [
+        BlocProvider(
+          lazy: false,
+          create: (context) => getIt<AuthManagementCubit>(),
+        ),
+        BlocProvider(
+          lazy: false,
+          create: (context) => getIt<AuthCubit>(),
+        ),
+        BlocProvider(
+          lazy: false,
+          create: (context) => getIt<ConnectivityCubit>(),
+        ),
+        BlocProvider(
+          lazy: false,
+          create: (context) => getIt<ChatSetupCubit>(),
+        ),
+        BlocProvider(
+          create: (context) => getIt<PhoneNumberSignInCubit>(),
+        ),
+        BlocProvider(
+          create: (context) => getIt<ChatManagementCubit>()..reset(),
+        ),
+      ],
       child: BlocListener<ConnectivityCubit, ConnectivityState>(
         listener: _handleConnectivityChanges,
         child: MaterialApp.router(
@@ -36,34 +59,6 @@ class AppWidget extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  /// Builds all BlocProviders required by the app
-  List<BlocProvider> _buildBlocProviders() {
-    return [
-      BlocProvider(
-        lazy: false,
-        create: (context) => getIt<AuthManagementCubit>(),
-      ),
-      BlocProvider(
-        lazy: false,
-        create: (context) => getIt<AuthCubit>(),
-      ),
-      BlocProvider(
-        lazy: false,
-        create: (context) => getIt<ConnectivityCubit>(),
-      ),
-      BlocProvider(
-        lazy: false,
-        create: (context) => getIt<ChatSetupCubit>(),
-      ),
-      BlocProvider(
-        create: (context) => getIt<PhoneNumberSignInCubit>(),
-      ),
-      BlocProvider(
-        create: (context) => getIt<ChatManagementCubit>()..reset(),
-      ),
-    ];
   }
 
   /// Manages connectivity state changes and shows appropriate notifications
