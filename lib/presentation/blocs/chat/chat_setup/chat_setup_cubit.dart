@@ -5,15 +5,11 @@ import 'package:flutter_social_chat/domain/chat/chat_user_model.dart';
 import 'package:flutter_social_chat/domain/chat/i_chat_service.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 
-import 'package:get_it/get_it.dart';
-
 class ChatSetupCubit extends HydratedCubit<ChatSetupState> {
   late final StreamSubscription<ChatUserModel>? _chatUserSubscription;
-  late final IChatService _chatService;
+  final IChatService _chatService;
 
-  ChatSetupCubit() : super(ChatSetupState.empty()) {
-    _chatService = GetIt.instance<IChatService>();
-
+  ChatSetupCubit(this._chatService) : super(ChatSetupState.empty()) {
     _chatUserSubscription = _chatService.chatAuthStateChanges.listen(_listenChatUserAuthStateChangesStream);
   }
 
@@ -31,12 +27,14 @@ class ChatSetupCubit extends HydratedCubit<ChatSetupState> {
     );
   }
 
+  @override
   Map<String, dynamic> toJson(ChatSetupState state) {
     return {
       'chatUser': state.chatUser.toJson(),
     };
   }
 
+  @override
   ChatSetupState fromJson(Map<String, dynamic> json) {
     return ChatSetupState.empty().copyWith(
       chatUser: ChatUserModel.fromJson(json['chatUser']),

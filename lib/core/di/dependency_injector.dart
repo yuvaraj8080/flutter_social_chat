@@ -32,7 +32,7 @@ void injectionSetup() {
   // External services
   getIt.registerSingleton<Connectivity>(Connectivity());
   getIt.registerSingleton<StreamChatClient>(StreamChatClient('3r6a7g8d4v8e', logLevel: Level.INFO));
-  
+
   // Firebase services
   getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
   getIt.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
@@ -53,7 +53,7 @@ void injectionSetup() {
   getIt.registerLazySingleton<ConnectivityCubit>(() => ConnectivityCubit());
   getIt.registerFactory<MicrophoneCubit>(() => MicrophoneCubit(getIt<IMicrophoneService>()));
   getIt.registerFactory<CameraCubit>(() => CameraCubit(getIt<ICameraService>()));
-  
+
   // Auth Cubits
   getIt.registerLazySingleton<AuthCubit>(
     () => AuthCubit(
@@ -70,7 +70,7 @@ void injectionSetup() {
     ),
   );
   getIt.registerFactory<PhoneNumberSignInCubit>(() => PhoneNumberSignInCubit(getIt<IAuthService>()));
-  
+
   // Chat Cubits
   getIt.registerFactory<ChatManagementCubit>(
     () => ChatManagementCubit(
@@ -79,5 +79,5 @@ void injectionSetup() {
       getIt<AuthCubit>(),
     ),
   );
-  getIt.registerLazySingleton<ChatSetupCubit>(() => ChatSetupCubit());
+  getIt.registerLazySingleton<ChatSetupCubit>(() => ChatSetupCubit(getIt<IChatService>()));
 }

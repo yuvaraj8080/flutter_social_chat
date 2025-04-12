@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_social_chat/presentation/blocs/auth_management/auth_management_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat/chat_management/chat_management_cubit.dart';
+import 'package:flutter_social_chat/presentation/blocs/chat/chat_setup/chat_setup_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/connectivity/connectivity_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/connectivity/connectivity_state.dart';
 import 'package:flutter_social_chat/core/constants/colors.dart';
@@ -38,6 +39,10 @@ class AppWidget extends StatelessWidget {
           create: (context) => getIt<ConnectivityCubit>(),
         ),
         BlocProvider(
+          lazy: false,
+          create: (context) => getIt<ChatSetupCubit>(),
+        ),
+        BlocProvider(
           create: (context) => getIt<PhoneNumberSignInCubit>(),
         ),
         BlocProvider(
@@ -58,7 +63,8 @@ class AppWidget extends StatelessWidget {
             if (!state.isUserConnectedToTheInternet) {
               BotToast.showText(
                 text: 'Connection Failed!',
-                duration: const Duration(days: 365),
+                duration: const Duration(seconds: 30),
+                clickClose: true,
               );
             } else if (state.isUserConnectedToTheInternet) {
               BotToast.cleanAll();
@@ -66,6 +72,8 @@ class AppWidget extends StatelessWidget {
           },
           child: MaterialApp.router(
             theme: ThemeData(
+              useMaterial3: true,
+              colorScheme: ColorScheme.fromSeed(seedColor: customIndigoColor),
               textSelectionTheme: const TextSelectionThemeData(
                 cursorColor: customIndigoColor,
                 selectionColor: customIndigoColor,

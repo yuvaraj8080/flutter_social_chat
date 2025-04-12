@@ -20,26 +20,44 @@ import 'package:go_router/go_router.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class AppRouter {
+  AppRouter();
+
+  // Navigator keys for different navigation scopes
   static final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
   static final GlobalKey<NavigatorState> _shellNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'shell');
 
+  // Toast observer for notifications
   final BotToastNavigatorObserver botToastNavigatorObserver = BotToastNavigatorObserver();
 
-  late final router = GoRouter(
+  // Main router configuration
+  late final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
     debugLogDiagnostics: true,
     observers: [botToastNavigatorObserver],
     initialLocation: RouterEnum.initialLocation.routeName,
     routes: [
-      GoRoute(
+      _initialRoute,
+      _bottomTabShellRoute,
+      _chatRoute,
+      _captureAndSendPhotoRoute,
+      _signInRoute,
+      _signInVerificationRoute,
+      _createNewChatRoute,
+      _onboardingRoute,
+    ],
+  );
+
+  // Route definitions
+  GoRoute get _initialRoute => GoRoute(
         path: RouterEnum.initialLocation.routeName,
         pageBuilder: (context, state) => customPageBuilderWidget(
           context,
           state,
           const LandingPage(),
         ),
-      ),
-      ShellRoute(
+      );
+
+  ShellRoute get _bottomTabShellRoute => ShellRoute(
         navigatorKey: _shellNavigatorKey,
         pageBuilder: (context, state, child) {
           return customPageBuilderWidget(
@@ -76,22 +94,26 @@ class AppRouter {
             ),
           ),
         ],
-      ),
-      GoRoute(
+      );
+
+  GoRoute get _chatRoute => GoRoute(
         path: RouterEnum.chatView.routeName,
         builder: (context, state) {
           final channel = state.extra as Channel?;
           return ChatPage(channel: channel!);
         },
-      ),
-      GoRoute(
+      );
+
+  GoRoute get _captureAndSendPhotoRoute => GoRoute(
         path: RouterEnum.captureAndSendPhotoView.routeName,
         builder: (context, state) {
           final extraParameters = state.extra as Map<String, dynamic>?;
+          if (extraParameters == null) {
+            throw Exception('Missing required parameters for CaptureAndSendPhotoPage');
+          }
 
           final pathOfTheTakenPhoto =
-              extraParameters!.entries.where((entries) => entries.key == 'pathOfTheTakenPhoto').single.value as String;
-
+              extraParameters.entries.where((entries) => entries.key == 'pathOfTheTakenPhoto').single.value as String;
           final sizeOfTheTakenPhoto =
               extraParameters.entries.where((entries) => entries.key == 'sizeOfTheTakenPhoto').single.value as int;
 
@@ -100,20 +122,21 @@ class AppRouter {
             sizeOfTheTakenPhoto: sizeOfTheTakenPhoto,
           );
         },
-      ),
-      GoRoute(
+      );
+
+  GoRoute get _signInRoute => GoRoute(
         path: RouterEnum.signInView.routeName,
         pageBuilder: (context, state) => customPageBuilderWidget(
           context,
           state,
           const SignInView(),
         ),
-      ),
-      GoRoute(
+      );
+
+  GoRoute get _signInVerificationRoute => GoRoute(
         path: RouterEnum.signInVerificationView.routeName,
         builder: (context, state) {
           final String? encodedExtras = state.extra as String?;
-
           final extras = encodedExtras != null ? PhoneNumberSignInStateCodec.decode(encodedExtras) : {};
 
           final phoneNumberSignInState = PhoneNumberSignInState(
@@ -130,13 +153,17 @@ class AppRouter {
 
           return SmsVerificationView(state: phoneNumberSignInState);
         },
-      ),
-      GoRoute(
+      );
+
+  GoRoute get _createNewChatRoute => GoRoute(
         path: RouterEnum.createNewChatView.routeName,
         builder: (context, state) {
           final extraParameters = state.extra as Map<String, dynamic>?;
+          if (extraParameters == null) {
+            throw Exception('Missing required parameters for CreateNewChatPage');
+          }
 
-          final userListController = extraParameters!.entries
+          final userListController = extraParameters.entries
               .where((entries) => entries.key == 'userListController')
               .single
               .value as StreamUserListController?;
@@ -151,15 +178,14 @@ class AppRouter {
             isCreateNewChatPageForCreatingGroup: isCreateNewChatPageForCreatingGroup,
           );
         },
-      ),
-      GoRoute(
+      );
+
+  GoRoute get _onboardingRoute => GoRoute(
         path: RouterEnum.onboardingView.routeName,
         pageBuilder: (context, state) => customPageBuilderWidget(
           context,
           state,
           const OnboardingPage(),
         ),
-      ),
-    ],
-  );
+      );
 }
