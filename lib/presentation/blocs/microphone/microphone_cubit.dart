@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_chat/presentation/blocs/microphone/microphone_state.dart';
-import 'package:flutter_social_chat/domain/microphone/i_microphone_service.dart';
+import 'package:flutter_social_chat/core/interfaces/i_microphone_service.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class MicrophoneCubit extends Cubit<MicrophoneState> {

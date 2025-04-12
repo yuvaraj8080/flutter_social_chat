@@ -1,4 +1,4 @@
-import 'package:flutter_social_chat/domain/camera/i_camera_service.dart';
+import 'package:flutter_social_chat/core/interfaces/i_camera_service.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class CameraService implements ICameraService {

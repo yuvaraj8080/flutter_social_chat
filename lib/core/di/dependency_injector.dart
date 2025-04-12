@@ -14,14 +14,14 @@ import 'package:flutter_social_chat/presentation/blocs/chat/chat_management/chat
 import 'package:flutter_social_chat/presentation/blocs/chat/chat_setup/chat_setup_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/connectivity/connectivity_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/microphone/microphone_cubit.dart';
-import 'package:flutter_social_chat/domain/auth/i_auth_service.dart';
-import 'package:flutter_social_chat/domain/camera/i_camera_service.dart';
-import 'package:flutter_social_chat/domain/chat/i_chat_service.dart';
-import 'package:flutter_social_chat/domain/connectivity/i_connectivity_service.dart';
+import 'package:flutter_social_chat/core/interfaces/i_auth_service.dart';
+import 'package:flutter_social_chat/core/interfaces/i_camera_service.dart';
+import 'package:flutter_social_chat/core/interfaces/i_chat_service.dart';
+import 'package:flutter_social_chat/core/interfaces/i_connectivity_service.dart';
 import 'package:flutter_social_chat/core/init/router/app_router.dart';
 import 'package:get_it/get_it.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
-import 'package:flutter_social_chat/domain/microphone/i_microphone_service.dart';
+import 'package:flutter_social_chat/core/interfaces/i_microphone_service.dart';
 
 final getIt = GetIt.instance;
 

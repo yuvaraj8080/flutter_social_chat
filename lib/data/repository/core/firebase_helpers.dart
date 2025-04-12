@@ -1,5 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_social_chat/domain/auth/auth_user_model.dart';
+import 'package:flutter_social_chat/domain/models/auth/auth_user_model.dart';
 
 extension FirebaseUserDomainX on User {
   AuthUserModel toDomain() {

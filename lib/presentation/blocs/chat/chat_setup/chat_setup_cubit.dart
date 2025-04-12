@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter_social_chat/presentation/blocs/chat/chat_setup/chat_setup_state.dart';
-import 'package:flutter_social_chat/domain/chat/chat_user_model.dart';
-import 'package:flutter_social_chat/domain/chat/i_chat_service.dart';
+import 'package:flutter_social_chat/domain/models/chat/chat_user_model.dart';
+import 'package:flutter_social_chat/core/interfaces/i_chat_service.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 
 class ChatSetupCubit extends HydratedCubit<ChatSetupState> {

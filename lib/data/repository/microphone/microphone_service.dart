@@ -1,4 +1,4 @@
-import 'package:flutter_social_chat/domain/microphone/i_microphone_service.dart';
+import 'package:flutter_social_chat/core/interfaces/i_microphone_service.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class MicrophoneService implements IMicrophoneService {

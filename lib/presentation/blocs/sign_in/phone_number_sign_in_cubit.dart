@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_state.dart';
 import 'package:flutter_social_chat/core/constants/enums/auth_failure_enum.dart';
-import 'package:flutter_social_chat/domain/auth/i_auth_service.dart';
+import 'package:flutter_social_chat/core/interfaces/i_auth_service.dart';
 import 'package:fpdart/fpdart.dart';
 
 class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {

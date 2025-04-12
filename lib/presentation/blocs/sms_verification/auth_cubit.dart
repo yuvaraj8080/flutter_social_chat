@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_state.dart';
-import 'package:flutter_social_chat/domain/auth/auth_user_model.dart';
-import 'package:flutter_social_chat/domain/auth/i_auth_service.dart';
-import 'package:flutter_social_chat/domain/chat/i_chat_service.dart';
+import 'package:flutter_social_chat/domain/models/auth/auth_user_model.dart';
+import 'package:flutter_social_chat/core/interfaces/i_auth_service.dart';
+import 'package:flutter_social_chat/core/interfaces/i_chat_service.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 
 class AuthCubit extends HydratedCubit<AuthState> {

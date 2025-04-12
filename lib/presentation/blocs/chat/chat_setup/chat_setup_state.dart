@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter_social_chat/domain/chat/chat_user_model.dart';
+import 'package:flutter_social_chat/domain/models/chat/chat_user_model.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class ChatSetupState extends Equatable {

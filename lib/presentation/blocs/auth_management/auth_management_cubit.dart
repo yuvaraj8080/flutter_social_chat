@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_chat/presentation/blocs/auth_management/auth_management_state.dart';
 import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_cubit.dart';
-import 'package:flutter_social_chat/domain/auth/i_auth_service.dart';
+import 'package:flutter_social_chat/core/interfaces/i_auth_service.dart';
 import 'package:flutter_social_chat/data/repository/core/firestore_helpers.dart';
 import 'package:image_picker/image_picker.dart';
 

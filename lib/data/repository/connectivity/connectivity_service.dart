@@ -1,5 +1,5 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:flutter_social_chat/domain/connectivity/i_connectivity_service.dart';
+import 'package:flutter_social_chat/core/interfaces/i_connectivity_service.dart';
 
 // It works well on the real devices, but
 // there is a known issue that the package is not working properly in the simulators.

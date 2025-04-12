@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_chat/presentation/blocs/camera/camera_state.dart';
-import 'package:flutter_social_chat/domain/camera/i_camera_service.dart';
+import 'package:flutter_social_chat/core/interfaces/i_camera_service.dart';
 import 'package:image/image.dart' as img;
 import 'package:permission_handler/permission_handler.dart';
 
