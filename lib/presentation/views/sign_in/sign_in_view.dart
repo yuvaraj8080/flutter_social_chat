@@ -41,6 +41,7 @@ class SignInView extends StatelessWidget {
           final String appBarTitle = AppLocalizations.of(context)?.signIn ?? '';
           
           return PopScopeScaffold(
+            resizeToAvoidBottomInset: false,
             body: const SignInViewBody(),
             appBar: CustomAppBar(
               backgroundColor: customIndigoColor, 

@@ -21,30 +21,28 @@ class PhoneNumberInputCard extends StatelessWidget {
 
     return BlocBuilder<PhoneNumberSignInCubit, PhoneNumberSignInState>(
       builder: (context, state) {
-        return SingleChildScrollView(
-          child: Container(
-            width: size.width,
-            padding: EdgeInsets.only(
-              top: size.height / 3,
-              right: Dimens.padding24,
-              left: Dimens.padding24,
-              bottom: Dimens.padding24,
+        return Container(
+          width: size.width,
+          padding: EdgeInsets.only(
+            top: size.height / 3,
+            right: Dimens.padding24,
+            left: Dimens.padding24,
+            bottom: Dimens.padding24,
+          ),
+          child: Card(
+            color: surfaceColor,
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(Dimens.borderRadius16),
             ),
-            child: Card(
-              color: surfaceColor,
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(Dimens.borderRadius16),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildTitle(context),
-                  PhoneNumberInputField(state: state),
-                  _buildInfoText(context),
-                  _buildSubmitButton(context, state),
-                ],
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildTitle(context),
+                PhoneNumberInputField(state: state),
+                _buildInfoText(context),
+                _buildSubmitButton(context, state),
+              ],
             ),
           ),
         );
