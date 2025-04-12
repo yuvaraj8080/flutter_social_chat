@@ -5,13 +5,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_chat/presentation/blocs/auth_management/auth_management_state.dart';
 import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_cubit.dart';
-import 'package:flutter_social_chat/core/interfaces/i_auth_service.dart';
+import 'package:flutter_social_chat/core/interfaces/i_auth_repository.dart';
 import 'package:flutter_social_chat/data/repository/core/firestore_helpers.dart';
 import 'package:image_picker/image_picker.dart';
 
 class AuthManagementCubit extends Cubit<AuthManagementState> {
   AuthManagementCubit({
-    required IAuthService authService,
+    required IAuthRepository authService,
     required FirebaseStorage firebaseStorage,
     required FirebaseFirestore firebaseFirestore,
     required AuthCubit authCubit,
@@ -21,7 +21,7 @@ class AuthManagementCubit extends Cubit<AuthManagementState> {
         _authCubit = authCubit,
         super(AuthManagementState.empty());
 
-  final IAuthService _authService;
+  final IAuthRepository _authService;
   final FirebaseStorage _firebaseStorage;
   final FirebaseFirestore _firebaseFirestore;
   final AuthCubit _authCubit;

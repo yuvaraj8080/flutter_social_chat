@@ -1,7 +1,7 @@
 import 'package:flutter_social_chat/domain/models/chat/chat_user_model.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-abstract class IChatService {
+abstract class IChatRepository {
   Stream<ChatUserModel> get chatAuthStateChanges;
 
   Stream<List<Channel>> get channelsThatTheUserIsIncluded;

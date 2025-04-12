@@ -4,13 +4,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_social_chat/core/constants/enums/auth_failure_enum.dart';
 import 'package:flutter_social_chat/domain/models/auth/auth_user_model.dart';
-import 'package:flutter_social_chat/core/interfaces/i_auth_service.dart';
+import 'package:flutter_social_chat/core/interfaces/i_auth_repository.dart';
 import 'package:flutter_social_chat/data/repository/core/firebase_helpers.dart';
-import 'package:flutter_social_chat/data/repository/core/firestore_helpers.dart';
 import 'package:fpdart/fpdart.dart';
 
-class FirebaseAuthService implements IAuthService {
-  FirebaseAuthService(this._firebaseAuth, this._firestore);
+class FirebaseAuthRepository implements IAuthRepository {
+  FirebaseAuthRepository(this._firebaseAuth, this._firestore);
 
   final FirebaseAuth _firebaseAuth;
   final FirebaseFirestore _firestore;
@@ -90,31 +89,24 @@ class FirebaseAuthService implements IAuthService {
     required String verificationId,
   }) async {
     try {
-      final PhoneAuthCredential phoneAuthCredential = PhoneAuthProvider.credential(
+      final credential = PhoneAuthProvider.credential(
         verificationId: verificationId,
         smsCode: smsCode,
       );
 
-      await _firebaseAuth.signInWithCredential(phoneAuthCredential).then(
-        (userCredential) async {
-          final userDoc = await _firestore.currentUserDocument();
-
-          final user = userCredential.user!;
-          return userDoc.set(
-            {
-              'userPhone': user.phoneNumber!,
-              'uid': user.uid,
-            },
-            SetOptions(merge: true),
-          );
-        },
-      );
-
+      await _firebaseAuth.signInWithCredential(credential);
+      
+      final userDoc = _firestore.collection('users').doc(_firebaseAuth.currentUser!.uid);
+      await userDoc.set({
+        'userName': _firebaseAuth.currentUser!.displayName ?? 'User',
+        'phoneNumber': _firebaseAuth.currentUser!.phoneNumber,
+      });
+      
       return right(unit);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'session-expired') {
         return left(AuthFailureEnum.sessionExpired);
-      } else if (e.code == 'ınvalıd-verıfıcatıon-code' || e.code == 'invalid-verification-code') {
+      } else if (e.code == 'invalid-verification-code') {
         return left(AuthFailureEnum.invalidVerificationCode);
       }
       return left(AuthFailureEnum.serverError);

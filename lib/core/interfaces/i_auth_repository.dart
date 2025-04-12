@@ -2,7 +2,7 @@ import 'package:flutter_social_chat/core/constants/enums/auth_failure_enum.dart'
 import 'package:flutter_social_chat/domain/models/auth/auth_user_model.dart';
 import 'package:fpdart/fpdart.dart';
 
-abstract class IAuthService {
+abstract class IAuthRepository {
   Stream<AuthUserModel> get authStateChanges;
 
   Future<Option<AuthUserModel>> getSignedInUser();

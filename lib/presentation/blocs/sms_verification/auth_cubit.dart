@@ -2,18 +2,18 @@ import 'dart:async';
 
 import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_state.dart';
 import 'package:flutter_social_chat/domain/models/auth/auth_user_model.dart';
-import 'package:flutter_social_chat/core/interfaces/i_auth_service.dart';
-import 'package:flutter_social_chat/core/interfaces/i_chat_service.dart';
+import 'package:flutter_social_chat/core/interfaces/i_auth_repository.dart';
+import 'package:flutter_social_chat/core/interfaces/i_chat_repository.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 
 class AuthCubit extends HydratedCubit<AuthState> {
-  final IAuthService _authService;
-  final IChatService _chatService;
+  final IAuthRepository _authService;
+  final IChatRepository _chatService;
   StreamSubscription<AuthUserModel>? _authUserSubscription;
 
   AuthCubit({
-    required IAuthService authService,
-    required IChatService chatService,
+    required IAuthRepository authService,
+    required IChatRepository chatService,
   })  : _authService = authService,
         _chatService = chatService,
         super(AuthState.empty()) {
@@ -62,12 +62,18 @@ class AuthCubit extends HydratedCubit<AuthState> {
   }
 
   @override
-  AuthState? fromJson(Map<String, dynamic> json) {
-    return AuthState.empty().copyWith(authUser: json['authUser']);
+  Map<String, dynamic> toJson(AuthState state) {
+    return {
+      'authUser': state.authUser.toJson(),
+      'isUserCheckedFromAuthService': state.isUserCheckedFromAuthService,
+    };
   }
 
   @override
-  Map<String, dynamic>? toJson(AuthState state) {
-    return {'authUser': state.authUser.toJson()};
+  AuthState? fromJson(Map<String, dynamic> json) {
+    return AuthState.empty().copyWith(
+      authUser: AuthUserModel.fromJson(json['authUser']),
+      isUserCheckedFromAuthService: json['isUserCheckedFromAuthService'],
+    );
   }
 }

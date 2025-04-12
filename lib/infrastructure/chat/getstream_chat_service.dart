@@ -1,16 +1,16 @@
 // ignore_for_file: depend_on_referenced_packages
 
 import 'package:flutter_social_chat/data/repository/core/getstream_helpers.dart';
-import 'package:flutter_social_chat/core/interfaces/i_auth_service.dart';
+import 'package:flutter_social_chat/core/interfaces/i_auth_repository.dart';
 import 'package:flutter_social_chat/domain/models/chat/chat_user_model.dart';
-import 'package:flutter_social_chat/core/interfaces/i_chat_service.dart';
+import 'package:flutter_social_chat/core/interfaces/i_chat_repository.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-class GetstreamChatService implements IChatService {
+class GetstreamChatService implements IChatRepository {
   GetstreamChatService(this._firebaseAuth, this.streamChatClient);
 
-  final IAuthService _firebaseAuth;
+  final IAuthRepository _firebaseAuth;
   final StreamChatClient streamChatClient;
 
   @override
@@ -47,24 +47,22 @@ class GetstreamChatService implements IChatService {
 
   @override
   Future<void> connectTheCurrentUser() async {
-    final signedInUserOption = await _firebaseAuth.getSignedInUser();
+    final currentUserOption = await _firebaseAuth.getSignedInUser();
 
-    final signedInUser = signedInUserOption.fold(
-      () => throw Exception('Not authanticated'),
-      (user) => user,
-    );
+    await currentUserOption.fold(
+      () => throw Exception('User not found'),
+      (authUserModel) async {
+        final String devToken = streamChatClient.devToken(authUserModel.id).rawValue;
 
-    // devToken, get info from readme.md file
-    final String devToken =
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZWZlIn0.WfcPNsvL16TFOc0ced5eIrjzCukZBHIVyCz3DHBSWKI';
-
-    await streamChatClient.connectUser(
-      User(
-        id: signedInUser.id,
-        name: signedInUser.userName,
-        image: signedInUser.photoUrl,
-      ),
-      devToken,
+        await streamChatClient.connectUser(
+          User(
+            id: authUserModel.id,
+            name: authUserModel.userName,
+            image: authUserModel.photoUrl,
+          ),
+          devToken,
+        );
+      },
     );
   }
 
@@ -89,45 +87,41 @@ class GetstreamChatService implements IChatService {
 
   @override
   Future<void> sendPhotoAsMessageToTheSelectedUser({
-    required String channelId,
     required int sizeOfTheTakenPhoto,
+    required String channelId,
     required String pathOfTheTakenPhoto,
   }) async {
     final randomMessageId = const Uuid().v1();
+    final channel = streamChatClient.channel('messaging', id: channelId);
 
-    final signedInUserOption = await _firebaseAuth.getSignedInUser();
-    final signedInUser = signedInUserOption.fold(
-      () => throw Exception('Not authanticated'),
+    final currentUserOption = await _firebaseAuth.getSignedInUser();
+    final currentUser = currentUserOption.fold(
+      () => throw Exception('User not found'),
       (user) => user,
     );
-    final user = User(id: signedInUser.id);
 
-    streamChatClient
-        .sendImage(
+    final user = User(id: currentUser.id);
+
+    final response = await channel.sendImage(
       AttachmentFile(
-        size: sizeOfTheTakenPhoto,
         path: pathOfTheTakenPhoto,
+        size: sizeOfTheTakenPhoto,
       ),
-      channelId,
-      'messaging',
-    )
-        .then((response) {
-      // Successful upload, you can now attach this image
-      // to an message that you then send to a channel
-      final imageUrl = response.file;
-      final image = Attachment(
-        type: 'image',
-        imageUrl: imageUrl,
-      );
+    );
 
-      final message = Message(
-        user: user,
-        id: randomMessageId,
-        createdAt: DateTime.now(),
-        attachments: [image],
-      );
+    final imageUrl = response.file;
+    final image = Attachment(
+      type: 'image',
+      imageUrl: imageUrl,
+    );
 
-      streamChatClient.sendMessage(message, channelId, 'messaging');
-    });
+    final message = Message(
+      id: randomMessageId,
+      user: user,
+      createdAt: DateTime.now(),
+      attachments: [image],
+    );
+
+    await channel.sendMessage(message);
   }
 }

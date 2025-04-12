@@ -1,12 +1,12 @@
-import 'package:flutter_social_chat/core/interfaces/i_camera_service.dart';
+import 'package:flutter_social_chat/core/interfaces/i_microphone_repository.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-class CameraService implements ICameraService {
+class MicrophoneRepository implements IMicrophoneRepository {
   @override
-  Stream<PermissionStatus> get cameraStateChanges {
-    const camera = Permission.camera;
+  Stream<PermissionStatus> get microphoneStateChanges {
+    const microphone = Permission.microphone;
 
-    return camera.status.asStream().map(
+    return microphone.status.asStream().map(
       (permissionStatus) {
         if (permissionStatus.isGranted) {
           return PermissionStatus.granted;
@@ -25,15 +25,15 @@ class CameraService implements ICameraService {
 
   @override
   Future<PermissionStatus> requestPermission() async {
-    const camera = Permission.camera;
+    const microphone = Permission.microphone;
 
-    final permissionStatus = await camera.request();
+    final permissionStatus = await microphone.request();
 
     return permissionStatus;
   }
 
   @override
-  Future<void> openAppSettingsForTheCameraPermission() async {
+  Future<void> openAppSettingsForTheMicrophonePermission() async {
     await openAppSettings();
   }
 }

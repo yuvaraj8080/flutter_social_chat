@@ -1,5 +1,5 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 
-abstract class IConnectivityService {
+abstract class IConnectivityRepository {
   Stream<ConnectivityResult> get connectivityStateChanges;
 }

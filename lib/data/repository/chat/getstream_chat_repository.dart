@@ -1,16 +1,16 @@
 // ignore_for_file: depend_on_referenced_packages
 
-import 'package:flutter_social_chat/core/interfaces/i_auth_service.dart';
+import 'package:flutter_social_chat/core/interfaces/i_auth_repository.dart';
 import 'package:flutter_social_chat/domain/models/chat/chat_user_model.dart';
-import 'package:flutter_social_chat/core/interfaces/i_chat_service.dart';
+import 'package:flutter_social_chat/core/interfaces/i_chat_repository.dart';
 import 'package:flutter_social_chat/data/repository/core/getstream_helpers.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-class GetstreamChatService implements IChatService {
-  GetstreamChatService(this._firebaseAuth, this.streamChatClient);
+class GetstreamChatRepository implements IChatRepository {
+  GetstreamChatRepository(this._firebaseAuth, this.streamChatClient);
 
-  final IAuthService _firebaseAuth;
+  final IAuthRepository _firebaseAuth;
   final StreamChatClient streamChatClient;
 
   @override
