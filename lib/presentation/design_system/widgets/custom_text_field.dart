@@ -38,21 +38,6 @@ class CustomTextField extends StatelessWidget {
         onChanged: onChanged,
         cursorColor: Theme.of(context).primaryColor,
         decoration: InputDecoration(
-          enabledBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(24)),
-          ),
-          focusedBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(24)),
-          ),
-          border: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(24)),
-          ),
-          focusedErrorBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(24)),
-          ),
-          errorBorder: const OutlineInputBorder(
-            borderRadius: BorderRadius.all(Radius.circular(24)),
-          ),
           labelText: labelText,
           hintText: hintText,
           prefixIcon: Icon(icon, color: Theme.of(context).iconTheme.color),

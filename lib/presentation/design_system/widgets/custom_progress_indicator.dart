@@ -4,7 +4,7 @@ class CustomProgressIndicator extends StatelessWidget {
   const CustomProgressIndicator({
     super.key,
     this.progressIndicatorColor,
-    this.size = 50.0,
+    this.size = 48.0,
     this.strokeWidth = 4.0,
   });
 

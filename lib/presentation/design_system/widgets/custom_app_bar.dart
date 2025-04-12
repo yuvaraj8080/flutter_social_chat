@@ -14,7 +14,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.titleFontWeight = FontWeight.w500,
     this.actions,
     this.elevation,
-  }) : preferredSize = const Size.fromHeight(kToolbarHeight + 10);
+  }) : preferredSize = const Size.fromHeight(kToolbarHeight + 8);
 
   @override
   final Size preferredSize;
@@ -43,9 +43,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       centerTitle: isTitleCentered,
       backgroundColor: backgroundColor ?? scaffoldBackgroundColor,
-      toolbarHeight: kToolbarHeight + 10,
+      toolbarHeight: kToolbarHeight + 8,
       elevation: elevation ?? 0,
-      leadingWidth: 90,
+      leadingWidth: 88,
       leading: leading,
       actions: actions,
       surfaceTintColor: backgroundColor,
