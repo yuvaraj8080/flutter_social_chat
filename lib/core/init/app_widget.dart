@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -25,68 +23,76 @@ class AppWidget extends StatelessWidget {
     final botToastBuilder = BotToastInit();
 
     return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          lazy: false,
-          create: (context) => getIt<AuthManagementCubit>(),
-        ),
-        BlocProvider(
-          lazy: false,
-          create: (context) => getIt<AuthCubit>(),
-        ),
-        BlocProvider(
-          lazy: false,
-          create: (context) => getIt<ConnectivityCubit>(),
-        ),
-        BlocProvider(
-          lazy: false,
-          create: (context) => getIt<ChatSetupCubit>(),
-        ),
-        BlocProvider(
-          create: (context) => getIt<PhoneNumberSignInCubit>(),
-        ),
-        BlocProvider(
-          create: (context) => getIt<ChatManagementCubit>()..reset(),
-        ),
-      ],
-      child: Listener(
-        onPointerUp: (_) {
-          if (Platform.isIOS) {
-            final FocusScopeNode currentFocus = FocusScope.of(context);
-            if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null) {
-              FocusManager.instance.primaryFocus!.unfocus();
-            }
-          }
-        },
-        child: BlocListener<ConnectivityCubit, ConnectivityState>(
-          listener: (context, state) {
-            if (!state.isUserConnectedToTheInternet) {
-              BotToast.showText(
-                text: 'Connection Failed!',
-                duration: const Duration(seconds: 30),
-                clickClose: true,
-              );
-            } else if (state.isUserConnectedToTheInternet) {
-              BotToast.cleanAll();
-            }
-          },
-          child: MaterialApp.router(
-            theme: AppTheme.lightTheme,
-            debugShowCheckedModeBanner: false,
-            routerConfig: appRouter.router,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            builder: (context, child) {
-              final client = getIt<StreamChatClient>();
-
-              child = StreamChat(client: client, child: child);
-              child = botToastBuilder(context, child);
-
-              return child;
-            },
-          ),
+      providers: _buildBlocProviders(),
+      child: BlocListener<ConnectivityCubit, ConnectivityState>(
+        listener: _handleConnectivityChanges,
+        child: MaterialApp.router(
+          theme: AppTheme.lightTheme,
+          debugShowCheckedModeBanner: false,
+          routerConfig: appRouter.router,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          builder: (context, child) => _buildAppWithStreamChat(context, child, botToastBuilder),
         ),
       ),
     );
+  }
+
+  /// Builds all BlocProviders required by the app
+  List<BlocProvider> _buildBlocProviders() {
+    return [
+      BlocProvider(
+        lazy: false,
+        create: (context) => getIt<AuthManagementCubit>(),
+      ),
+      BlocProvider(
+        lazy: false,
+        create: (context) => getIt<AuthCubit>(),
+      ),
+      BlocProvider(
+        lazy: false,
+        create: (context) => getIt<ConnectivityCubit>(),
+      ),
+      BlocProvider(
+        lazy: false,
+        create: (context) => getIt<ChatSetupCubit>(),
+      ),
+      BlocProvider(
+        create: (context) => getIt<PhoneNumberSignInCubit>(),
+      ),
+      BlocProvider(
+        create: (context) => getIt<ChatManagementCubit>()..reset(),
+      ),
+    ];
+  }
+
+  /// Manages connectivity state changes and shows appropriate notifications
+  void _handleConnectivityChanges(BuildContext context, ConnectivityState state) {
+    if (!state.isUserConnectedToTheInternet) {
+      _showConnectivityToast(true);
+    } else if (state.isUserConnectedToTheInternet) {
+      BotToast.cleanAll();
+    }
+  }
+
+  /// Shows a connectivity error toast message
+  void _showConnectivityToast(bool hasConnectionFailed) {
+    if (hasConnectionFailed) {
+      BotToast.showText(
+        text: 'Connection Failed!',
+        duration: const Duration(seconds: 30),
+        clickClose: true,
+      );
+    }
+  }
+
+  /// Builds the app with StreamChat integration and toast capabilities
+  Widget _buildAppWithStreamChat(BuildContext context, Widget? child, TransitionBuilder botToastBuilder) {
+    final client = getIt<StreamChatClient>();
+
+    child = StreamChat(client: client, child: child);
+    child = botToastBuilder(context, child);
+
+    return child;
   }
 }
