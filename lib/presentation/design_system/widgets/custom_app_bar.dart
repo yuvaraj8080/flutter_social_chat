@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_social_chat/presentation/design_system/custom_text.dart';
-import 'package:flutter_social_chat/core/constants/colors.dart';
+import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
+import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   CustomAppBar({

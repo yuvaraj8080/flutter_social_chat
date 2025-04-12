@@ -2,13 +2,13 @@ import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_social_chat/core/constants/colors.dart';
+import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/core/constants/enums/auth_failure_enum.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_state.dart';
-import 'package:flutter_social_chat/presentation/design_system/custom_app_bar.dart';
-import 'package:flutter_social_chat/presentation/design_system/custom_progress_indicator.dart';
-import 'package:flutter_social_chat/presentation/design_system/popscope_scaffold.dart';
+import 'package:flutter_social_chat/presentation/design_system/widgets/custom_app_bar.dart';
+import 'package:flutter_social_chat/presentation/design_system/widgets/custom_progress_indicator.dart';
+import 'package:flutter_social_chat/presentation/design_system/widgets/popscope_scaffold.dart';
 import 'package:flutter_social_chat/presentation/views/sign_in/widgets/sign_in_view_body.dart';
 import 'package:go_router/go_router.dart';
 

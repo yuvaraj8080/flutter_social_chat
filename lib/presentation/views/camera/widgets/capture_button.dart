@@ -2,7 +2,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_chat/presentation/blocs/camera/camera_cubit.dart';
-import 'package:flutter_social_chat/core/constants/colors.dart';
+import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 
 class CaptureButton extends StatelessWidget {
   const CaptureButton({super.key, this.controller});

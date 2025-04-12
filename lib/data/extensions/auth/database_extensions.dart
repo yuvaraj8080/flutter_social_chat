@@ -3,10 +3,10 @@ import 'package:flutter_social_chat/core/di/dependency_injector.dart';
 import 'package:flutter_social_chat/core/interfaces/i_auth_repository.dart';
 import 'package:fpdart/fpdart.dart';
 
-extension FirestoreX on FirebaseFirestore {
+extension DatabaseExtensions on FirebaseFirestore {
   Future<DocumentReference> currentUserDocument() async {
     final userOption = await getIt<IAuthRepository>().getSignedInUser();
-    final user = userOption.getOrElse(() => throw Exception('Not authanticated'));
+    final user = userOption.getOrElse(() => throw Exception('Not authenticated'));
 
     return FirebaseFirestore.instance.collection('users').doc(user.id);
   }
@@ -16,6 +16,6 @@ extension FirestoreX on FirebaseFirestore {
   }
 }
 
-extension DocumentReferenceX on DocumentReference {
+extension CollectionExtensions on DocumentReference {
   CollectionReference get userCollection => collection('users');
-}
+} 

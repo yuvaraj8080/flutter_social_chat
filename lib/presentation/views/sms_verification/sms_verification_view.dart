@@ -7,9 +7,9 @@ import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_cub
 import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_state.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_state.dart';
-import 'package:flutter_social_chat/core/constants/colors.dart';
-import 'package:flutter_social_chat/presentation/design_system/custom_app_bar.dart';
-import 'package:flutter_social_chat/presentation/design_system/popscope_scaffold.dart';
+import 'package:flutter_social_chat/presentation/design_system/colors.dart';
+import 'package:flutter_social_chat/presentation/design_system/widgets/custom_app_bar.dart';
+import 'package:flutter_social_chat/presentation/design_system/widgets/popscope_scaffold.dart';
 import 'package:flutter_social_chat/presentation/views/sms_verification/widgets/sms_verification_view_body.dart';
 import 'package:go_router/go_router.dart';
 

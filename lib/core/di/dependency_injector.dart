@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter_social_chat/data/repository/auth/firebase_auth_repository.dart';
+import 'package:flutter_social_chat/data/repository/auth/auth_repository.dart';
 import 'package:flutter_social_chat/data/repository/camera/camera_repository.dart';
+import 'package:flutter_social_chat/data/repository/chat/getstream_chat_repository.dart';
 import 'package:flutter_social_chat/data/repository/connectivity/connectivity_repository.dart';
 import 'package:flutter_social_chat/data/repository/microphone/microphone_repository.dart';
-import 'package:flutter_social_chat/infrastructure/chat/getstream_chat_service.dart';
 import 'package:flutter_social_chat/presentation/blocs/auth_management/auth_management_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_cubit.dart';
@@ -16,7 +16,7 @@ import 'package:flutter_social_chat/presentation/blocs/connectivity/connectivity
 import 'package:flutter_social_chat/presentation/blocs/microphone/microphone_cubit.dart';
 import 'package:flutter_social_chat/core/interfaces/i_auth_repository.dart';
 import 'package:flutter_social_chat/core/interfaces/i_camera_repository.dart';
-import 'package:flutter_social_chat/core/interfaces/i_chat_repository.dart';
+import 'package:flutter_social_chat/core/interfaces/i_getstream_chat_repository.dart';
 import 'package:flutter_social_chat/core/interfaces/i_connectivity_repository.dart';
 import 'package:flutter_social_chat/core/init/router/app_router.dart';
 import 'package:get_it/get_it.dart';
@@ -43,10 +43,10 @@ void injectionSetup() {
   getIt.registerLazySingleton<IConnectivityRepository>(() => ConnectivityRepository(getIt<Connectivity>()));
   getIt.registerLazySingleton<ICameraRepository>(() => CameraRepository());
   getIt.registerLazySingleton<IAuthRepository>(
-    () => FirebaseAuthRepository(getIt<FirebaseAuth>(), getIt<FirebaseFirestore>()),
+    () => AuthRepository(getIt<FirebaseAuth>(), getIt<FirebaseFirestore>()),
   );
-  getIt.registerLazySingleton<IChatRepository>(
-    () => GetstreamChatService(getIt<IAuthRepository>(), getIt<StreamChatClient>()),
+  getIt.registerLazySingleton<IGetstreamChatRepository>(
+    () => GetstreamChatRepository(getIt<IAuthRepository>(), getIt<StreamChatClient>()),
   );
 
   // Blocs and Cubits
@@ -58,7 +58,7 @@ void injectionSetup() {
   getIt.registerLazySingleton<AuthCubit>(
     () => AuthCubit(
       authService: getIt<IAuthRepository>(),
-      chatService: getIt<IChatRepository>(),
+      chatService: getIt<IGetstreamChatRepository>(),
     ),
   );
   getIt.registerLazySingleton<AuthManagementCubit>(
@@ -74,10 +74,10 @@ void injectionSetup() {
   // Chat Cubits
   getIt.registerFactory<ChatManagementCubit>(
     () => ChatManagementCubit(
-      getIt<IChatRepository>(),
+      getIt<IGetstreamChatRepository>(),
       getIt<FirebaseFirestore>(),
       getIt<AuthCubit>(),
     ),
   );
-  getIt.registerLazySingleton<ChatSetupCubit>(() => ChatSetupCubit(getIt<IChatRepository>()));
+  getIt.registerLazySingleton<ChatSetupCubit>(() => ChatSetupCubit(getIt<IGetstreamChatRepository>()));
 }

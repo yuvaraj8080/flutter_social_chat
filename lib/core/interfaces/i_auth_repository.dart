@@ -23,4 +23,10 @@ abstract class IAuthRepository {
   Future<void> updateDisplayName({required String displayName});
 
   Future<void> updatePhotoURL({required String photoURL});
+  
+  Future<void> updateUserProfile({
+    String? displayName,
+    String? photoURL,
+    bool? isOnboardingCompleted,
+  });
 }

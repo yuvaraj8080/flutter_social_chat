@@ -4,8 +4,8 @@ import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_cub
 import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_state.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat/chat_setup/chat_setup_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat/chat_setup/chat_setup_state.dart';
-import 'package:flutter_social_chat/core/constants/colors.dart';
-import 'package:flutter_social_chat/presentation/design_system/custom_progress_indicator.dart';
+import 'package:flutter_social_chat/presentation/design_system/colors.dart';
+import 'package:flutter_social_chat/presentation/design_system/widgets/custom_progress_indicator.dart';
 import 'package:flutter_social_chat/presentation/views/profile/widgets/custom_profile_button.dart';
 import 'package:flutter_social_chat/presentation/views/profile/widgets/profile_core.dart';
 import 'package:flutter_social_chat/presentation/views/profile/widgets/user_details.dart';

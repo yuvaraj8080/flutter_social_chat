@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat/chat_management/chat_management_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat/chat_management/chat_management_state.dart';
-import 'package:flutter_social_chat/core/constants/colors.dart';
-import 'package:flutter_social_chat/presentation/design_system/custom_app_bar.dart';
-import 'package:flutter_social_chat/presentation/design_system/custom_progress_indicator.dart';
+import 'package:flutter_social_chat/presentation/design_system/colors.dart';
+import 'package:flutter_social_chat/presentation/design_system/widgets/custom_app_bar.dart';
+import 'package:flutter_social_chat/presentation/design_system/widgets/custom_progress_indicator.dart';
 import 'package:flutter_social_chat/presentation/views/capture_and_send_photo/widgets/capture_and_send_photo_page_body.dart';
 import 'package:go_router/go_router.dart';
 

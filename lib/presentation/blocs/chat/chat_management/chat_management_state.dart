@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:flutter_social_chat/core/constants/enums/chat_failure_enum.dart';
 
 class ChatManagementState extends Equatable {
   const ChatManagementState({
@@ -12,6 +13,7 @@ class ChatManagementState extends Equatable {
     this.listOfSelectedUserIDs = const {},
     this.listOfSelectedUsers = const {},
     this.currentUserChannels = const [],
+    this.error,
   });
 
   final bool isInProgress;
@@ -23,9 +25,10 @@ class ChatManagementState extends Equatable {
   final Set<String> listOfSelectedUserIDs;
   final Set<User> listOfSelectedUsers;
   final List<Channel> currentUserChannels;
+  final ChatFailureEnum? error;
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
         isInProgress,
         isChannelNameValid,
         isChannelCreated,
@@ -35,6 +38,7 @@ class ChatManagementState extends Equatable {
         listOfSelectedUserIDs,
         listOfSelectedUsers,
         currentUserChannels,
+        error,
       ];
 
   ChatManagementState copyWith({
@@ -47,6 +51,7 @@ class ChatManagementState extends Equatable {
     Set<String>? listOfSelectedUserIDs,
     Set<User>? listOfSelectedUsers,
     List<Channel>? currentUserChannels,
+    ChatFailureEnum? error,
   }) {
     return ChatManagementState(
       isInProgress: isInProgress ?? this.isInProgress,
@@ -58,6 +63,7 @@ class ChatManagementState extends Equatable {
       listOfSelectedUserIDs: listOfSelectedUserIDs ?? this.listOfSelectedUserIDs,
       listOfSelectedUsers: listOfSelectedUsers ?? this.listOfSelectedUsers,
       currentUserChannels: currentUserChannels ?? this.currentUserChannels,
+      error: error ?? this.error,
     );
   }
 

@@ -5,8 +5,8 @@ import 'package:flutter_social_chat/presentation/blocs/camera/camera_cubit.dart'
 import 'package:flutter_social_chat/presentation/blocs/camera/camera_state.dart';
 import 'package:flutter_social_chat/presentation/blocs/microphone/microphone_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/microphone/microphone_state.dart';
-import 'package:flutter_social_chat/core/constants/colors.dart';
-import 'package:flutter_social_chat/presentation/design_system/custom_progress_indicator.dart';
+import 'package:flutter_social_chat/presentation/design_system/colors.dart';
+import 'package:flutter_social_chat/presentation/design_system/widgets/custom_progress_indicator.dart';
 import 'package:flutter_social_chat/presentation/views/camera/widgets/camera_view.dart';
 import 'package:flutter_social_chat/presentation/views/camera/widgets/no_permission_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';

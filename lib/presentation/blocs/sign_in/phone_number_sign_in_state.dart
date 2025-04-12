@@ -8,6 +8,7 @@ class PhoneNumberSignInState extends Equatable {
     this.smsCode = '',
     this.verificationIdOption = const None(),
     this.failureMessageOption = const None(),
+    this.authFailureOrSuccessOption = const None(),
     this.isInProgress = false,
     this.isPhoneNumberInputValidated = false,
     this.phoneNumberAndResendTokenPair = const ('', null),
@@ -17,6 +18,7 @@ class PhoneNumberSignInState extends Equatable {
   final String smsCode;
   final Option<String> verificationIdOption;
   final Option<AuthFailureEnum> failureMessageOption;
+  final Option<Either<AuthFailureEnum, Unit>> authFailureOrSuccessOption;
   final bool isInProgress;
   final bool isPhoneNumberInputValidated;
   final (String, int?) phoneNumberAndResendTokenPair;
@@ -27,6 +29,7 @@ class PhoneNumberSignInState extends Equatable {
         smsCode,
         verificationIdOption,
         failureMessageOption,
+        authFailureOrSuccessOption,
         isInProgress,
         isPhoneNumberInputValidated,
         phoneNumberAndResendTokenPair,
@@ -37,6 +40,7 @@ class PhoneNumberSignInState extends Equatable {
     String? smsCode,
     Option<String>? verificationIdOption,
     Option<AuthFailureEnum>? failureMessageOption,
+    Option<Either<AuthFailureEnum, Unit>>? authFailureOrSuccessOption,
     bool? isInProgress,
     bool? isPhoneNumberInputValidated,
     (String, int?)? phoneNumberAndResendTokenPair,
@@ -46,6 +50,7 @@ class PhoneNumberSignInState extends Equatable {
       smsCode: smsCode ?? this.smsCode,
       verificationIdOption: verificationIdOption ?? this.verificationIdOption,
       failureMessageOption: failureMessageOption ?? this.failureMessageOption,
+      authFailureOrSuccessOption: authFailureOrSuccessOption ?? this.authFailureOrSuccessOption,
       isInProgress: isInProgress ?? this.isInProgress,
       isPhoneNumberInputValidated: isPhoneNumberInputValidated ?? this.isPhoneNumberInputValidated,
       phoneNumberAndResendTokenPair: phoneNumberAndResendTokenPair ?? this.phoneNumberAndResendTokenPair,

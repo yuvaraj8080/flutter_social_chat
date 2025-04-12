@@ -9,7 +9,7 @@ import 'package:flutter_social_chat/presentation/blocs/chat/chat_management/chat
 import 'package:flutter_social_chat/presentation/blocs/chat/chat_setup/chat_setup_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/connectivity/connectivity_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/connectivity/connectivity_state.dart';
-import 'package:flutter_social_chat/core/constants/colors.dart';
+import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/core/di/dependency_injector.dart';
 import 'package:flutter_social_chat/core/init/router/app_router.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_cubit.dart';

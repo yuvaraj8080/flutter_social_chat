@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_social_chat/core/constants/colors.dart';
+import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/core/constants/enums/router_enum.dart';
 import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_state.dart';
-import 'package:flutter_social_chat/presentation/design_system/custom_progress_indicator.dart';
+import 'package:flutter_social_chat/presentation/design_system/widgets/custom_progress_indicator.dart';
 import 'package:go_router/go_router.dart';
 
 class LandingPage extends StatefulWidget {

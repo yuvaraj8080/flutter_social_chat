@@ -4,14 +4,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat/chat_management/chat_management_state.dart';
-import 'package:flutter_social_chat/core/interfaces/i_chat_repository.dart';
-import 'package:flutter_social_chat/data/repository/core/firestore_helpers.dart';
+import 'package:flutter_social_chat/core/interfaces/i_getstream_chat_repository.dart';
+import 'package:flutter_social_chat/data/extensions/auth/database_extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class ChatManagementCubit extends Cubit<ChatManagementState> {
   final String randomGroupProfilePhoto = 'https://picsum.photos/200/300';
 
-  final IChatRepository _chatService;
+  final IGetstreamChatRepository _chatService;
   final FirebaseFirestore _firebaseFirestore;
   final AuthCubit _authCubit;
 
@@ -71,13 +71,16 @@ class ChatManagementCubit extends Cubit<ChatManagementState> {
     // To show the progress indicator, and well UX.
     await Future.delayed(const Duration(seconds: 1));
 
-    await _chatService.sendPhotoAsMessageToTheSelectedUser(
+    final result = await _chatService.sendPhotoAsMessageToTheSelectedUser(
       channelId: channelId!,
       pathOfTheTakenPhoto: pathOfTheTakenPhoto,
       sizeOfTheTakenPhoto: sizeOfTheTakenPhoto,
     );
 
-    emit(state.copyWith(isInProgress: false, isCapturedPhotoSent: true));
+    result.fold(
+      (failure) => emit(state.copyWith(isInProgress: false, isCapturedPhotoSent: false, error: failure)),
+      (_) => emit(state.copyWith(isInProgress: false, isCapturedPhotoSent: true)),
+    );
   }
 
   Future<void> createNewChannel({
@@ -124,13 +127,16 @@ class ChatManagementCubit extends Cubit<ChatManagementState> {
     if (listOfMemberIDs.length >= 2 && isChannelNameValid) {
       emit(state.copyWith(isInProgress: true, isChannelCreated: false));
 
-      await _chatService.createNewChannel(
+      final result = await _chatService.createNewChannel(
         listOfMemberIDs: listOfMemberIDs.toList(),
         channelName: channelName,
         channelImageUrl: channelImageUrl,
       );
 
-      emit(state.copyWith(isInProgress: false, isChannelCreated: true));
+      result.fold(
+        (failure) => emit(state.copyWith(isInProgress: false, isChannelCreated: false, error: failure)),
+        (_) => emit(state.copyWith(isInProgress: false, isChannelCreated: true)),
+      );
     }
   }
 

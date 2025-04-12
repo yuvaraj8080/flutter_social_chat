@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_social_chat/presentation/design_system/custom_text.dart';
+import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
 import 'package:flutter_social_chat/presentation/views/profile/widgets/profile_image.dart';
 
 class ProfileCore extends StatelessWidget {

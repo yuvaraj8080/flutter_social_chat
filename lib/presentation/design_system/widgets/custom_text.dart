@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_social_chat/core/constants/colors.dart';
+import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CustomText extends StatelessWidget {

@@ -5,16 +5,18 @@ class AuthState extends Equatable {
   final AuthUserModel authUser;
   final bool isUserCheckedFromAuthService;
   final bool isInProgress;
+  final bool hasError;
 
   // Constructor
   const AuthState({
     required this.authUser,
     required this.isUserCheckedFromAuthService,
     required this.isInProgress,
+    this.hasError = false,
   });
 
   @override
-  List<Object?> get props => [authUser, isUserCheckedFromAuthService, isInProgress];
+  List<Object?> get props => [authUser, isUserCheckedFromAuthService, isInProgress, hasError];
 
   // Empty state factory
   factory AuthState.empty() => AuthState(
@@ -30,11 +32,13 @@ class AuthState extends Equatable {
     AuthUserModel? authUser,
     bool? isUserCheckedFromAuthService,
     bool? isInProgress,
+    bool? hasError,
   }) {
     return AuthState(
       authUser: authUser ?? this.authUser,
       isUserCheckedFromAuthService: isUserCheckedFromAuthService ?? this.isUserCheckedFromAuthService,
       isInProgress: isInProgress ?? this.isInProgress,
+      hasError: hasError ?? this.hasError,
     );
   }
 }

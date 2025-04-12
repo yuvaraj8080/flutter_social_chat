@@ -6,7 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_chat/presentation/blocs/auth_management/auth_management_state.dart';
 import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_cubit.dart';
 import 'package:flutter_social_chat/core/interfaces/i_auth_repository.dart';
-import 'package:flutter_social_chat/data/repository/core/firestore_helpers.dart';
+import 'package:flutter_social_chat/data/extensions/auth/database_extensions.dart';
 import 'package:image_picker/image_picker.dart';
 
 class AuthManagementCubit extends Cubit<AuthManagementState> {

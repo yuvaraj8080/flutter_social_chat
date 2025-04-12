@@ -36,6 +36,7 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
         smsCode: '',
         isInProgress: false,
         isPhoneNumberInputValidated: false,
+        authFailureOrSuccessOption: none(),
         phoneNumberAndResendTokenPair: ('', null),
       ),
     );
@@ -57,7 +58,7 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
         //Verification id does not exist. This should not happen.
       },
       (String verificationId) async {
-        emit(state.copyWith(isInProgress: true, failureMessageOption: none()));
+        emit(state.copyWith(isInProgress: true, failureMessageOption: none(), authFailureOrSuccessOption: none()));
 
         final Either<AuthFailureEnum, Unit> failureOrSuccess = await _authService.verifySmsCode(
           smsCode: state.smsCode,
@@ -66,10 +67,16 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
 
         failureOrSuccess.fold(
           (AuthFailureEnum failure) {
-            emit(state.copyWith(failureMessageOption: some(failure), isInProgress: false));
+            emit(
+              state.copyWith(
+                failureMessageOption: some(failure),
+                authFailureOrSuccessOption: some(left(failure)),
+                isInProgress: false,
+              ),
+            );
           },
           (Unit _) {
-            emit(state.copyWith(isInProgress: false));
+            emit(state.copyWith(isInProgress: false, authFailureOrSuccessOption: some(right(unit))));
           },
         );
       },
@@ -81,7 +88,7 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
       return;
     }
 
-    emit(state.copyWith(isInProgress: true, failureMessageOption: none()));
+    emit(state.copyWith(isInProgress: true, failureMessageOption: none(), authFailureOrSuccessOption: none()));
 
     _phoneNumberSignInSubscription?.cancel();
 
@@ -96,13 +103,18 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
         .listen(
           (Either<AuthFailureEnum, (String, int?)> failureOrVerificationId) => failureOrVerificationId.fold(
             (AuthFailureEnum failure) {
-              emit(state.copyWith(failureMessageOption: some(failure), isInProgress: false));
+              emit(state.copyWith(
+                  failureMessageOption: some(failure),
+                  authFailureOrSuccessOption: some(left(failure)),
+                  isInProgress: false));
             },
             ((String, int?) verificationIdResendTokenPair) {
               emit(
                 state.copyWith(
                   verificationIdOption: some(verificationIdResendTokenPair.$1),
                   isInProgress: false,
+                  isPhoneNumberInputValidated: true,
+                  authFailureOrSuccessOption: some(right(unit)),
                   phoneNumberAndResendTokenPair: (state.phoneNumber, verificationIdResendTokenPair.$2),
                 ),
               );
