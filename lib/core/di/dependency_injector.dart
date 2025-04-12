@@ -26,42 +26,35 @@ import 'package:flutter_social_chat/domain/microphone/i_microphone_service.dart'
 final getIt = GetIt.instance;
 
 void injectionSetup() {
-  // Firebase Services
+  // Core utilities
+  getIt.registerSingleton<AppRouter>(AppRouter());
+
+  // External services
+  getIt.registerSingleton<Connectivity>(Connectivity());
+  getIt.registerSingleton<StreamChatClient>(StreamChatClient('3r6a7g8d4v8e', logLevel: Level.INFO));
+  
+  // Firebase services
   getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
   getIt.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
   getIt.registerLazySingleton<FirebaseStorage>(() => FirebaseStorage.instance);
 
-  // Microphone
+  // Domain services
   getIt.registerLazySingleton<IMicrophoneService>(() => MicrophoneService());
-  getIt.registerFactory<MicrophoneCubit>(() => MicrophoneCubit(getIt<IMicrophoneService>()));
-
-  // Connectivity
-  getIt.registerSingleton<Connectivity>(Connectivity());
   getIt.registerLazySingleton<IConnectivityService>(() => ConnectivityHandler(getIt<Connectivity>()));
-  getIt.registerLazySingleton<ConnectivityCubit>(() => ConnectivityCubit());
-
-  // Chat
-  getIt.registerSingleton<StreamChatClient>(StreamChatClient('3r6a7g8d4v8e', logLevel: Level.INFO));
-  getIt.registerLazySingleton<IChatService>(
-    () => GetstreamChatService(getIt<IAuthService>(), getIt<StreamChatClient>()),
-  );
-  getIt.registerFactory<ChatManagementCubit>(
-    () => ChatManagementCubit(
-      getIt<IChatService>(),
-      getIt<FirebaseFirestore>(),
-      getIt<AuthCubit>(),
-    ),
-  );
-  getIt.registerLazySingleton<ChatSetupCubit>(() => ChatSetupCubit());
-
-  // Camera
   getIt.registerLazySingleton<ICameraService>(() => CameraService());
-  getIt.registerFactory(() => CameraCubit(getIt<ICameraService>()));
-
-  // Auth
   getIt.registerLazySingleton<IAuthService>(
     () => FirebaseAuthService(getIt<FirebaseAuth>(), getIt<FirebaseFirestore>()),
   );
+  getIt.registerLazySingleton<IChatService>(
+    () => GetstreamChatService(getIt<IAuthService>(), getIt<StreamChatClient>()),
+  );
+
+  // Blocs and Cubits
+  getIt.registerLazySingleton<ConnectivityCubit>(() => ConnectivityCubit());
+  getIt.registerFactory<MicrophoneCubit>(() => MicrophoneCubit(getIt<IMicrophoneService>()));
+  getIt.registerFactory<CameraCubit>(() => CameraCubit(getIt<ICameraService>()));
+  
+  // Auth Cubits
   getIt.registerLazySingleton<AuthCubit>(
     () => AuthCubit(
       authService: getIt<IAuthService>(),
@@ -76,9 +69,15 @@ void injectionSetup() {
       authCubit: getIt<AuthCubit>(),
     ),
   );
-
-  getIt.registerFactory(() => PhoneNumberSignInCubit(getIt<IAuthService>()));
-
-  // App Services (Router, StreamChatClient, etc.)
-  getIt.registerSingleton<AppRouter>(AppRouter());
+  getIt.registerFactory<PhoneNumberSignInCubit>(() => PhoneNumberSignInCubit(getIt<IAuthService>()));
+  
+  // Chat Cubits
+  getIt.registerFactory<ChatManagementCubit>(
+    () => ChatManagementCubit(
+      getIt<IChatService>(),
+      getIt<FirebaseFirestore>(),
+      getIt<AuthCubit>(),
+    ),
+  );
+  getIt.registerLazySingleton<ChatSetupCubit>(() => ChatSetupCubit());
 }
