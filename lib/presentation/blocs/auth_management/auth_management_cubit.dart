@@ -6,7 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_chat/presentation/blocs/auth_management/auth_management_state.dart';
 import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_cubit.dart';
 import 'package:flutter_social_chat/core/interfaces/i_auth_repository.dart';
-import 'package:flutter_social_chat/data/extensions/auth/database_extensions.dart';
+import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 
 class AuthManagementCubit extends Cubit<AuthManagementState> {
@@ -26,23 +26,35 @@ class AuthManagementCubit extends Cubit<AuthManagementState> {
   final FirebaseFirestore _firebaseFirestore;
   final AuthCubit _authCubit;
 
+  /// Validates the username and updates the state
   void validateUserName({required bool isUserNameValid}) {
     emit(state.copyWith(isUserNameValid: isUserNameValid));
   }
 
+  /// Handles profile image selection from the provided image picker result
   Future<void> selectProfileImage({
     required Future<XFile?> userFileImg,
   }) async {
-    final fileImg = await userFileImg;
+    try {
+      emit(state.copyWith(isInProgress: true));
 
-    if (fileImg == null) {
-      return;
+      final fileImg = await userFileImg;
+
+      if (fileImg == null) {
+        emit(state.copyWith(isInProgress: false));
+        return;
+      }
+
+      final selectedImagePath = File(fileImg.path).path;
+      emit(state.copyWith(selectedImagePath: selectedImagePath, isInProgress: false));
+    } catch (e) {
+      debugPrint('Error selecting profile image: $e');
+      emit(state.copyWith(isInProgress: false, error: 'Failed to select image'));
     }
-
-    final selectedImagePath = File(fileImg.path).path;
-    emit(state.copyWith(selectedImagePath: selectedImagePath));
   }
 
+  /// Creates a user profile by uploading the profile image and updating user information
+  /// Returns the profile photo URL if successful, empty string otherwise
   Future<String> createProfile() async {
     if (state.isInProgress) {
       return '';
@@ -50,46 +62,63 @@ class AuthManagementCubit extends Cubit<AuthManagementState> {
 
     emit(state.copyWith(isInProgress: true));
 
-    final uid = _authCubit.state.authUser.id;
+    try {
+      final uid = _authCubit.state.authUser.id;
 
-    if (state.selectedImagePath != '' && state.isUserNameValid) {
-      await _firebaseStorage.ref(uid).putFile(File(state.selectedImagePath)).then(
-        (taskState) async {
-          if (taskState.state == TaskState.success) {
-            await downloadUrl();
-          }
-        },
-      );
+      if (state.selectedImagePath.isEmpty || !state.isUserNameValid) {
+        emit(state.copyWith(isInProgress: false, userProfilePhotoUrl: '', error: 'Missing required information'));
+        return '';
+      }
 
-      return state.userProfilePhotoUrl;
-    } else {
-      emit(state.copyWith(isInProgress: false, userProfilePhotoUrl: ''));
+      // Upload the image to Firebase Storage
+      final uploadTask = await _firebaseStorage.ref(uid).putFile(File(state.selectedImagePath));
 
+      if (uploadTask.state == TaskState.success) {
+        // Get download URL and update profile information
+        await downloadUrl();
+        return state.userProfilePhotoUrl;
+      } else {
+        emit(state.copyWith(isInProgress: false, error: 'Failed to upload image'));
+        return '';
+      }
+    } catch (e) {
+      debugPrint('Error creating profile: $e');
+      emit(state.copyWith(isInProgress: false, error: 'Failed to create profile'));
       return '';
     }
   }
 
+  /// Downloads the profile image URL and updates user information
   Future<void> downloadUrl() async {
-    final uid = _authCubit.state.authUser.id;
+    try {
+      final uid = _authCubit.state.authUser.id;
+      final photoUrl = await _firebaseStorage.ref(uid).getDownloadURL();
+      final userName = _authCubit.state.authUser.userName!;
 
-    final photoUrl = await _firebaseStorage.ref(uid).getDownloadURL();
+      // Update both Firebase Auth and Firestore in parallel for efficiency
+      await Future.wait([
+        _authService.updateUserProfile(
+          displayName: userName,
+          photoURL: photoUrl,
+          isOnboardingCompleted: true,
+        ),
 
-    await _authService.updateDisplayName(
-      displayName: _authCubit.state.authUser.userName!,
-    );
+        // Get the document reference first, then set the data
+        _firebaseFirestore.collection('users').doc(uid).set(
+          {
+            'photoUrl': photoUrl,
+            'displayName': userName,
+            'isOnboardingCompleted': true,
+            'lastUpdated': FieldValue.serverTimestamp(),
+          },
+          SetOptions(merge: true),
+        ),
+      ]);
 
-    await _authService.updatePhotoURL(photoURL: photoUrl);
-
-    await _firebaseFirestore.currentUserDocument().then(
-          (value) => value.set(
-            {
-              'photoUrl': photoUrl,
-              'displayName': _authCubit.state.authUser.userName,
-            },
-            SetOptions(merge: true),
-          ),
-        );
-
-    emit(state.copyWith(isInProgress: false, userProfilePhotoUrl: photoUrl));
+      emit(state.copyWith(isInProgress: false, userProfilePhotoUrl: photoUrl));
+    } catch (e) {
+      debugPrint('Error updating profile: $e');
+      emit(state.copyWith(isInProgress: false, error: 'Failed to update profile'));
+    }
   }
 }

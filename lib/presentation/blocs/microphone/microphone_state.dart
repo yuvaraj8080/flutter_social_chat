@@ -2,15 +2,26 @@ import 'package:equatable/equatable.dart';
 
 class MicrophoneState extends Equatable {
   final bool isMicrophonePermissionGranted;
+  final String? error;
 
-  const MicrophoneState({this.isMicrophonePermissionGranted = false});
+  const MicrophoneState({
+    this.isMicrophonePermissionGranted = false,
+    this.error,
+  });
 
   @override
-  List<Object> get props => [isMicrophonePermissionGranted];
+  List<Object?> get props => [
+        isMicrophonePermissionGranted,
+        error,
+      ];
 
-  MicrophoneState copyWith({bool? isMicrophonePermissionGranted}) {
+  MicrophoneState copyWith({
+    bool? isMicrophonePermissionGranted,
+    String? error,
+  }) {
     return MicrophoneState(
       isMicrophonePermissionGranted: isMicrophonePermissionGranted ?? this.isMicrophonePermissionGranted,
+      error: error ?? this.error,
     );
   }
 

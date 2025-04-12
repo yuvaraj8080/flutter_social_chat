@@ -6,12 +6,14 @@ class AuthManagementState extends Equatable {
     this.isInProgress = false,
     this.userProfilePhotoUrl = '',
     this.selectedImagePath = '',
+    this.error,
   });
 
   final bool isUserNameValid;
   final bool isInProgress;
   final String userProfilePhotoUrl;
   final String selectedImagePath;
+  final String? error;
 
   @override
   List<Object?> get props => [
@@ -19,6 +21,7 @@ class AuthManagementState extends Equatable {
         isInProgress,
         userProfilePhotoUrl,
         selectedImagePath,
+        error,
       ];
 
   AuthManagementState copyWith({
@@ -26,12 +29,14 @@ class AuthManagementState extends Equatable {
     bool? isInProgress,
     String? userProfilePhotoUrl,
     String? selectedImagePath,
+    String? error,
   }) {
     return AuthManagementState(
       isUserNameValid: isUserNameValid ?? this.isUserNameValid,
       isInProgress: isInProgress ?? this.isInProgress,
       userProfilePhotoUrl: userProfilePhotoUrl ?? this.userProfilePhotoUrl,
       selectedImagePath: selectedImagePath ?? this.selectedImagePath,
+      error: error ?? this.error,
     );
   }
 

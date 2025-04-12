@@ -7,6 +7,7 @@ class CameraState extends Equatable {
   final String pathOfTheTakenPhoto;
   final bool isInProgress;
   final bool isCameraPermissionGranted;
+  final String? error;
 
   const CameraState({
     this.cameras = const [],
@@ -14,15 +15,17 @@ class CameraState extends Equatable {
     this.pathOfTheTakenPhoto = '',
     this.isInProgress = false,
     this.isCameraPermissionGranted = false,
+    this.error,
   });
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
         cameras,
         sizeOfTheTakenPhoto,
         pathOfTheTakenPhoto,
         isInProgress,
         isCameraPermissionGranted,
+        error,
       ];
 
   CameraState copyWith({
@@ -31,6 +34,7 @@ class CameraState extends Equatable {
     String? pathOfTheTakenPhoto,
     bool? isInProgress,
     bool? isCameraPermissionGranted,
+    String? error,
   }) {
     return CameraState(
       cameras: cameras ?? this.cameras,
@@ -38,6 +42,7 @@ class CameraState extends Equatable {
       pathOfTheTakenPhoto: pathOfTheTakenPhoto ?? this.pathOfTheTakenPhoto,
       isInProgress: isInProgress ?? this.isInProgress,
       isCameraPermissionGranted: isCameraPermissionGranted ?? this.isCameraPermissionGranted,
+      error: error ?? this.error,
     );
   }
 

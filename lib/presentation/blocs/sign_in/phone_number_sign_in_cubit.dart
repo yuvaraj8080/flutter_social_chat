@@ -103,10 +103,13 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
         .listen(
           (Either<AuthFailureEnum, (String, int?)> failureOrVerificationId) => failureOrVerificationId.fold(
             (AuthFailureEnum failure) {
-              emit(state.copyWith(
+              emit(
+                state.copyWith(
                   failureMessageOption: some(failure),
                   authFailureOrSuccessOption: some(left(failure)),
-                  isInProgress: false));
+                  isInProgress: false,
+                ),
+              );
             },
             ((String, int?) verificationIdResendTokenPair) {
               emit(
