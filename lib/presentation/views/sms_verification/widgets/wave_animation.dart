@@ -13,8 +13,7 @@ class CustomWaveAnimation extends StatefulWidget {
   State<CustomWaveAnimation> createState() => _CustomWaveAnimationState();
 }
 
-class _CustomWaveAnimationState extends State<CustomWaveAnimation>
-    with SingleTickerProviderStateMixin {
+class _CustomWaveAnimationState extends State<CustomWaveAnimation> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
 
   @override
@@ -71,37 +70,35 @@ class WavePainter extends CustomPainter {
     final double waveHeight = size.height * 0.03;
     final double frequency = 2.5; // Number of waves
     final double waterLevel = size.height * 0.95; // Fill most of the screen
-    
+
     // Create main background
     final Paint backgroundPaint = Paint()..color = color;
     canvas.drawRect(
       Rect.fromLTWH(0, 0, size.width, waterLevel),
       backgroundPaint,
     );
-    
+
     // Create wave path
     final path = Path();
     path.moveTo(0, waterLevel);
-    
+
     // Use fewer points for better performance
     final pixelSkip = (size.width / 100).ceil();
-    
+
     // Create curve points for the wave
     for (double x = 0; x <= size.width; x += pixelSkip) {
       // Calculate y position with sine function
-      double y = waterLevel + 
-                 math.sin((x / size.width * frequency * math.pi * 2) + 
-                     (animationValue * math.pi * 2)) * 
-                 waveHeight;
-      
+      double y = waterLevel +
+          math.sin((x / size.width * frequency * math.pi * 2) + (animationValue * math.pi * 2)) * waveHeight;
+
       path.lineTo(x, y);
     }
-    
+
     // Complete the path
     path.lineTo(size.width, size.height);
     path.lineTo(0, size.height);
     path.close();
-    
+
     // Create gradient for the wave
     final Paint wavePaint = Paint()
       ..shader = LinearGradient(
@@ -109,15 +106,14 @@ class WavePainter extends CustomPainter {
         end: Alignment.bottomCenter,
         colors: [
           color,
-          color.withOpacity(0.7),
+          color.withValues(alpha: 0.7),
         ],
       ).createShader(Rect.fromLTWH(0, waterLevel, size.width, size.height - waterLevel));
-    
+
     // Draw the wave
     canvas.drawPath(path, wavePaint);
   }
 
   @override
-  bool shouldRepaint(WavePainter oldDelegate) => 
-      oldDelegate.animationValue != animationValue;
+  bool shouldRepaint(WavePainter oldDelegate) => oldDelegate.animationValue != animationValue;
 }
