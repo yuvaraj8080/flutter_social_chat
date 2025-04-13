@@ -10,8 +10,8 @@ import 'package:flutter_social_chat/presentation/blocs/profile_management/profil
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/camera/camera_cubit.dart';
-import 'package:flutter_social_chat/presentation/blocs/chat/chat_management/chat_management_cubit.dart';
-import 'package:flutter_social_chat/presentation/blocs/chat/chat_session/chat_session_cubit.dart';
+import 'package:flutter_social_chat/presentation/blocs/chat_management/chat_management_cubit.dart';
+import 'package:flutter_social_chat/presentation/blocs/chat_session/chat_session_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/connectivity/connectivity_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/microphone/microphone_cubit.dart';
 import 'package:flutter_social_chat/core/interfaces/i_auth_repository.dart';

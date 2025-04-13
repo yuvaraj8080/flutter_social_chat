@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_social_chat/presentation/blocs/chat/chat_management/chat_management_cubit.dart';
-import 'package:flutter_social_chat/presentation/blocs/chat/chat_management/chat_management_state.dart';
+import 'package:flutter_social_chat/presentation/blocs/chat_management/chat_management_cubit.dart';
+import 'package:flutter_social_chat/presentation/blocs/chat_management/chat_management_state.dart';
 import 'package:flutter_social_chat/presentation/views/create_new_chat/widgets/channel_name_form_field.dart';
 import 'package:flutter_social_chat/presentation/views/create_new_chat/widgets/create_new_chat_button.dart';
 import 'package:flutter_social_chat/presentation/views/create_new_chat/widgets/selected_user_item.dart';

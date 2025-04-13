@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_social_chat/presentation/blocs/chat/chat_management/chat_management_cubit.dart';
+import 'package:flutter_social_chat/presentation/blocs/chat_management/chat_management_cubit.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 
 class ChannelNameFormField extends StatelessWidget {
