@@ -6,9 +6,9 @@ import 'package:flutter_social_chat/data/repository/camera/camera_repository.dar
 import 'package:flutter_social_chat/data/repository/chat/chat_repository.dart';
 import 'package:flutter_social_chat/data/repository/connectivity/connectivity_repository.dart';
 import 'package:flutter_social_chat/data/repository/microphone/microphone_repository.dart';
-import 'package:flutter_social_chat/presentation/blocs/auth_management/auth_management_cubit.dart';
+import 'package:flutter_social_chat/presentation/blocs/profile_management/profile_manager_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_cubit.dart';
-import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_cubit.dart';
+import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/camera/camera_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat/chat_management/chat_management_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat/chat_setup/chat_setup_cubit.dart';
@@ -55,18 +55,18 @@ void injectionSetup() {
   getIt.registerFactory<CameraCubit>(() => CameraCubit(getIt<ICameraRepository>()));
 
   // Auth Cubits
-  getIt.registerLazySingleton<AuthCubit>(
-    () => AuthCubit(
-      authService: getIt<IAuthRepository>(),
-      chatService: getIt<IChatRepository>(),
+  getIt.registerLazySingleton<AuthSessionCubit>(
+    () => AuthSessionCubit(
+      authRepository: getIt<IAuthRepository>(),
+      chatRepository: getIt<IChatRepository>(),
     ),
   );
-  getIt.registerLazySingleton<AuthManagementCubit>(
-    () => AuthManagementCubit(
+  getIt.registerLazySingleton<ProfileManagerCubit>(
+    () => ProfileManagerCubit(
       authService: getIt<IAuthRepository>(),
       firebaseStorage: getIt<FirebaseStorage>(),
       firebaseFirestore: getIt<FirebaseFirestore>(),
-      authCubit: getIt<AuthCubit>(),
+      authCubit: getIt<AuthSessionCubit>(),
     ),
   );
   getIt.registerFactory<PhoneNumberSignInCubit>(() => PhoneNumberSignInCubit(getIt<IAuthRepository>()));
@@ -76,7 +76,7 @@ void injectionSetup() {
     () => ChatManagementCubit(
       getIt<IChatRepository>(),
       getIt<FirebaseFirestore>(),
-      getIt<AuthCubit>(),
+      getIt<AuthSessionCubit>(),
     ),
   );
   getIt.registerLazySingleton<ChatSetupCubit>(() => ChatSetupCubit(getIt<IChatRepository>()));

@@ -3,28 +3,28 @@ import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_social_chat/presentation/blocs/auth_management/auth_management_state.dart';
-import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_cubit.dart';
+import 'package:flutter_social_chat/presentation/blocs/profile_management/profile_manager_state.dart';
+import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_cubit.dart';
 import 'package:flutter_social_chat/core/interfaces/i_auth_repository.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 
-class AuthManagementCubit extends Cubit<AuthManagementState> {
-  AuthManagementCubit({
+class ProfileManagerCubit extends Cubit<ProfileManagerState> {
+  ProfileManagerCubit({
     required IAuthRepository authService,
     required FirebaseStorage firebaseStorage,
     required FirebaseFirestore firebaseFirestore,
-    required AuthCubit authCubit,
+    required AuthSessionCubit authCubit,
   })  : _authService = authService,
         _firebaseStorage = firebaseStorage,
         _firebaseFirestore = firebaseFirestore,
         _authCubit = authCubit,
-        super(AuthManagementState.empty());
+        super(ProfileManagerState.empty());
 
   final IAuthRepository _authService;
   final FirebaseStorage _firebaseStorage;
   final FirebaseFirestore _firebaseFirestore;
-  final AuthCubit _authCubit;
+  final AuthSessionCubit _authCubit;
 
   /// Validates the username and updates the state
   void validateUserName({required bool isUserNameValid}) {

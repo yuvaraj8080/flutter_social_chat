@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_cubit.dart';
+import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_cubit.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
@@ -14,7 +14,7 @@ class CustomProfileButton extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 20),
       child: InkWell(
         onTap: () {
-          context.read<AuthCubit>().signOut();
+          context.read<AuthSessionCubit>().signOut();
           context.read<PhoneNumberSignInCubit>().reset();
         },
         child: Container(

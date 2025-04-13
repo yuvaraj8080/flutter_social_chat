@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_cubit.dart';
+import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat/chat_management/chat_management_state.dart';
 import 'package:flutter_social_chat/core/interfaces/i_chat_repository.dart';
 import 'package:flutter_social_chat/data/extensions/auth/database_extensions.dart';
@@ -13,7 +13,7 @@ class ChatManagementCubit extends Cubit<ChatManagementState> {
 
   final IChatRepository _chatService;
   final FirebaseFirestore _firebaseFirestore;
-  final AuthCubit _authCubit;
+  final AuthSessionCubit _authCubit;
 
   late StreamSubscription<List<Channel>>? _currentUserChannelsSubscription;
 

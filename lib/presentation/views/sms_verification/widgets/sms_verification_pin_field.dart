@@ -9,7 +9,7 @@ class SmsVerificationPinField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Size size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
 
     return Padding(
       padding: const EdgeInsets.only(top: 40),
@@ -30,9 +30,8 @@ class SmsVerificationPinField extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             appContext: context,
             length: 6,
-            onChanged: (String smsCode) {
-              context.read<PhoneNumberSignInCubit>().smsCodeChanged(smsCode: smsCode);
-            },
+            animationType: AnimationType.fade,
+            onChanged: (smsCode) => context.read<PhoneNumberSignInCubit>().smsCodeChanged(smsCode: smsCode),
             textStyle: const TextStyle(color: white),
             keyboardType: TextInputType.phone,
             hintCharacter: '-',

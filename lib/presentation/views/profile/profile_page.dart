@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_cubit.dart';
-import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_state.dart';
+import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_cubit.dart';
+import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_state.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat/chat_setup/chat_setup_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat/chat_setup/chat_setup_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
@@ -20,7 +20,7 @@ class ProfilePage extends StatelessWidget {
     return BlocBuilder<ChatSetupCubit, ChatSetupState>(
       builder: (context, chatSetupState) {
         if (chatSetupState.isChatUserConnected) {
-          return BlocConsumer<AuthCubit, AuthState>(
+          return BlocConsumer<AuthSessionCubit, AuthSessionState>(
             listenWhen: (p, c) => p.isLoggedIn != c.isLoggedIn,
             listener: (context, state) {
               if (!state.isLoggedIn) {

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_chat/core/constants/enums/router_enum.dart';
-import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_cubit.dart';
-import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_state.dart';
+import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_cubit.dart';
+import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_progress_indicator.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/popscope_scaffold.dart';
 import 'package:go_router/go_router.dart';
@@ -22,8 +22,8 @@ class _LandingPageState extends State<LandingPage> {
       (_) {
         if (mounted) {
           _handleNavigation(
-            context.read<AuthCubit>().state.isLoggedIn,
-            context.read<AuthCubit>().state.authUser.isOnboardingCompleted,
+            context.read<AuthSessionCubit>().state.isLoggedIn,
+            context.read<AuthSessionCubit>().state.authUser.isOnboardingCompleted,
           );
         }
       },
@@ -42,7 +42,7 @@ class _LandingPageState extends State<LandingPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AuthCubit, AuthState>(
+    return BlocListener<AuthSessionCubit, AuthSessionState>(
       listenWhen: (previous, current) =>
           previous.isUserCheckedFromAuthService != current.isUserCheckedFromAuthService &&
           current.isUserCheckedFromAuthService,

@@ -1,14 +1,13 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_social_chat/domain/models/auth/auth_user_model.dart';
 
-class AuthState extends Equatable {
+class AuthSessionState extends Equatable {
   final AuthUserModel authUser;
   final bool isUserCheckedFromAuthService;
   final bool isInProgress;
   final bool hasError;
 
-  // Constructor
-  const AuthState({
+  const AuthSessionState({
     required this.authUser,
     required this.isUserCheckedFromAuthService,
     required this.isInProgress,
@@ -18,23 +17,21 @@ class AuthState extends Equatable {
   @override
   List<Object?> get props => [authUser, isUserCheckedFromAuthService, isInProgress, hasError];
 
-  // Empty state factory
-  factory AuthState.empty() => AuthState(
+  factory AuthSessionState.empty() => AuthSessionState(
         authUser: AuthUserModel.empty(),
         isUserCheckedFromAuthService: false,
         isInProgress: false,
       );
 
-  // Helper getter to check if the user is logged in
   bool get isLoggedIn => authUser != AuthUserModel.empty();
 
-  AuthState copyWith({
+  AuthSessionState copyWith({
     AuthUserModel? authUser,
     bool? isUserCheckedFromAuthService,
     bool? isInProgress,
     bool? hasError,
   }) {
-    return AuthState(
+    return AuthSessionState(
       authUser: authUser ?? this.authUser,
       isUserCheckedFromAuthService: isUserCheckedFromAuthService ?? this.isUserCheckedFromAuthService,
       isInProgress: isInProgress ?? this.isInProgress,

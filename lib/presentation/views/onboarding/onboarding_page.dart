@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_social_chat/presentation/blocs/auth_management/auth_management_cubit.dart';
-import 'package:flutter_social_chat/presentation/blocs/auth_management/auth_management_state.dart';
-import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_cubit.dart';
-import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_state.dart';
+import 'package:flutter_social_chat/presentation/blocs/profile_management/profile_manager_cubit.dart';
+import 'package:flutter_social_chat/presentation/blocs/profile_management/profile_manager_state.dart';
+import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_cubit.dart';
+import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_progress_indicator.dart';
 import 'package:flutter_social_chat/presentation/views/onboarding/widgets/onboarding_page_body.dart';
@@ -22,7 +22,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     if (mounted) {
       WidgetsBinding.instance.addPostFrameCallback(
         (_) {
-          final bool isOnboardingCompleted = context.read<AuthCubit>().state.authUser.isOnboardingCompleted;
+          final bool isOnboardingCompleted = context.read<AuthSessionCubit>().state.authUser.isOnboardingCompleted;
 
           if (isOnboardingCompleted) {
             context.go(context.namedLocation('channels_page'));
@@ -36,13 +36,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AuthCubit, AuthState>(
+    return BlocListener<AuthSessionCubit, AuthSessionState>(
       listener: (context, state) {
         if (state.authUser.isOnboardingCompleted) {
           context.go(context.namedLocation('channels_page'));
         }
       },
-      child: BlocBuilder<AuthManagementCubit, AuthManagementState>(
+      child: BlocBuilder<ProfileManagerCubit, ProfileManagerState>(
         builder: (context, state) {
           if (state.isInProgress) {
             return const Scaffold(

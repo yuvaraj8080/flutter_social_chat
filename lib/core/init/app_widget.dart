@@ -2,7 +2,7 @@ import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_social_chat/presentation/blocs/auth_management/auth_management_cubit.dart';
+import 'package:flutter_social_chat/presentation/blocs/profile_management/profile_manager_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat/chat_management/chat_management_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat/chat_setup/chat_setup_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/connectivity/connectivity_cubit.dart';
@@ -11,7 +11,7 @@ import 'package:flutter_social_chat/presentation/design_system/theme.dart';
 import 'package:flutter_social_chat/core/di/dependency_injector.dart';
 import 'package:flutter_social_chat/core/init/router/app_router.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_cubit.dart';
-import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_cubit.dart';
+import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_cubit.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class AppWidget extends StatelessWidget {
@@ -26,11 +26,11 @@ class AppWidget extends StatelessWidget {
       providers: [
         BlocProvider(
           lazy: false,
-          create: (context) => getIt<AuthManagementCubit>(),
+          create: (context) => getIt<ProfileManagerCubit>(),
         ),
         BlocProvider(
           lazy: false,
-          create: (context) => getIt<AuthCubit>(),
+          create: (context) => getIt<AuthSessionCubit>(),
         ),
         BlocProvider(
           lazy: false,

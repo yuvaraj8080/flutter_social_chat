@@ -14,17 +14,13 @@ class ResendCodeButton extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(top: 24, left: 24),
-      child: InkWell(
-        highlightColor: transparent,
-        splashColor: transparent,
-        hoverColor: transparent,
-        onTap: () {
-          context.read<PhoneNumberSignInCubit>().signInWithPhoneNumber();
-        },
+      child: GestureDetector(
+        onTap: () => context.read<PhoneNumberSignInCubit>().signInWithPhoneNumber(),
         child: Padding(
           padding: const EdgeInsets.all(8),
           child: Row(
             spacing: 12,
+            mainAxisSize: MainAxisSize.min,
             children: [
               CustomText(text: resendCodeText, color: white, fontSize: 16, fontWeight: FontWeight.w400),
               const Icon(Icons.arrow_forward_ios, size: 16, color: white),

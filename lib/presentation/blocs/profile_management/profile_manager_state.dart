@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
-class AuthManagementState extends Equatable {
-  const AuthManagementState({
+class ProfileManagerState extends Equatable {
+  const ProfileManagerState({
     this.isUserNameValid = false,
     this.isInProgress = false,
     this.userProfilePhotoUrl = '',
@@ -24,14 +24,14 @@ class AuthManagementState extends Equatable {
         error,
       ];
 
-  AuthManagementState copyWith({
+  ProfileManagerState copyWith({
     bool? isUserNameValid,
     bool? isInProgress,
     String? userProfilePhotoUrl,
     String? selectedImagePath,
     String? error,
   }) {
-    return AuthManagementState(
+    return ProfileManagerState(
       isUserNameValid: isUserNameValid ?? this.isUserNameValid,
       isInProgress: isInProgress ?? this.isInProgress,
       userProfilePhotoUrl: userProfilePhotoUrl ?? this.userProfilePhotoUrl,
@@ -40,5 +40,5 @@ class AuthManagementState extends Equatable {
     );
   }
 
-  factory AuthManagementState.empty() => const AuthManagementState();
+  factory ProfileManagerState.empty() => const ProfileManagerState();
 }

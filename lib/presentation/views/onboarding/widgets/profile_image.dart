@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_social_chat/presentation/blocs/auth_management/auth_management_cubit.dart';
+import 'package:flutter_social_chat/presentation/blocs/profile_management/profile_manager_cubit.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/gen/assets.gen.dart';
 
@@ -51,7 +51,7 @@ class ProfileImage extends StatelessWidget {
                 imageQuality: 100,
               );
 
-              context.read<AuthManagementCubit>().selectProfileImage(userFileImg: image);
+              context.read<ProfileManagerCubit>().selectProfileImage(userFileImg: image);
             },
             icon: Icon(
               CupertinoIcons.chevron_down_square_fill,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_cubit.dart';
@@ -13,48 +14,54 @@ class VerificationConfirmButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Size size = MediaQuery.of(context).size;
+    final size = MediaQuery.sizeOf(context);
     final String confirmText = AppLocalizations.of(context)?.confirm ?? '';
+    final bool isEnabled = state.smsCode.isNotEmpty;
 
-    return InkWell(
-      highlightColor: transparent,
-      splashColor: transparent,
-      hoverColor: transparent,
-      onTap: () {
-        if (state.smsCode.isNotEmpty) {
-          context.read<PhoneNumberSignInCubit>().verifySmsCode();
-        }
-      },
-      child: Container(
-        margin: const EdgeInsets.only(top: 76, left: 24, right: 24),
-        width: size.width,
-        height: size.height / 12,
-        decoration: BoxDecoration(
-          color: black.withValues(alpha: 0.25),
-          borderRadius: const BorderRadius.all(Radius.circular(8)),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 20),
-              child: CustomText(
-                text: confirmText,
-                color: white,
-                fontWeight: FontWeight.w600,
-                fontSize: 26,
+    return GestureDetector(
+      onTap: isEnabled
+          ? () {
+              // Add haptic feedback for better UX
+              HapticFeedback.mediumImpact();
+              context.read<PhoneNumberSignInCubit>().verifySmsCode();
+            }
+          : null,
+      child: Opacity(
+        opacity: isEnabled ? 1 : 0.6,
+        child: Container(
+          margin: const EdgeInsets.only(top: 76, left: 24, right: 24, bottom: 24),
+          width: size.width,
+          height: size.height / 12,
+          decoration: BoxDecoration(
+            color: black.withValues(alpha: 0.25),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 20),
+                child: CustomText(
+                  text: confirmText,
+                  color: white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 26,
+                ),
               ),
-            ),
-            Container(
-              width: 75,
-              height: MediaQuery.of(context).size.height / 12,
-              decoration: const BoxDecoration(
-                color: white,
-                borderRadius: BorderRadius.only(topRight: Radius.circular(8), bottomRight: Radius.circular(8)),
+              Container(
+                width: 75,
+                height: size.height / 12,
+                decoration: const BoxDecoration(
+                  color: white,
+                  borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(8),
+                    bottomRight: Radius.circular(8),
+                  ),
+                ),
+                child: const Icon(Icons.arrow_forward, size: 36, color: white),
               ),
-              child: const Icon(Icons.arrow_forward, size: 36),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

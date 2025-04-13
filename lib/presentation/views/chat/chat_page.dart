@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_social_chat/presentation/blocs/sms_verification/auth_cubit.dart';
+import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_cubit.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/views/chat/widgets/chat_page_body.dart';
 import 'package:go_router/go_router.dart';
@@ -20,7 +20,7 @@ class ChatPage extends StatelessWidget {
     final lengthOfTheChannelMembers = channelMembers.length;
 
     final oneToOneChatMember =
-        channelMembers.where((member) => member.userId != context.read<AuthCubit>().state.authUser.id).first.user!;
+        channelMembers.where((member) => member.userId != context.read<AuthSessionCubit>().state.authUser.id).first.user!;
 
     return StreamChannel(
       channel: channel,

@@ -4,7 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ConfirmationInfoTextWithIcon extends StatelessWidget {
-  const ConfirmationInfoTextWithIcon({Key? key, required this.phoneNumber}) : super(key: key);
+  const ConfirmationInfoTextWithIcon({super.key, required this.phoneNumber});
 
   final String phoneNumber;
 
