@@ -136,22 +136,28 @@ class AppRouter {
   GoRoute get _signInVerificationRoute => GoRoute(
         path: RouterEnum.signInVerificationView.routeName,
         builder: (context, state) {
-          final String? encodedExtras = state.extra as String?;
-          final extras = encodedExtras != null ? PhoneNumberSignInStateCodec.decode(encodedExtras) : {};
+          // Handle both direct state object and legacy encoded format for backward compatibility
+          if (state.extra is PhoneNumberSignInState) {
+            return SmsVerificationView(state: state.extra as PhoneNumberSignInState);
+          } else {
+            // Fallback for backward compatibility or if state is missing
+            final String? encodedExtras = state.extra as String?;
+            final extras = encodedExtras != null ? PhoneNumberSignInStateCodec.decode(encodedExtras) : {};
 
-          final phoneNumberSignInState = PhoneNumberSignInState(
-            phoneNumber: extras['phoneNumber'] ?? '',
-            smsCode: extras['smsCode'] ?? '',
-            verificationIdOption: Option.of(extras['verificationId'] as String? ?? ''),
-            isInProgress: extras['isInProgress'] ?? false,
-            isPhoneNumberInputValidated: extras['isPhoneNumberInputValidated'] ?? false,
-            phoneNumberAndResendTokenPair: (
-              extras['phoneNumberPair'] ?? '',
-              extras['resendToken'] as int?,
-            ),
-          );
+            final phoneNumberSignInState = PhoneNumberSignInState(
+              phoneNumber: extras['phoneNumber'] ?? '',
+              smsCode: extras['smsCode'] ?? '',
+              verificationIdOption: Option.of(extras['verificationId'] as String? ?? ''),
+              isInProgress: extras['isInProgress'] ?? false,
+              isPhoneNumberInputValidated: extras['isPhoneNumberInputValidated'] ?? false,
+              phoneNumberAndResendTokenPair: (
+                extras['phoneNumberPair'] ?? '',
+                extras['resendToken'] as int?,
+              ),
+            );
 
-          return SmsVerificationView(state: phoneNumberSignInState);
+            return SmsVerificationView(state: phoneNumberSignInState);
+          }
         },
       );
 

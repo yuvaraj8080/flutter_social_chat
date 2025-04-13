@@ -9,7 +9,6 @@ import 'package:flutter_social_chat/presentation/design_system/text_styles.dart'
 import 'package:flutter_social_chat/presentation/design_system/widgets/animated_gradient_button.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
 import 'package:flutter_social_chat/presentation/views/sign_in/widgets/phone_number_sign_in_section.dart';
-import 'package:flutter_social_chat/core/init/router/codec.dart';
 import 'package:go_router/go_router.dart';
 
 class PhoneNumberInputCard extends StatelessWidget {
@@ -73,18 +72,10 @@ class PhoneNumberInputCard extends StatelessWidget {
       // First initiate the sign-in process
       context.read<PhoneNumberSignInCubit>().signInWithPhoneNumber();
 
-      // Then navigate to the verification page
+      // Navigate to verification screen with the current state
       context.push(
         RouterEnum.signInVerificationView.routeName,
-        extra: PhoneNumberSignInStateCodec.encode({
-          'phoneNumber': state.phoneNumber,
-          'smsCode': state.smsCode,
-          'verificationId': state.verificationIdOption.toNullable(),
-          'isInProgress': state.isInProgress,
-          'isPhoneNumberInputValidated': state.isPhoneNumberInputValidated,
-          'phoneNumberPair': state.phoneNumberAndResendTokenPair.$1,
-          'resendToken': state.phoneNumberAndResendTokenPair.$2,
-        }),
+        extra: state,
       );
     }
   }
