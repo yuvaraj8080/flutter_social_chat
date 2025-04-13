@@ -7,7 +7,7 @@
 > If you want to read an article about this project, there is an article that is written by me and sponsored by [Stream](https://getstream.io/chat/flutter/tutorial/?utm_source=GitHub&utm_medium=referral&utm_content=&utm_campaign=flutter_social_chat). Here is the link: https://gstrm.io/sahinefe
 
 ![flutter_chat_preview](https://user-images.githubusercontent.com/67283777/214430512-e987c9ba-f6e6-4b43-abe9-efe0c375ef7c.png)
-![Stream](assets/images/stream-logo.png)
+![Stream](assets/images/stream_logo.png)
 
 ## Distinctive features gathered in a Single App
 * BLoC for state management

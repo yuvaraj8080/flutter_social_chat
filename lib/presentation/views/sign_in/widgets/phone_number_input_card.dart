@@ -23,24 +23,16 @@ class PhoneNumberInputCard extends StatelessWidget {
       builder: (context, state) {
         return Container(
           width: size.width,
-          padding: EdgeInsets.only(
-            top: size.height / 3,
-            right: 24,
-            left: 24,
-            bottom: 24,
-          ),
+          padding: EdgeInsets.only(top: size.height / 3, right: 24, left: 24, bottom: 24),
           child: Card(
             color: white,
             elevation: 4,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildTitle(context),
-                // Use intrinsic height instead of fixed height
                 PhoneNumberInputField(state: state),
                 _buildInfoText(context),
                 _buildContinueButton(context, state),
@@ -164,8 +156,10 @@ class PhoneNumberInputCard extends StatelessWidget {
   /// Handles the submit action when the user presses the button
   void _handleSubmit(BuildContext context, PhoneNumberSignInState state) {
     if (state.isPhoneNumberInputValidated) {
+      // First initiate the sign-in process
       context.read<PhoneNumberSignInCubit>().signInWithPhoneNumber();
 
+      // Then navigate to the verification page
       context.push(
         RouterEnum.signInVerificationView.routeName,
         extra: PhoneNumberSignInStateCodec.encode({

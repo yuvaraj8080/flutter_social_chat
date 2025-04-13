@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_chat/presentation/blocs/auth_management/auth_management_cubit.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
+import 'package:flutter_social_chat/presentation/gen/assets.gen.dart';
 
 import 'package:image_picker/image_picker.dart';
 
@@ -36,7 +37,7 @@ class ProfileImage extends StatelessWidget {
               image: DecorationImage(
                 fit: BoxFit.fill,
                 image: selectedImagePath == ''
-                    ? const AssetImage('assets/images/user.png') as ImageProvider
+                    ? AssetImage(Assets.images.user.path) as ImageProvider
                     : FileImage(File(selectedImagePath)),
               ),
             ),

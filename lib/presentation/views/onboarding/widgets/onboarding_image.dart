@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_social_chat/presentation/gen/assets.gen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class OnboardingImage extends StatelessWidget {
@@ -13,13 +14,13 @@ class OnboardingImage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Image.asset(
-          'assets/images/onboarding_top_corner.png',
+          Assets.images.onboardingTopCorner.path,
           width: 120,
         ),
         Padding(
           padding: const EdgeInsets.only(top: 50),
           child: SvgPicture.asset(
-            'assets/images/chat.svg',
+            Assets.images.chat,
             width: size.width / 2,
             height: size.height / 4,
           ),

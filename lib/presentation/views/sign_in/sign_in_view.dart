@@ -7,7 +7,6 @@ import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_app_bar.dart';
-import 'package:flutter_social_chat/presentation/design_system/widgets/custom_progress_indicator.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/popscope_scaffold.dart';
 import 'package:flutter_social_chat/presentation/views/sign_in/widgets/sign_in_view_body.dart';
 import 'package:go_router/go_router.dart';
@@ -17,40 +16,27 @@ class SignInView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<PhoneNumberSignInCubit, PhoneNumberSignInState>(
-      listenWhen: (previous, current) => 
-          previous.failureMessageOption != current.failureMessageOption && 
-          current.failureMessageOption.isSome(),
+    final String appBarTitle = AppLocalizations.of(context)?.signIn ?? '';
+
+    return BlocListener<PhoneNumberSignInCubit, PhoneNumberSignInState>(
+      listenWhen: (previous, current) =>
+          previous.failureMessageOption != current.failureMessageOption && current.failureMessageOption.isSome(),
       listener: (context, state) {
         state.failureMessageOption.fold(
           () {},
           (authFailure) {
             _showErrorToast(context, authFailure);
+
             context.read<PhoneNumberSignInCubit>().reset();
             context.pop();
           },
         );
       },
-      buildWhen: (previous, current) => previous.isInProgress != current.isInProgress,
-      builder: (context, state) {
-        if (state.isInProgress) {
-          return const PopScopeScaffold(
-            body: Center(child: CustomProgressIndicator()),
-          );
-        } else {
-          final String appBarTitle = AppLocalizations.of(context)?.signIn ?? '';
-          
-          return PopScopeScaffold(
-            resizeToAvoidBottomInset: false,
-            body: const SignInViewBody(),
-            appBar: CustomAppBar(
-              backgroundColor: customIndigoColor, 
-              title: appBarTitle, 
-              titleColor: white,
-            ),
-          );
-        }
-      },
+      child: PopScopeScaffold(
+        resizeToAvoidBottomInset: false,
+        body: const SignInViewBody(),
+        appBar: CustomAppBar(backgroundColor: customIndigoColor, title: appBarTitle, titleColor: white),
+      ),
     );
   }
 
@@ -63,7 +49,7 @@ class SignInView extends StatelessWidget {
   /// Gets localized error message for a specific auth failure
   String _getErrorMessageForFailure(BuildContext context, AuthFailureEnum authFailure) {
     final localizations = AppLocalizations.of(context);
-    
+
     return switch (authFailure) {
       AuthFailureEnum.serverError => localizations?.serverError ?? '',
       AuthFailureEnum.tooManyRequests => localizations?.tooManyRequests ?? '',

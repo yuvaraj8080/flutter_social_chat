@@ -9,6 +9,16 @@
 
 import 'package:flutter/widgets.dart';
 
+class $AssetsAnimationsGen {
+  const $AssetsAnimationsGen();
+
+  /// File path: assets/animations/chat_animation.json
+  String get chatAnimation => 'assets/animations/chat_animation.json';
+
+  /// List of all assets
+  List<String> get values => [chatAnimation];
+}
+
 class $AssetsImagesGen {
   const $AssetsImagesGen();
 
@@ -22,25 +32,32 @@ class $AssetsImagesGen {
   AssetGenImage get onboardingTopCorner =>
       const AssetGenImage('assets/images/onboarding_top_corner.png');
 
+  /// File path: assets/images/stream_logo.png
+  AssetGenImage get streamLogo =>
+      const AssetGenImage('assets/images/stream_logo.png');
+
   /// File path: assets/images/user.png
   AssetGenImage get user => const AssetGenImage('assets/images/user.png');
 
   /// List of all assets
-  List<dynamic> get values => [chat, flutter, onboardingTopCorner, user];
+  List<dynamic> get values => [
+    chat,
+    flutter,
+    onboardingTopCorner,
+    streamLogo,
+    user,
+  ];
 }
 
 class Assets {
-  Assets._();
+  const Assets._();
 
+  static const $AssetsAnimationsGen animations = $AssetsAnimationsGen();
   static const $AssetsImagesGen images = $AssetsImagesGen();
 }
 
 class AssetGenImage {
-  const AssetGenImage(
-    this._assetName, {
-    this.size,
-    this.flavors = const {},
-  });
+  const AssetGenImage(this._assetName, {this.size, this.flavors = const {}});
 
   final String _assetName;
 
@@ -68,7 +85,7 @@ class AssetGenImage {
     bool gaplessPlayback = true,
     bool isAntiAlias = false,
     String? package,
-    FilterQuality filterQuality = FilterQuality.low,
+    FilterQuality filterQuality = FilterQuality.medium,
     int? cacheWidth,
     int? cacheHeight,
   }) {
@@ -100,15 +117,8 @@ class AssetGenImage {
     );
   }
 
-  ImageProvider provider({
-    AssetBundle? bundle,
-    String? package,
-  }) {
-    return AssetImage(
-      _assetName,
-      bundle: bundle,
-      package: package,
-    );
+  ImageProvider provider({AssetBundle? bundle, String? package}) {
+    return AssetImage(_assetName, bundle: bundle, package: package);
   }
 
   String get path => _assetName;

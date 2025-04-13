@@ -6,6 +6,7 @@ import 'package:flutter_social_chat/presentation/blocs/chat/chat_setup/chat_setu
 import 'package:flutter_social_chat/presentation/blocs/chat/chat_setup/chat_setup_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_progress_indicator.dart';
+import 'package:flutter_social_chat/presentation/gen/assets.gen.dart';
 import 'package:flutter_social_chat/presentation/views/profile/widgets/custom_profile_button.dart';
 import 'package:flutter_social_chat/presentation/views/profile/widgets/profile_core.dart';
 import 'package:flutter_social_chat/presentation/views/profile/widgets/user_details.dart';
@@ -59,14 +60,14 @@ class ProfilePage extends StatelessWidget {
                                     maxHeight: MediaQuery.of(context).size.height / 2.8,
                                     maxWidth: MediaQuery.of(context).size.width,
                                   ),
-                                  decoration: const BoxDecoration(
+                                  decoration:  BoxDecoration(
                                     image: DecorationImage(
                                       fit: BoxFit.cover,
                                       image: AssetImage(
-                                        'assets/images/flutter.png',
+                                        Assets.images.flutter.path,
                                       ),
                                     ),
-                                    borderRadius: BorderRadius.only(
+                                    borderRadius:const  BorderRadius.only(
                                       topLeft: Radius.circular(20),
                                       topRight: Radius.circular(20),
                                       bottomRight: Radius.circular(20),

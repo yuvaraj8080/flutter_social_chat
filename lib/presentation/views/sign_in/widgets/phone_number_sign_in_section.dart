@@ -18,7 +18,6 @@ class PhoneNumberInputField extends StatefulWidget {
 }
 
 class _PhoneNumberInputFieldState extends State<PhoneNumberInputField> {
-  /// Initial phone number with default country code
   final PhoneNumber initialPhone = PhoneNumber(isoCode: 'TR');
   final TextEditingController _phoneController = TextEditingController();
   bool _hasAttemptedValidation = false;
@@ -28,12 +27,9 @@ class _PhoneNumberInputFieldState extends State<PhoneNumberInputField> {
   @override
   void initState() {
     super.initState();
-    // Set initial phone number value on initialization
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        context.read<PhoneNumberSignInCubit>().phoneNumberChanged(
-              phoneNumber: initialPhone.phoneNumber ?? '',
-            );
+        context.read<PhoneNumberSignInCubit>().phoneNumberChanged(phoneNumber: initialPhone.phoneNumber ?? '');
       }
     });
   }
