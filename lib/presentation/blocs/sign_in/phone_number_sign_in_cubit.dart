@@ -11,7 +11,7 @@ import 'package:fpdart/fpdart.dart';
 class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
   final IAuthRepository _authService;
   StreamSubscription<Either<AuthFailureEnum, (String, int?)>>? _phoneNumberSignInSubscription;
-  
+
   // Timeout for SMS verification code
   final Duration verificationCodeTimeout = const Duration(seconds: 60);
 
@@ -21,14 +21,14 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
   void phoneNumberChanged({required String phoneNumber}) {
     // Prevent unnecessary state emissions with identical phone numbers
     if (state.phoneNumber == phoneNumber) return;
-    
+
     emit(state.copyWith(phoneNumber: phoneNumber, isPhoneNumberInputValidated: false));
   }
 
   void updateNextButtonStatus({required bool isPhoneNumberInputValidated}) {
     // Only emit new state if value changed
     if (state.isPhoneNumberInputValidated == isPhoneNumberInputValidated) return;
-    
+
     emit(state.copyWith(isPhoneNumberInputValidated: isPhoneNumberInputValidated));
   }
 
@@ -36,7 +36,7 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
   void smsCodeChanged({required String smsCode}) {
     // Prevent unnecessary state emissions with identical SMS codes
     if (state.smsCode == smsCode) return;
-    
+
     emit(state.copyWith(smsCode: smsCode));
   }
 
@@ -64,6 +64,92 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
     );
   }
 
+  /// Resends the verification code without changing verification ID
+  /// This prevents triggering navigation in the view
+  void resendCode() {
+    if (state.isInProgress || state.phoneNumber.isEmpty) {
+      return;
+    }
+
+    emit(
+      state.copyWith(
+        isInProgress: true,
+        failureMessageOption: none(),
+        authFailureOrSuccessOption: none(),
+        smsCode: '',
+      ),
+    );
+
+    // Cancel any existing subscription
+    _cancelSubscription();
+
+    try {
+      _phoneNumberSignInSubscription = _authService
+          .signInWithPhoneNumber(
+        phoneNumber: state.phoneNumber,
+        timeout: verificationCodeTimeout,
+        resendToken: state.phoneNumberAndResendTokenPair.$2,
+      )
+          .listen(
+        (Either<AuthFailureEnum, (String, int?)> failureOrVerificationId) {
+          // Check if cubit is still active
+          if (isClosed) return;
+
+          failureOrVerificationId.fold(
+            (AuthFailureEnum failure) {
+              emit(
+                state.copyWith(
+                  failureMessageOption: some(failure),
+                  authFailureOrSuccessOption: some(left(failure)),
+                  isInProgress: false,
+                ),
+              );
+            },
+            ((String, int?) verificationIdResendTokenPair) {
+              // Note: We're NOT updating verificationIdOption here
+              // This prevents triggering navigation
+              emit(
+                state.copyWith(
+                  isInProgress: false,
+                  authFailureOrSuccessOption: some(right(unit)),
+                  phoneNumberAndResendTokenPair: (state.phoneNumber, verificationIdResendTokenPair.$2),
+                  // Only store the new verification ID in the option if there wasn't one before
+                  verificationIdOption: state.verificationIdOption.isNone()
+                      ? some(verificationIdResendTokenPair.$1)
+                      : state.verificationIdOption,
+                ),
+              );
+            },
+          );
+        },
+        onError: (error) {
+          // Handle stream errors gracefully
+          debugPrint('Stream error in resendCode: $error');
+          if (!isClosed) {
+            emit(
+              state.copyWith(
+                failureMessageOption: some(AuthFailureEnum.serverError),
+                authFailureOrSuccessOption: some(left(AuthFailureEnum.serverError)),
+                isInProgress: false,
+              ),
+            );
+          }
+        },
+      );
+    } catch (e) {
+      debugPrint('Unexpected error in resendCode: $e');
+      if (!isClosed) {
+        emit(
+          state.copyWith(
+            failureMessageOption: some(AuthFailureEnum.serverError),
+            authFailureOrSuccessOption: some(left(AuthFailureEnum.serverError)),
+            isInProgress: false,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Future<void> close() async {
     await _cancelSubscription();
@@ -85,10 +171,12 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
     state.verificationIdOption.fold(
       () {
         // Verification id does not exist. This should not happen.
-        emit(state.copyWith(
-          failureMessageOption: some(AuthFailureEnum.sessionExpired),
-          isInProgress: false,
-        ));
+        emit(
+          state.copyWith(
+            failureMessageOption: some(AuthFailureEnum.sessionExpired),
+            isInProgress: false,
+          ),
+        );
       },
       (String verificationId) async {
         emit(state.copyWith(isInProgress: true, failureMessageOption: none(), authFailureOrSuccessOption: none()));
@@ -146,54 +234,53 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
     try {
       _phoneNumberSignInSubscription = _authService
           .signInWithPhoneNumber(
-            phoneNumber: state.phoneNumber,
-            timeout: verificationCodeTimeout,
-            resendToken: state.phoneNumber != state.phoneNumberAndResendTokenPair.$1
-                ? null
-                : state.phoneNumberAndResendTokenPair.$2,
-          )
+        phoneNumber: state.phoneNumber,
+        timeout: verificationCodeTimeout,
+        resendToken:
+            state.phoneNumber != state.phoneNumberAndResendTokenPair.$1 ? null : state.phoneNumberAndResendTokenPair.$2,
+      )
           .listen(
-            (Either<AuthFailureEnum, (String, int?)> failureOrVerificationId) {
-              // Check if cubit is still active
-              if (isClosed) return;
-              
-              failureOrVerificationId.fold(
-                (AuthFailureEnum failure) {
-                  emit(
-                    state.copyWith(
-                      failureMessageOption: some(failure),
-                      authFailureOrSuccessOption: some(left(failure)),
-                      isInProgress: false,
-                    ),
-                  );
-                },
-                ((String, int?) verificationIdResendTokenPair) {
-                  emit(
-                    state.copyWith(
-                      verificationIdOption: some(verificationIdResendTokenPair.$1),
-                      isInProgress: false,
-                      isPhoneNumberInputValidated: true,
-                      authFailureOrSuccessOption: some(right(unit)),
-                      phoneNumberAndResendTokenPair: (state.phoneNumber, verificationIdResendTokenPair.$2),
-                    ),
-                  );
-                },
+        (Either<AuthFailureEnum, (String, int?)> failureOrVerificationId) {
+          // Check if cubit is still active
+          if (isClosed) return;
+
+          failureOrVerificationId.fold(
+            (AuthFailureEnum failure) {
+              emit(
+                state.copyWith(
+                  failureMessageOption: some(failure),
+                  authFailureOrSuccessOption: some(left(failure)),
+                  isInProgress: false,
+                ),
               );
             },
-            onError: (error) {
-              // Handle stream errors gracefully
-              debugPrint('Stream error in signInWithPhoneNumber: $error');
-              if (!isClosed) {
-                emit(
-                  state.copyWith(
-                    failureMessageOption: some(AuthFailureEnum.serverError),
-                    authFailureOrSuccessOption: some(left(AuthFailureEnum.serverError)),
-                    isInProgress: false,
-                  ),
-                );
-              }
+            ((String, int?) verificationIdResendTokenPair) {
+              emit(
+                state.copyWith(
+                  verificationIdOption: some(verificationIdResendTokenPair.$1),
+                  isInProgress: false,
+                  isPhoneNumberInputValidated: true,
+                  authFailureOrSuccessOption: some(right(unit)),
+                  phoneNumberAndResendTokenPair: (state.phoneNumber, verificationIdResendTokenPair.$2),
+                ),
+              );
             },
           );
+        },
+        onError: (error) {
+          // Handle stream errors gracefully
+          debugPrint('Stream error in signInWithPhoneNumber: $error');
+          if (!isClosed) {
+            emit(
+              state.copyWith(
+                failureMessageOption: some(AuthFailureEnum.serverError),
+                authFailureOrSuccessOption: some(left(AuthFailureEnum.serverError)),
+                isInProgress: false,
+              ),
+            );
+          }
+        },
+      );
     } catch (e) {
       debugPrint('Unexpected error in signInWithPhoneNumber: $e');
       if (!isClosed) {

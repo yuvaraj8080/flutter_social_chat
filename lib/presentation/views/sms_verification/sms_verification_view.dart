@@ -53,8 +53,7 @@ class SmsVerificationView extends StatelessWidget {
 
                 if (authFailure == AuthFailureEnum.serverError || authFailure == AuthFailureEnum.sessionExpired) {
                   // For critical errors, go back to the sign-in screen
-                  context.read<PhoneNumberSignInCubit>().reset();
-                  context.pop();
+                  _safelyNavigateBack(context);
                 } else {
                   // For validation errors like invalid code, just clear the error state
                   context.read<PhoneNumberSignInCubit>().resetErrorOnly();
@@ -68,11 +67,11 @@ class SmsVerificationView extends StatelessWidget {
         backgroundColor: customIndigoColor,
         resizeToAvoidBottomInset: false,
         onPopInvokedWithResult: (didPop, result) {
-          _handleBackNavigation(context);
+          _safelyNavigateBack(context);
         },
         appBar: CustomAppBar(
           leading: IconButton(
-            onPressed: () => _handleBackNavigation(context),
+            onPressed: () => _safelyNavigateBack(context),
             icon: const Icon(CupertinoIcons.back, color: white),
           ),
           backgroundColor: customIndigoColor,
@@ -105,9 +104,18 @@ class SmsVerificationView extends StatelessWidget {
     };
   }
 
-  /// Handles back button navigation
-  void _handleBackNavigation(BuildContext context) {
-    context.read<PhoneNumberSignInCubit>().reset();
-    context.pop();
+  /// Safely navigate back to prevent multiple pops or other navigation issues
+  void _safelyNavigateBack(BuildContext context) {
+    try {
+      // We need to clear verificationIdOption to prevent navigation loops
+      context.read<PhoneNumberSignInCubit>().reset();
+
+      // Pop the route
+      context.pop();
+    } catch (e) {
+      debugPrint('Error in back navigation: $e');
+      // If pop fails, try to go to sign-in view directly
+      context.go(RouterEnum.signInView.routeName);
+    }
   }
 }

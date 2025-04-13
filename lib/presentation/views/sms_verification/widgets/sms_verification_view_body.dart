@@ -111,7 +111,7 @@ class SmsVerificationViewBody extends StatelessWidget {
     final bool isEnabled = state.smsCode.isNotEmpty && state.smsCode.length == 6;
 
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 120),
       curve: Curves.easeInOut,
       width: double.infinity,
       height: 56,

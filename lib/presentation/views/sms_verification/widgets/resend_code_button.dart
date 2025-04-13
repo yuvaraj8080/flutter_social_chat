@@ -15,7 +15,7 @@ class ResendCodeButton extends StatelessWidget {
     return Align(
       alignment: Alignment.centerLeft,
       child: InkWell(
-        onTap: () => context.read<PhoneNumberSignInCubit>().signInWithPhoneNumber(),
+        onTap: () => _resendCode(context),
         borderRadius: BorderRadius.circular(8),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -30,5 +30,12 @@ class ResendCodeButton extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Handle resending the code without triggering navigation
+  void _resendCode(BuildContext context) {
+    // We want to resend the code but not navigate again
+    // Access the cubit and resend the code using the same phone number
+    context.read<PhoneNumberSignInCubit>().resendCode();
   }
 }
