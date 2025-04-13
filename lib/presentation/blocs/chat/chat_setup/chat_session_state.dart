@@ -2,12 +2,12 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_social_chat/domain/models/chat/chat_user_model.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-class ChatSetupState extends Equatable {
+class ChatSessionState extends Equatable {
   final ChatUserModel chatUser;
   final ConnectionStatus webSocketConnectionStatus;
   final bool isUserCheckedFromChatService;
 
-  const ChatSetupState({
+  const ChatSessionState({
     required this.chatUser,
     required this.webSocketConnectionStatus,
     required this.isUserCheckedFromChatService,
@@ -16,20 +16,20 @@ class ChatSetupState extends Equatable {
   @override
   List<Object> get props => [chatUser, webSocketConnectionStatus, isUserCheckedFromChatService];
 
-  ChatSetupState copyWith({
+  ChatSessionState copyWith({
     ChatUserModel? chatUser,
     ConnectionStatus? webSocketConnectionStatus,
     bool? isUserCheckedFromChatService,
   }) {
-    return ChatSetupState(
+    return ChatSessionState(
       chatUser: chatUser ?? this.chatUser,
       webSocketConnectionStatus: webSocketConnectionStatus ?? this.webSocketConnectionStatus,
       isUserCheckedFromChatService: isUserCheckedFromChatService ?? this.isUserCheckedFromChatService,
     );
   }
 
-  factory ChatSetupState.empty() {
-    return ChatSetupState(
+  factory ChatSessionState.empty() {
+    return ChatSessionState(
       chatUser: ChatUserModel.empty(),
       webSocketConnectionStatus: ConnectionStatus.disconnected,
       isUserCheckedFromChatService: false,

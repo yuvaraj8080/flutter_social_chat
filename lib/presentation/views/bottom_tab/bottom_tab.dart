@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_social_chat/presentation/blocs/chat/chat_setup/chat_setup_cubit.dart';
-import 'package:flutter_social_chat/presentation/blocs/chat/chat_setup/chat_setup_state.dart';
+import 'package:flutter_social_chat/presentation/blocs/chat/chat_setup/chat_session_cubit.dart';
+import 'package:flutter_social_chat/presentation/blocs/chat/chat_setup/chat_session_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_progress_indicator.dart';
 import 'package:flutter_social_chat/core/di/dependency_injector.dart';
@@ -15,8 +15,8 @@ class BottomTabPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => getIt<ChatSetupCubit>(),
-      child: BlocBuilder<ChatSetupCubit, ChatSetupState>(
+      create: (context) => getIt<ChatSessionCubit>(),
+      child: BlocBuilder<ChatSessionCubit, ChatSessionState>(
         buildWhen: (p, c) => p.isChatUserConnected != c.isChatUserConnected && c.isChatUserConnected,
         builder: (context, state) {
           final isUserCheckedFromChatService = state.isUserCheckedFromChatService;
