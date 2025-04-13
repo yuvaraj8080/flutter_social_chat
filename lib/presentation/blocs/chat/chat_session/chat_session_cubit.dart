@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter_social_chat/presentation/blocs/chat/chat_setup/chat_session_state.dart';
+import 'package:flutter_social_chat/presentation/blocs/chat/chat_session/chat_session_state.dart';
 import 'package:flutter_social_chat/domain/models/chat/chat_user_model.dart';
 import 'package:flutter_social_chat/core/interfaces/i_chat_repository.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
