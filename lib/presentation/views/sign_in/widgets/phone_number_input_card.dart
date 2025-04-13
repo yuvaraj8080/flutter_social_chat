@@ -4,7 +4,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
-import 'package:flutter_social_chat/presentation/design_system/text_styles.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/animated_gradient_button.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
 import 'package:flutter_social_chat/presentation/views/sign_in/widgets/phone_number_sign_in_section.dart';
@@ -40,7 +39,7 @@ class PhoneNumberInputCard extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 28, left: 28),
                   child: CustomText(
                     text: signInWithPhoneNumber,
-                    style: AppTextStyles.heading3,
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: black),
                   ),
                 ),
                 PhoneNumberInputField(state: state),
@@ -48,7 +47,7 @@ class PhoneNumberInputCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
                   child: CustomText(
                     text: smsInformationMessage,
-                    style: AppTextStyles.bodySmall,
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: secondaryTextColor),
                   ),
                 ),
                 AnimatedGradientButton(

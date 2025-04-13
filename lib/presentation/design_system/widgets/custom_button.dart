@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_social_chat/core/constants/enums/button_size_enum.dart';
 import 'package:flutter_social_chat/core/constants/enums/button_type_enum.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
-import 'package:flutter_social_chat/presentation/design_system/text_styles.dart';
+import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
 
 class CustomButton extends StatelessWidget {
   const CustomButton({
@@ -79,13 +79,6 @@ class CustomButton extends StatelessWidget {
         ),
     };
 
-    // Text style based on size
-    TextStyle textStyle = switch (buttonSize) {
-      ButtonSizeEnum.small => AppTextStyles.buttonMedium.copyWith(fontSize: 12),
-      ButtonSizeEnum.medium => AppTextStyles.buttonMedium,
-      ButtonSizeEnum.large => AppTextStyles.buttonLarge,
-    };
-
     // Button color based on type
     Color textColor = switch (buttonType) {
       ButtonTypeEnum.primary => white,
@@ -105,20 +98,14 @@ class CustomButton extends StatelessWidget {
           )
         : (icon != null)
             ? Row(
+                spacing: 8,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   icon!,
-                  const SizedBox(width: 8),
-                  Text(
-                    text,
-                    style: textStyle.copyWith(color: textColor),
-                  ),
+                  CustomText(text: text, color: textColor),
                 ],
               )
-            : Text(
-                text,
-                style: textStyle.copyWith(color: textColor),
-              );
+            : CustomText(text: text, color: textColor);
 
     // Button widget
     Widget buttonWidget = switch (buttonType) {

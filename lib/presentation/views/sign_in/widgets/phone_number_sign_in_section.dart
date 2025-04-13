@@ -5,7 +5,6 @@ import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/styles/input_styles.dart';
-import 'package:flutter_social_chat/presentation/design_system/text_styles.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
 class PhoneNumberInputField extends StatefulWidget {
@@ -71,7 +70,7 @@ class _PhoneNumberInputFieldState extends State<PhoneNumberInputField> {
                 useBottomSheetSafeArea: true,
                 setSelectorButtonAsPrefixIcon: true,
               ),
-              textStyle: AppTextStyles.bodyMedium,
+              textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: black),
               autoValidateMode: AutovalidateMode.onUserInteraction,
               initialValue: initialPhone,
               inputBorder: InputBorder.none,
@@ -93,7 +92,7 @@ class _PhoneNumberInputFieldState extends State<PhoneNumberInputField> {
                   padding: const EdgeInsets.only(left: 24, top: 4),
                   child: Text(
                     _errorText,
-                    style: AppTextStyles.withColor(AppTextStyles.caption, errorColor),
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: errorColor),
                   ),
                 )
               : const SizedBox.shrink(),

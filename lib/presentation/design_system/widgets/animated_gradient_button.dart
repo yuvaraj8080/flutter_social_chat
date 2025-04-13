@@ -1,15 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
-import 'package:flutter_social_chat/presentation/design_system/text_styles.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
 
-/// An animated gradient button with a smooth transition effect based on
-/// enabled state.
-///
-/// This button displays a gradient background that animates between active and
-/// inactive states, with a configurable text and trailing icon.
 class AnimatedGradientButton extends StatelessWidget {
-  /// Creates an animated gradient button.
   const AnimatedGradientButton({
     super.key,
     required this.text,
@@ -23,38 +16,29 @@ class AnimatedGradientButton extends StatelessWidget {
     this.trailingIcon = Icons.arrow_forward,
   });
 
-  /// The text to display on the button.
   final String text;
 
-  /// The callback to invoke when the button is tapped.
   final VoidCallback? onPressed;
 
-  /// Whether the button is enabled.
   final bool isEnabled;
 
-  /// The text style for the button text.
   final TextStyle? textStyle;
 
-  /// The border radius of the button.
   final double borderRadius;
 
-  /// The height of the button.
   final double height;
 
-  /// The size of the trailing icon.
   final double iconSize;
 
-  /// The duration of the animation in milliseconds.
   final int animationDuration;
 
-  /// The icon to display at the trailing end of the button.
   final IconData trailingIcon;
 
   @override
   Widget build(BuildContext context) {
-    // Use the provided text style or default to the button medium style
+    // Use the provided text style or default to button medium style
     final buttonTextStyle =
-        textStyle ?? AppTextStyles.buttonMedium.copyWith(letterSpacing: 1.2, fontWeight: FontWeight.w600);
+        textStyle ?? const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 1.2, color: white);
 
     return Padding(
       padding: const EdgeInsets.all(28),
@@ -113,4 +97,3 @@ class AnimatedGradientButton extends StatelessWidget {
     );
   }
 }
- 

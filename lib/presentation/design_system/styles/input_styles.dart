@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
-import 'package:flutter_social_chat/presentation/design_system/text_styles.dart';
 
 class InputStyles {
   static UnderlineInputBorder createUnderlineBorder(Color color, double width) {
@@ -45,7 +44,7 @@ class InputStyles {
       filled: true,
       fillColor: white,
       contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-      errorStyle: AppTextStyles.withColor(AppTextStyles.caption, errorColor),
+      errorStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: errorColor),
       enabledBorder: regularBorder,
       focusedBorder: activeBorder,
       errorBorder: createOutlineBorder(color: errorColor),
@@ -62,7 +61,7 @@ class InputStyles {
   }) {
     return baseUnderlineDecoration.copyWith(
       hintText: hintText,
-      hintStyle: AppTextStyles.withColor(AppTextStyles.bodyMedium, secondaryTextColor),
+      hintStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: secondaryTextColor),
       enabledBorder: enabledBorder,
       focusedBorder: focusedBorder,
       errorBorder: errorBorder,
@@ -77,7 +76,7 @@ class InputStyles {
   }) {
     return baseOutlineDecoration.copyWith(
       hintText: hintText,
-      hintStyle: AppTextStyles.withColor(AppTextStyles.bodyMedium, secondaryTextColor),
+      hintStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: secondaryTextColor),
       prefixIcon: prefixIcon,
       suffixIcon: suffixIcon,
       border: createOutlineBorder(radius: 16),
