@@ -85,11 +85,13 @@ class SmsVerificationView extends StatelessWidget {
         backgroundColor: customIndigoColor,
         resizeToAvoidBottomInset: false,
         onPopInvokedWithResult: (didPop, result) {
-          _safelyNavigateBack(context);
+          if (!didPop) {
+            _handleBackNavigation(context);
+          }
         },
         appBar: CustomAppBar(
           leading: IconButton(
-            onPressed: () => _safelyNavigateBack(context),
+            onPressed: () => _handleBackNavigation(context),
             icon: const Icon(CupertinoIcons.back, color: white),
           ),
           backgroundColor: customIndigoColor,
@@ -122,21 +124,33 @@ class SmsVerificationView extends StatelessWidget {
     };
   }
 
+  /// Handle back button press
+  void _handleBackNavigation(BuildContext context) {
+    // Ensure loading indicator is hidden first
+    CustomLoadingIndicator.of(context).hide();
+    
+    // Reset state in cubit to prevent verification ID from triggering navigation
+    context.read<PhoneNumberSignInCubit>().reset();
+    
+    // Safely navigate back with a slight delay to avoid navigation lock
+    _safelyNavigateBack(context);
+  }
+
   /// Safely navigate back to prevent multiple pops or other navigation issues
   void _safelyNavigateBack(BuildContext context) {
-    try {
-      // Ensure loading indicator is hidden before navigation
-      CustomLoadingIndicator.of(context).hide();
-
-      // We need to clear verificationIdOption to prevent navigation loops
-      context.read<PhoneNumberSignInCubit>().reset();
-
-      // Pop the route
-      context.pop();
-    } catch (e) {
-      debugPrint('Error in back navigation: $e');
-      // If pop fails, try to go to sign-in view directly
-      context.go(RouterEnum.signInView.routeName);
-    }
+    // Use a microtask to defer the navigation to the next frame
+    // This prevents navigator lock issues during transitions
+    Future.microtask(() {
+      try {
+        context.pop();
+      } catch (e) {
+        debugPrint('Error in back navigation: $e');
+        // If pop fails, try to go to sign-in view directly
+        // Also defer this to avoid nested navigation
+        Future.microtask(() {
+          context.go(RouterEnum.signInView.routeName);
+        });
+      }
+    });
   }
 }
