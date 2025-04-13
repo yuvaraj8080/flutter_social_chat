@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
-import 'package:flutter_social_chat/presentation/design_system/dimens.dart';
 import 'package:flutter_social_chat/presentation/design_system/text_styles.dart';
 
 class InputStyles {
@@ -13,7 +12,7 @@ class InputStyles {
   static OutlineInputBorder createOutlineBorder({
     Color color = customGreyColor400,
     double width = 1,
-    double radius = Dimens.borderRadius25,
+    double radius = 24,
   }) {
     return OutlineInputBorder(
       borderRadius: BorderRadius.circular(radius),
@@ -27,8 +26,8 @@ class InputStyles {
 
     return InputDecoration(
       contentPadding: const EdgeInsets.symmetric(
-        vertical: Dimens.padding12,
-        horizontal: Dimens.padding8,
+        vertical: 12,
+        horizontal: 8,
       ),
       errorStyle: const TextStyle(fontSize: 0, height: 0),
       enabledBorder: regularBorder,
@@ -45,7 +44,7 @@ class InputStyles {
     return InputDecoration(
       filled: true,
       fillColor: white,
-      contentPadding: const EdgeInsets.symmetric(vertical: Dimens.padding16, horizontal: Dimens.padding20),
+      contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
       errorStyle: AppTextStyles.withColor(AppTextStyles.caption, errorColor),
       enabledBorder: regularBorder,
       focusedBorder: activeBorder,
@@ -81,10 +80,10 @@ class InputStyles {
       hintStyle: AppTextStyles.withColor(AppTextStyles.bodyMedium, secondaryTextColor),
       prefixIcon: prefixIcon,
       suffixIcon: suffixIcon,
-      border: createOutlineBorder(radius: Dimens.borderRadius16),
-      enabledBorder: createOutlineBorder(radius: Dimens.borderRadius16),
-      focusedBorder: createOutlineBorder(color: customIndigoColor, radius: Dimens.borderRadius16),
-      contentPadding: const EdgeInsets.symmetric(vertical: Dimens.padding12, horizontal: Dimens.padding16),
+      border: createOutlineBorder(radius: 16),
+      enabledBorder: createOutlineBorder(radius: 16),
+      focusedBorder: createOutlineBorder(color: customIndigoColor, radius: 16),
+      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
     );
   }
 }

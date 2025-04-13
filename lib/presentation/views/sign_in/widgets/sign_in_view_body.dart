@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
-import 'package:flutter_social_chat/presentation/design_system/dimens.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/keyboard_dismiss_wrapper.dart';
 import 'package:flutter_social_chat/presentation/views/sign_in/widgets/phone_number_input_card.dart';
 
@@ -38,8 +37,8 @@ class SignInViewBody extends StatelessWidget {
       decoration: const BoxDecoration(
         color: customIndigoColor,
         borderRadius: BorderRadius.only(
-          bottomRight: Radius.circular(Dimens.borderRadius28),
-          bottomLeft: Radius.circular(Dimens.borderRadius28),
+          bottomRight: Radius.circular(28),
+          bottomLeft: Radius.circular(28),
         ),
       ),
     );
@@ -48,7 +47,7 @@ class SignInViewBody extends StatelessWidget {
   /// Builds the sign in step icons that visually guide the user
   Widget _buildSignInStepsIcons() {
     // Using const icons improves performance by allowing Flutter to reuse them
-    const iconSize = Dimens.iconSize52;
+    const iconSize = 52.0;
     const iconColor = white;
     
     return const Padding(

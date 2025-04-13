@@ -4,7 +4,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
-import 'package:flutter_social_chat/presentation/design_system/dimens.dart';
 import 'package:flutter_social_chat/presentation/design_system/styles/input_styles.dart';
 import 'package:flutter_social_chat/presentation/design_system/text_styles.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
@@ -54,7 +53,7 @@ class _PhoneNumberInputFieldState extends State<PhoneNumberInputField> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: Dimens.padding24),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Theme(
             // Remove splashes from country selector
             data: Theme.of(context).copyWith(
@@ -123,7 +122,7 @@ class _PhoneNumberInputFieldState extends State<PhoneNumberInputField> {
           curve: Curves.easeInOut,
           child: _hasAttemptedValidation && !_isInputValid
               ? Padding(
-                  padding: const EdgeInsets.only(left: Dimens.padding24, top: 4),
+                  padding: const EdgeInsets.only(left: 24, top: 4),
                   child: Text(
                     _errorText,
                     style: AppTextStyles.withColor(AppTextStyles.caption, errorColor),

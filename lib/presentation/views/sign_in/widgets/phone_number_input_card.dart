@@ -5,7 +5,6 @@ import 'package:flutter_social_chat/core/constants/enums/router_enum.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
-import 'package:flutter_social_chat/presentation/design_system/dimens.dart';
 import 'package:flutter_social_chat/presentation/design_system/text_styles.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
 import 'package:flutter_social_chat/presentation/views/sign_in/widgets/phone_number_sign_in_section.dart';
@@ -26,15 +25,15 @@ class PhoneNumberInputCard extends StatelessWidget {
           width: size.width,
           padding: EdgeInsets.only(
             top: size.height / 3,
-            right: Dimens.padding24,
-            left: Dimens.padding24,
-            bottom: Dimens.padding24,
+            right: 24,
+            left: 24,
+            bottom: 24,
           ),
           child: Card(
             color: white,
             elevation: 4,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(Dimens.borderRadius16),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
