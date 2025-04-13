@@ -58,4 +58,26 @@ class PhoneNumberSignInState extends Equatable {
   }
 
   factory PhoneNumberSignInState.empty() => const PhoneNumberSignInState();
+
+  /// Converts the state to a serializable JSON map
+  ///
+  /// This extracts the needed primitive values that can be safely serialized
+  /// for navigation and storage purposes.
+  Map<String, dynamic> toJson() {
+    String? verificationId;
+    verificationIdOption.fold(
+      () => verificationId = null,
+      (id) => verificationId = id,
+    );
+
+    return {
+      'phoneNumber': phoneNumber,
+      'smsCode': smsCode,
+      'verificationId': verificationId,
+      'isInProgress': isInProgress,
+      'isPhoneNumberInputValidated': isPhoneNumberInputValidated,
+      'phoneNumberPair': phoneNumberAndResendTokenPair.$1,
+      'resendToken': phoneNumberAndResendTokenPair.$2,
+    };
+  }
 }

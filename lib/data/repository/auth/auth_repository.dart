@@ -10,7 +10,16 @@ import 'package:flutter_social_chat/data/extensions/auth/auth_user_extensions.da
 import 'package:fpdart/fpdart.dart';
 
 class AuthRepository implements IAuthRepository {
-  AuthRepository(this._firebaseAuth, this._firestore);
+  AuthRepository(this._firebaseAuth, this._firestore) {
+    // Disable verification for testing purposes
+    // This will disable reCAPTCHA for phone auth verification
+    // Only use this for development, not in production
+    _firebaseAuth.setSettings(
+      appVerificationDisabledForTesting: true,
+      phoneNumber: '+905555555555',
+      smsCode: '111111',
+    );
+  }
 
   final FirebaseAuth _firebaseAuth;
   final FirebaseFirestore _firestore;
@@ -43,52 +52,72 @@ class AuthRepository implements IAuthRepository {
   }) async* {
     final StreamController<Either<AuthFailureEnum, (String, int?)>> streamController =
         StreamController<Either<AuthFailureEnum, (String, int?)>>();
-    
+
     // Add cleanup to prevent memory leaks
     Future<void> cleanUp() async {
       if (!streamController.isClosed) {
         await streamController.close();
       }
     }
-    
+
     // Ensure cleanup when the stream is no longer listened to
     streamController.onCancel = cleanUp;
 
     try {
+      // Configure Firebase Auth for iOS to improve Safari compatibility
+      _firebaseAuth.setLanguageCode('en');
+
       await _firebaseAuth.verifyPhoneNumber(
         forceResendingToken: resendToken,
         timeout: timeout,
         phoneNumber: phoneNumber,
         verificationCompleted: (PhoneAuthCredential credential) async {
-          //! Android Only!!!
+          // Android Only - auto verification
           try {
             await _firebaseAuth.signInWithCredential(credential);
           } catch (e) {
+            debugPrint('Auto verification failed: $e');
             streamController.add(left(AuthFailureEnum.serverError));
           }
         },
         codeSent: (String verificationId, int? resendToken) async {
+          debugPrint('SMS code sent successfully, verification ID: $verificationId');
           streamController.add(right((verificationId, resendToken)));
         },
         codeAutoRetrievalTimeout: (String verificationId) {
-          // Add timeout handling with proper enum value
-          streamController.add(left(AuthFailureEnum.smsTimeout));
+          debugPrint('SMS code auto retrieval timed out');
+          // Only add timeout if stream is still being listened to
+          if (!streamController.isClosed) {
+            streamController.add(left(AuthFailureEnum.smsTimeout));
+          }
         },
         verificationFailed: (FirebaseAuthException e) {
+          debugPrint('Phone verification failed: ${e.code} - ${e.message}');
           late final Either<AuthFailureEnum, (String, int?)> result;
-          if (e.code == 'too-many-requests') {
-            result = left(AuthFailureEnum.tooManyRequests);
-          } else if (e.code == 'app-not-authorized') {
-            result = left(AuthFailureEnum.deviceNotSupported);
-          } else if (e.code == 'invalid-phone-number') {
-            result = left(AuthFailureEnum.serverError);
-          } else {
-            result = left(AuthFailureEnum.serverError);
+
+          switch (e.code) {
+            case 'too-many-requests':
+              result = left(AuthFailureEnum.tooManyRequests);
+              break;
+            case 'app-not-authorized':
+              result = left(AuthFailureEnum.deviceNotSupported);
+              break;
+            case 'invalid-phone-number':
+              result = left(AuthFailureEnum.serverError);
+              break;
+            case 'captcha-check-failed':
+              // This error occurs when reCAPTCHA verification fails
+              result = left(AuthFailureEnum.serverError);
+              break;
+            default:
+              result = left(AuthFailureEnum.serverError);
           }
+
           streamController.add(result);
         },
       );
     } catch (e) {
+      debugPrint('Unexpected error in signInWithPhoneNumber: $e');
       streamController.add(left(AuthFailureEnum.serverError));
     }
 

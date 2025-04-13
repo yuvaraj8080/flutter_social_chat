@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_social_chat/core/constants/enums/router_enum.dart';
+import 'package:flutter_social_chat/core/init/router/phone_number_sign_in_codec.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
@@ -72,11 +73,11 @@ class PhoneNumberInputCard extends StatelessWidget {
       // First initiate the sign-in process
       context.read<PhoneNumberSignInCubit>().signInWithPhoneNumber();
 
-      // Navigate to verification screen with the current state
-      context.push(
-        RouterEnum.signInVerificationView.routeName,
-        extra: state,
-      );
+      // Serialize state to JSON string using the codec
+      final encodedState = PhoneNumberSignInStateCodec.encodeMap(state.toJson());
+
+      // Navigate to verification screen with the serialized state
+      context.push(RouterEnum.signInVerificationView.routeName, extra: encodedState);
     }
   }
 }

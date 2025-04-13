@@ -1,4 +1,5 @@
 import 'package:bot_toast/bot_toast.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_social_chat/core/constants/enums/router_enum.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_state.dart';
@@ -13,7 +14,7 @@ import 'package:flutter_social_chat/presentation/views/onboarding/onboarding_pag
 import 'package:flutter_social_chat/presentation/views/profile/profile_page.dart';
 import 'package:flutter_social_chat/presentation/views/sign_in/sign_in_view.dart';
 import 'package:flutter_social_chat/presentation/views/sms_verification/sms_verification_view.dart';
-import 'package:flutter_social_chat/core/init/router/codec.dart';
+import 'package:flutter_social_chat/core/init/router/phone_number_sign_in_codec.dart';
 import 'package:flutter_social_chat/core/init/router/custom_page_builder_widget.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go_router/go_router.dart';
@@ -32,9 +33,10 @@ class AppRouter {
   // Main router configuration
   late final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
-    debugLogDiagnostics: true,
+    debugLogDiagnostics: kDebugMode,
     observers: [botToastNavigatorObserver],
     initialLocation: RouterEnum.initialLocation.routeName,
+    extraCodec: PhoneNumberSignInStateCodec(),
     routes: [
       _initialRoute,
       _bottomTabShellRoute,
@@ -136,28 +138,22 @@ class AppRouter {
   GoRoute get _signInVerificationRoute => GoRoute(
         path: RouterEnum.signInVerificationView.routeName,
         builder: (context, state) {
-          // Handle both direct state object and legacy encoded format for backward compatibility
-          if (state.extra is PhoneNumberSignInState) {
-            return SmsVerificationView(state: state.extra as PhoneNumberSignInState);
-          } else {
-            // Fallback for backward compatibility or if state is missing
-            final String? encodedExtras = state.extra as String?;
-            final extras = encodedExtras != null ? PhoneNumberSignInStateCodec.decode(encodedExtras) : {};
+          final String? encodedExtras = state.extra as String?;
+          final extras = encodedExtras != null ? PhoneNumberSignInStateCodec.decodeString(encodedExtras) : {};
 
-            final phoneNumberSignInState = PhoneNumberSignInState(
-              phoneNumber: extras['phoneNumber'] ?? '',
-              smsCode: extras['smsCode'] ?? '',
-              verificationIdOption: Option.of(extras['verificationId'] as String? ?? ''),
-              isInProgress: extras['isInProgress'] ?? false,
-              isPhoneNumberInputValidated: extras['isPhoneNumberInputValidated'] ?? false,
-              phoneNumberAndResendTokenPair: (
-                extras['phoneNumberPair'] ?? '',
-                extras['resendToken'] as int?,
-              ),
-            );
+          final phoneNumberSignInState = PhoneNumberSignInState(
+            phoneNumber: extras['phoneNumber'] ?? '',
+            smsCode: extras['smsCode'] ?? '',
+            verificationIdOption: Option.of(extras['verificationId'] as String? ?? ''),
+            isInProgress: extras['isInProgress'] ?? false,
+            isPhoneNumberInputValidated: extras['isPhoneNumberInputValidated'] ?? false,
+            phoneNumberAndResendTokenPair: (
+              extras['phoneNumberPair'] ?? '',
+              extras['resendToken'] as int?,
+            ),
+          );
 
-            return SmsVerificationView(state: phoneNumberSignInState);
-          }
+          return SmsVerificationView(state: phoneNumberSignInState);
         },
       );
 
