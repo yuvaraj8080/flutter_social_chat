@@ -48,8 +48,7 @@ flutter_social_chat_app.iml
 .vscode/*
 
 # Cursor related
-.cursor/*
-!.cursor/rules/
+.cursor/
 
 # Flutter/Dart/Pub related
 **/doc/api/
