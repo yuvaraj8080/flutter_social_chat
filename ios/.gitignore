@@ -1,20 +1,22 @@
-**/dgph
+# Xcode
 *.mode1v3
 *.mode2v3
 *.moved-aside
 *.pbxuser
 *.perspectivev3
-**/*sync/
+*sync/
 .sconsign.dblite
 .tags*
-**/.vagrant/
-**/DerivedData/
+.vagrant/
+DerivedData/
 Icon?
-**/Pods/
-**/.symlinks/
+Pods/
+.symlinks/
 profile
 xcuserdata
-**/.generated/
+.generated/
+
+# Flutter
 Flutter/App.framework
 Flutter/Flutter.framework
 Flutter/Flutter.podspec
@@ -22,12 +24,26 @@ Flutter/Generated.xcconfig
 Flutter/ephemeral/
 Flutter/app.flx
 Flutter/app.zip
+Flutter/.last_build_id
 Flutter/flutter_assets/
 Flutter/flutter_export_environment.sh
 ServiceDefinitions.json
 Runner/GeneratedPluginRegistrant.*
 
-# Exceptions to above rules.
+# Sensitive files
+GoogleService-Info.plist
+*.mobileprovision
+*.cer
+*.certSigningRequest
+*.p12
+*.ipa
+
+# OS X system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Exceptions to above rules
 !default.mode1v3
 !default.mode2v3
 !default.pbxuser

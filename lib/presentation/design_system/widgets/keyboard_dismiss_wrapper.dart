@@ -47,7 +47,7 @@ class KeyboardDismissWrapper extends StatelessWidget {
     // For iOS, also use the platform channel method for better reliability
     if (Platform.isIOS) {
       try {
-        SystemChannels.textInput.invokeMethod('TextInput.hide');
+      SystemChannels.textInput.invokeMethod('TextInput.hide');
       } catch (e) {
         // Fallback is already handled by unfocus() above
         debugPrint('Error hiding keyboard: $e');
