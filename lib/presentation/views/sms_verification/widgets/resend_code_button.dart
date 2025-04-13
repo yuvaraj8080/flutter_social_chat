@@ -12,18 +12,19 @@ class ResendCodeButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final String resendCodeText = AppLocalizations.of(context)?.resendCode ?? '';
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 24, left: 24),
-      child: GestureDetector(
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: InkWell(
         onTap: () => context.read<PhoneNumberSignInCubit>().signInWithPhoneNumber(),
+        borderRadius: BorderRadius.circular(8),
         child: Padding(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(
-            spacing: 12,
+            spacing: 8,
             mainAxisSize: MainAxisSize.min,
             children: [
-              CustomText(text: resendCodeText, color: white, fontSize: 16, fontWeight: FontWeight.w400),
-              const Icon(Icons.arrow_forward_ios, size: 16, color: white),
+              const Icon(Icons.refresh_rounded, size: 18, color: white),
+              CustomText(text: resendCodeText, color: white, fontSize: 14),
             ],
           ),
         ),

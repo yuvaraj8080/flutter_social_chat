@@ -13,22 +13,41 @@ class ConfirmationInfoTextWithIcon extends StatelessWidget {
     final String confirmationInfoText = AppLocalizations.of(context)?.confirmationInfo ?? '';
 
     return Padding(
-      padding: const EdgeInsets.only(left: 24, top: 12, right: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       child: Row(
-        spacing: 16,
         children: [
-          const Icon(Icons.phone_iphone_outlined, size: 52, color: white),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.sms_outlined, size: 22, color: white),
+          ),
+          const SizedBox(width: 16),
           Expanded(
             child: RichText(
               text: TextSpan(
                 children: [
                   TextSpan(
                     text: confirmationInfoText,
-                    style: GoogleFonts.roboto(fontSize: 20, color: white, fontWeight: FontWeight.w300, height: 1.6),
+                    style: GoogleFonts.roboto(
+                      fontSize: 16,
+                      color: white.withValues(alpha: 0.9),
+                      fontWeight: FontWeight.w400,
+                      height: 1.4,
+                      letterSpacing: 0.2,
+                    ),
                   ),
                   TextSpan(
                     text: phoneNumber,
-                    style: GoogleFonts.roboto(fontSize: 20, color: white, fontWeight: FontWeight.w700),
+                    style: GoogleFonts.roboto(
+                      fontSize: 16,
+                      color: white,
+                      fontWeight: FontWeight.w700,
+                      height: 1.4,
+                      letterSpacing: 0.2,
+                    ),
                   ),
                 ],
               ),

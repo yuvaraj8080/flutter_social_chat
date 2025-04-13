@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_cubit.dart';
+import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
@@ -11,44 +12,56 @@ class SmsVerificationPinField extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 40),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Container(
-            width: size.width,
-            height: size.height / 9,
-            margin: const EdgeInsets.symmetric(horizontal: 24),
-            decoration: BoxDecoration(
-              border: Border.all(color: white, width: 2),
-              borderRadius: const BorderRadius.all(Radius.circular(8)),
-            ),
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        // Outer container with white border
+        Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          width: size.width, // Accounting for parent padding
+          height: 80,
+          decoration: BoxDecoration(
+            border: Border.all(color: white, width: 1.5),
+            borderRadius: BorderRadius.circular(8),
           ),
-          PinCodeTextField(
-            backgroundColor: transparent,
-            mainAxisAlignment: MainAxisAlignment.center,
-            appContext: context,
-            length: 6,
-            animationType: AnimationType.fade,
-            onChanged: (smsCode) => context.read<PhoneNumberSignInCubit>().smsCodeChanged(smsCode: smsCode),
-            textStyle: const TextStyle(color: white),
-            keyboardType: TextInputType.phone,
-            hintCharacter: '-',
-            hintStyle: const TextStyle(color: white),
-            pinTheme: PinTheme(
-              fieldOuterPadding: const EdgeInsets.only(left: 4, right: 4, top: 8),
-              shape: PinCodeFieldShape.box,
-              borderRadius: BorderRadius.circular(4),
-              fieldHeight: 60,
-              fieldWidth: 48,
-              inactiveColor: black.withValues(alpha: 0.2),
-              activeColor: black.withValues(alpha: 0.2),
-              selectedColor: black.withValues(alpha: 0.2),
-            ),
-          ),
-        ],
-      ),
+        ),
+
+        // PIN code field - Create fresh controller each time (safer approach)
+        BlocBuilder<PhoneNumberSignInCubit, PhoneNumberSignInState>(
+          buildWhen: (previous, current) => previous.smsCode != current.smsCode,
+          builder: (context, state) {
+            return PinCodeTextField(
+              appContext: context,
+              length: 6,
+              animationType: AnimationType.fade,
+              onChanged: (value) {
+                context.read<PhoneNumberSignInCubit>().smsCodeChanged(smsCode: value);
+              },
+              textStyle: const TextStyle(color: white, fontWeight: FontWeight.bold, fontSize: 20),
+              keyboardType: TextInputType.number,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              cursorColor: white,
+              cursorHeight: 22,
+              enableActiveFill: true,
+              backgroundColor: transparent,
+              pinTheme: PinTheme(
+                shape: PinCodeFieldShape.box,
+                borderRadius: BorderRadius.circular(8),
+                fieldHeight: 52,
+                fieldWidth: 42,
+                borderWidth: 0,
+                selectedFillColor: white.withValues(alpha: 0.3),
+                activeFillColor: white.withValues(alpha: 0.2),
+                inactiveFillColor: white.withValues(alpha: 0.15),
+                selectedColor: transparent,
+                activeColor: transparent,
+                inactiveColor: transparent,
+              ),
+              controller: TextEditingController(text: state.smsCode),
+            );
+          },
+        ),
+      ],
     );
   }
 }

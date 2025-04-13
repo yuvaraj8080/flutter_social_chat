@@ -78,6 +78,8 @@
 
     "confirm": "Confirm",
 
+    "verifyCode": "Verify Code",
+
     "resendCode": "RESEND CODE",
     
     "username": "Username",

@@ -11,12 +11,21 @@ class ConfirmationTextWithIcon extends StatelessWidget {
     final String confirmationText = AppLocalizations.of(context)?.confirmation ?? '';
 
     return Padding(
-      padding: const EdgeInsets.only(left: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       child: Row(
-        spacing: 20,
+        spacing: 16,
         children: [
-          const Icon(Icons.check_rounded, size: 28, color: white),
-          CustomText(text: confirmationText, color: white, fontWeight: FontWeight.w600, fontSize: 28),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.verified_outlined, size: 28, color: white),
+          ),
+          Expanded(
+            child: CustomText(text: confirmationText, color: white, fontWeight: FontWeight.w700, fontSize: 26),
+          ),
         ],
       ),
     );

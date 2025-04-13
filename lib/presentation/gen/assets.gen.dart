@@ -15,8 +15,11 @@ class $AssetsAnimationsGen {
   /// File path: assets/animations/chat_animation.json
   String get chatAnimation => 'assets/animations/chat_animation.json';
 
+  /// File path: assets/animations/sms_animation.json
+  String get smsAnimation => 'assets/animations/sms_animation.json';
+
   /// List of all assets
-  List<String> get values => [chatAnimation];
+  List<String> get values => [chatAnimation, smsAnimation];
 }
 
 class $AssetsImagesGen {
