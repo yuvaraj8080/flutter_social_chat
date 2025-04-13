@@ -9,6 +9,7 @@ import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_app_bar.dart';
+import 'package:flutter_social_chat/presentation/design_system/widgets/custom_loading_indicator.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/popscope_scaffold.dart';
 import 'package:flutter_social_chat/presentation/views/sign_in/widgets/sign_in_view_body.dart';
 import 'package:go_router/go_router.dart';
@@ -23,12 +24,22 @@ class SignInView extends StatelessWidget {
     return BlocConsumer<PhoneNumberSignInCubit, PhoneNumberSignInState>(
       listenWhen: (previous, current) =>
           (previous.failureMessageOption != current.failureMessageOption && current.failureMessageOption.isSome()) ||
-          (previous.verificationIdOption != current.verificationIdOption && current.verificationIdOption.isSome()),
+          (previous.verificationIdOption != current.verificationIdOption && current.verificationIdOption.isSome()) ||
+          previous.isInProgress != current.isInProgress,
       listener: (context, state) {
+        // Show/hide loading indicator based on isInProgress state
+        if (state.isInProgress) {
+          CustomLoadingIndicator.of(context).show();
+        } else {
+          CustomLoadingIndicator.of(context).hide();
+        }
+
         // Handle errors
         state.failureMessageOption.fold(
-          () {}, 
+          () {},
           (authFailure) {
+            // Ensure loading indicator is hidden when there's an error
+            CustomLoadingIndicator.of(context).hide();
             _showErrorToast(context, authFailure);
             // Reset only error state without clearing phone number
             context.read<PhoneNumberSignInCubit>().resetErrorOnly();
@@ -79,7 +90,7 @@ class SignInView extends StatelessWidget {
   void _navigateToSmsVerification(BuildContext context, PhoneNumberSignInState state) {
     // Serialize state to JSON string using the codec
     final encodedState = PhoneNumberSignInStateCodec.encodeMap(state.toJson());
-    
+
     // Navigate to verification screen with the serialized state
     context.push(RouterEnum.signInVerificationView.routeName, extra: encodedState);
   }

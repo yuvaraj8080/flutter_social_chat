@@ -11,6 +11,7 @@ import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_app_bar.dart';
+import 'package:flutter_social_chat/presentation/design_system/widgets/custom_loading_indicator.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/popscope_scaffold.dart';
 import 'package:flutter_social_chat/presentation/views/sms_verification/widgets/sms_verification_view_body.dart';
 import 'package:go_router/go_router.dart';
@@ -32,11 +33,26 @@ class SmsVerificationView extends StatelessWidget {
           listenWhen: (previous, current) => previous.isLoggedIn != current.isLoggedIn,
           listener: (context, state) {
             if (state.isLoggedIn) {
+              // Ensure loading indicator is hidden before navigation
+              CustomLoadingIndicator.of(context).hide();
               context.go(
                 state.authUser.isOnboardingCompleted
                     ? RouterEnum.channelsView.routeName
                     : RouterEnum.onboardingView.routeName,
               );
+            }
+          },
+        ),
+
+        // Listen for progress state changes
+        BlocListener<PhoneNumberSignInCubit, PhoneNumberSignInState>(
+          listenWhen: (previous, current) => previous.isInProgress != current.isInProgress,
+          listener: (context, state) {
+            // Show/hide loading indicator based on isInProgress state
+            if (state.isInProgress) {
+              CustomLoadingIndicator.of(context).show();
+            } else {
+              CustomLoadingIndicator.of(context).hide();
             }
           },
         ),
@@ -49,6 +65,8 @@ class SmsVerificationView extends StatelessWidget {
             state.failureMessageOption.fold(
               () {},
               (authFailure) {
+                // Ensure loading indicator is hidden when there's an error
+                CustomLoadingIndicator.of(context).hide();
                 _showErrorToast(context, authFailure);
 
                 if (authFailure == AuthFailureEnum.serverError || authFailure == AuthFailureEnum.sessionExpired) {
@@ -107,6 +125,9 @@ class SmsVerificationView extends StatelessWidget {
   /// Safely navigate back to prevent multiple pops or other navigation issues
   void _safelyNavigateBack(BuildContext context) {
     try {
+      // Ensure loading indicator is hidden before navigation
+      CustomLoadingIndicator.of(context).hide();
+
       // We need to clear verificationIdOption to prevent navigation loops
       context.read<PhoneNumberSignInCubit>().reset();
 
