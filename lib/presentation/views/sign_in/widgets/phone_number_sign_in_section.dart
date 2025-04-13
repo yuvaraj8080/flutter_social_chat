@@ -9,7 +9,10 @@ import 'package:flutter_social_chat/presentation/design_system/text_styles.dart'
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
 class PhoneNumberInputField extends StatefulWidget {
-  const PhoneNumberInputField({super.key, required this.state});
+  const PhoneNumberInputField({
+    super.key,
+    required this.state,
+  });
 
   final PhoneNumberSignInState state;
 
@@ -27,6 +30,10 @@ class _PhoneNumberInputFieldState extends State<PhoneNumberInputField> {
   @override
   void initState() {
     super.initState();
+    _initializePhoneNumber();
+  }
+
+  void _initializePhoneNumber() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         context.read<PhoneNumberSignInCubit>().phoneNumberChanged(phoneNumber: initialPhone.phoneNumber ?? '');
@@ -51,45 +58,11 @@ class _PhoneNumberInputFieldState extends State<PhoneNumberInputField> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Theme(
-            // Remove splashes from country selector
-            data: Theme.of(context).copyWith(
-              splashColor: Colors.transparent,
-              highlightColor: Colors.transparent,
-            ),
+            data: Theme.of(context).copyWith(splashColor: transparent, highlightColor: transparent),
             child: InternationalPhoneNumberInput(
               textFieldController: _phoneController,
-              onInputChanged: (PhoneNumber phoneNumber) {
-                final newPhoneNumber = phoneNumber.phoneNumber ?? '';
-
-                // Only update if phone number changed - reduce unnecessary state updates
-                if (widget.state.phoneNumber != newPhoneNumber) {
-                  context.read<PhoneNumberSignInCubit>().phoneNumberChanged(
-                        phoneNumber: newPhoneNumber,
-                      );
-                }
-
-                // Mark that user has started typing, so we can show validation errors
-                if (newPhoneNumber.isNotEmpty && !_hasAttemptedValidation) {
-                  setState(() {
-                    _hasAttemptedValidation = true;
-                  });
-                }
-              },
-              onInputValidated: (bool isPhoneNumberInputValidated) {
-                if (_isInputValid != isPhoneNumberInputValidated) {
-                  setState(() {
-                    _isInputValid = isPhoneNumberInputValidated;
-                    _updateErrorText();
-                  });
-
-                  // Only update state if validation status changed
-                  if (widget.state.isPhoneNumberInputValidated != isPhoneNumberInputValidated) {
-                    context.read<PhoneNumberSignInCubit>().updateNextButtonStatus(
-                          isPhoneNumberInputValidated: isPhoneNumberInputValidated,
-                        );
-                  }
-                }
-              },
+              onInputChanged: _handlePhoneNumberChange,
+              onInputValidated: _handleValidationChange,
               spaceBetweenSelectorAndTextField: 0,
               selectorButtonOnErrorPadding: 0,
               inputDecoration: InputStyles.phoneNumberInputDecoration(hintText: hintText),
@@ -112,7 +85,6 @@ class _PhoneNumberInputFieldState extends State<PhoneNumberInputField> {
             ),
           ),
         ),
-        // Custom error message that doesn't affect layout
         AnimatedSize(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeInOut,
@@ -130,7 +102,39 @@ class _PhoneNumberInputFieldState extends State<PhoneNumberInputField> {
     );
   }
 
-  // Updates the error text based on current validation state
+  void _handlePhoneNumberChange(PhoneNumber phoneNumber) {
+    final newPhoneNumber = phoneNumber.phoneNumber ?? '';
+
+    // Only update if phone number changed - reduce unnecessary state updates
+    if (widget.state.phoneNumber != newPhoneNumber) {
+      context.read<PhoneNumberSignInCubit>().phoneNumberChanged(phoneNumber: newPhoneNumber);
+    }
+
+    // Mark that user has started typing, so we can show validation errors
+    if (newPhoneNumber.isNotEmpty && !_hasAttemptedValidation) {
+      setState(() {
+        _hasAttemptedValidation = true;
+      });
+    }
+  }
+
+  /// Handles validation status changes
+  void _handleValidationChange(bool isPhoneNumberInputValidated) {
+    if (_isInputValid != isPhoneNumberInputValidated) {
+      setState(() {
+        _isInputValid = isPhoneNumberInputValidated;
+        _updateErrorText();
+      });
+
+      // Only update state if validation status changed
+      if (widget.state.isPhoneNumberInputValidated != isPhoneNumberInputValidated) {
+        context.read<PhoneNumberSignInCubit>().updateNextButtonStatus(
+              isPhoneNumberInputValidated: isPhoneNumberInputValidated,
+            );
+      }
+    }
+  }
+
   void _updateErrorText() {
     if (_phoneController.text.isEmpty) {
       _errorText = AppLocalizations.of(context)?.phoneNumberRequired ?? '';
