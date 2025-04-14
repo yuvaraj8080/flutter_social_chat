@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
-import 'package:go_router/go_router.dart';
 
 /// A customizable loading indicator that shows a semi-transparent overlay with a circular progress indicator.
 ///
@@ -14,10 +13,9 @@ class CustomLoadingIndicator {
   void hide() {
     if (_isShowing) {
       try {
-        // Use GoRouter's pop which is compatible with the app's routing system
-        if (GoRouter.of(_context).canPop()) {
-          _context.pop();
-        }
+        // Use Navigator.pop with rootNavigator to only pop the dialog
+        // This won't interfere with GoRouter navigation stack
+        Navigator.of(_context, rootNavigator: true).pop();
         _isShowing = false;
       } catch (e) {
         debugPrint('Error hiding loading indicator: $e');
@@ -34,7 +32,7 @@ class CustomLoadingIndicator {
         context: _context,
         barrierDismissible: false,
         useSafeArea: false,
-        barrierColor: Colors.transparent,
+        barrierColor: transparent,
         builder: (_) => const LoadingIndicator(),
       ).then((_) => _isShowing = false);
     }

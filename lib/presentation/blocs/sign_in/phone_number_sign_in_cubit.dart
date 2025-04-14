@@ -40,6 +40,11 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
     emit(state.copyWith(smsCode: smsCode));
   }
 
+  /// Updates the navigation flag to prevent re-navigation
+  void updateNavigationFlag({required bool hasNavigated}) {
+    emit(state.copyWith(hasNavigatedToVerification: hasNavigated));
+  }
+
   /// Resets the state to initial values
   void reset() {
     emit(
@@ -49,6 +54,7 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
         smsCode: '',
         isInProgress: false,
         authFailureOrSuccessOption: none(),
+        hasNavigatedToVerification: false,
       ),
     );
   }

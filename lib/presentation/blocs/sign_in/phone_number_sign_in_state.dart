@@ -12,6 +12,7 @@ class PhoneNumberSignInState extends Equatable {
     this.isInProgress = false,
     this.isPhoneNumberInputValidated = false,
     this.phoneNumberAndResendTokenPair = const ('', null),
+    this.hasNavigatedToVerification = false,
   });
 
   final String phoneNumber;
@@ -22,6 +23,7 @@ class PhoneNumberSignInState extends Equatable {
   final bool isInProgress;
   final bool isPhoneNumberInputValidated;
   final (String, int?) phoneNumberAndResendTokenPair;
+  final bool hasNavigatedToVerification;
 
   @override
   List<Object?> get props => [
@@ -33,6 +35,7 @@ class PhoneNumberSignInState extends Equatable {
         isInProgress,
         isPhoneNumberInputValidated,
         phoneNumberAndResendTokenPair,
+        hasNavigatedToVerification,
       ];
 
   PhoneNumberSignInState copyWith({
@@ -44,6 +47,7 @@ class PhoneNumberSignInState extends Equatable {
     bool? isInProgress,
     bool? isPhoneNumberInputValidated,
     (String, int?)? phoneNumberAndResendTokenPair,
+    bool? hasNavigatedToVerification,
   }) {
     return PhoneNumberSignInState(
       phoneNumber: phoneNumber ?? this.phoneNumber,
@@ -54,6 +58,7 @@ class PhoneNumberSignInState extends Equatable {
       isInProgress: isInProgress ?? this.isInProgress,
       isPhoneNumberInputValidated: isPhoneNumberInputValidated ?? this.isPhoneNumberInputValidated,
       phoneNumberAndResendTokenPair: phoneNumberAndResendTokenPair ?? this.phoneNumberAndResendTokenPair,
+      hasNavigatedToVerification: hasNavigatedToVerification ?? this.hasNavigatedToVerification,
     );
   }
 
@@ -78,6 +83,7 @@ class PhoneNumberSignInState extends Equatable {
       'isPhoneNumberInputValidated': isPhoneNumberInputValidated,
       'phoneNumberPair': phoneNumberAndResendTokenPair.$1,
       'resendToken': phoneNumberAndResendTokenPair.$2,
+      'hasNavigatedToVerification': hasNavigatedToVerification,
     };
   }
 }

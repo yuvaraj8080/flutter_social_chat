@@ -151,6 +151,7 @@ class AppRouter {
               extras['phoneNumberPair'] ?? '',
               extras['resendToken'] as int?,
             ),
+            hasNavigatedToVerification: extras['hasNavigatedToVerification'] ?? false,
           );
 
           return SmsVerificationView(state: phoneNumberSignInState);

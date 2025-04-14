@@ -50,7 +50,7 @@ class SignInView extends StatelessWidget {
         state.verificationIdOption.fold(
           () {},
           (verificationId) {
-            if (verificationId.isNotEmpty) {
+            if (verificationId.isNotEmpty && !state.hasNavigatedToVerification) {
               _navigateToSmsVerification(context, state);
             }
           },
@@ -91,8 +91,12 @@ class SignInView extends StatelessWidget {
     // Hide loading indicator before navigation
     CustomLoadingIndicator.of(context).hide();
     
+    // Set the navigation flag to prevent re-navigation
+    final updatedState = state.copyWith(hasNavigatedToVerification: true);
+    context.read<PhoneNumberSignInCubit>().updateNavigationFlag(hasNavigated: true);
+    
     // Serialize state to JSON string using the codec
-    final encodedState = PhoneNumberSignInStateCodec.encodeMap(state.toJson());
+    final encodedState = PhoneNumberSignInStateCodec.encodeMap(updatedState.toJson());
 
     // Navigate to verification screen with the serialized state
     context.push(RouterEnum.smsVerificationView.routeName, extra: encodedState);

@@ -4,7 +4,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
-import 'package:flutter_social_chat/presentation/design_system/widgets/custom_progress_indicator.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
 import 'package:flutter_social_chat/presentation/gen/assets.gen.dart';
 import 'package:flutter_social_chat/presentation/views/sms_verification/widgets/confirmation_info_text_with_icon.dart';
@@ -21,17 +20,8 @@ class SmsVerificationViewBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<PhoneNumberSignInCubit, PhoneNumberSignInState>(
-      buildWhen: (previous, current) =>
-          previous.isInProgress != current.isInProgress || previous.smsCode != current.smsCode,
+      buildWhen: (previous, current) => previous.smsCode != current.smsCode,
       builder: (context, state) {
-        if (state.isInProgress) {
-          return const Center(
-            child: CustomProgressIndicator(
-              progressIndicatorColor: white,
-            ),
-          );
-        }
-
         return _buildVerificationContent(context, state);
       },
     );
