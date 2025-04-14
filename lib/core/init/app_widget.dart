@@ -10,7 +10,7 @@ import 'package:flutter_social_chat/presentation/blocs/connectivity/connectivity
 import 'package:flutter_social_chat/presentation/design_system/theme.dart';
 import 'package:flutter_social_chat/core/di/dependency_injector.dart';
 import 'package:flutter_social_chat/core/init/router/app_router.dart';
-import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_cubit.dart';
+import 'package:flutter_social_chat/presentation/blocs/phone_number_sign_in/phone_number_sign_in_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_cubit.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 

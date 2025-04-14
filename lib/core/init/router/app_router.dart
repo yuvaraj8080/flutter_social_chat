@@ -2,7 +2,7 @@ import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_social_chat/core/constants/enums/router_enum.dart';
-import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_state.dart';
+import 'package:flutter_social_chat/presentation/blocs/phone_number_sign_in/phone_number_sign_in_state.dart';
 import 'package:flutter_social_chat/presentation/views/bottom_tab/bottom_tab.dart';
 import 'package:flutter_social_chat/presentation/views/camera/camera_page.dart';
 import 'package:flutter_social_chat/presentation/views/capture_and_send_photo/capture_and_send_photo_page.dart';
