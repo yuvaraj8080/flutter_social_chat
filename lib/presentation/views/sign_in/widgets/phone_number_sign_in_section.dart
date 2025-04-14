@@ -9,10 +9,7 @@ import 'package:flutter_social_chat/presentation/design_system/widgets/custom_te
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
 class PhoneNumberInputField extends StatefulWidget {
-  const PhoneNumberInputField({
-    super.key,
-    required this.state,
-  });
+  const PhoneNumberInputField({super.key, required this.state});
 
   final PhoneNumberSignInState state;
 
@@ -101,12 +98,10 @@ class _PhoneNumberInputFieldState extends State<PhoneNumberInputField> {
   void _handlePhoneNumberChange(PhoneNumber phoneNumber) {
     final newPhoneNumber = phoneNumber.phoneNumber ?? '';
 
-    // Only update if phone number changed - reduce unnecessary state updates
     if (widget.state.phoneNumber != newPhoneNumber) {
       context.read<PhoneNumberSignInCubit>().phoneNumberChanged(phoneNumber: newPhoneNumber);
     }
 
-    // Mark that user has started typing, so we can show validation errors
     if (newPhoneNumber.isNotEmpty && !_hasAttemptedValidation) {
       setState(() {
         _hasAttemptedValidation = true;
@@ -114,7 +109,6 @@ class _PhoneNumberInputFieldState extends State<PhoneNumberInputField> {
     }
   }
 
-  /// Handles validation status changes
   void _handleValidationChange(bool isPhoneNumberInputValidated) {
     if (_isInputValid != isPhoneNumberInputValidated) {
       setState(() {
@@ -122,7 +116,6 @@ class _PhoneNumberInputFieldState extends State<PhoneNumberInputField> {
         _updateErrorText();
       });
 
-      // Only update state if validation status changed
       if (widget.state.isPhoneNumberInputValidated != isPhoneNumberInputValidated) {
         context.read<PhoneNumberSignInCubit>().updateNextButtonStatus(
               isPhoneNumberInputValidated: isPhoneNumberInputValidated,
@@ -132,10 +125,12 @@ class _PhoneNumberInputFieldState extends State<PhoneNumberInputField> {
   }
 
   void _updateErrorText() {
+    final localizations = AppLocalizations.of(context);
+
     if (_phoneController.text.isEmpty) {
-      _errorText = AppLocalizations.of(context)?.phoneNumberRequired ?? '';
+      _errorText = localizations?.phoneNumberRequired ?? '';
     } else if (!_isInputValid) {
-      _errorText = AppLocalizations.of(context)?.invalidPhoneNumber ?? '';
+      _errorText = localizations?.invalidPhoneNumber ?? '';
     } else {
       _errorText = '';
     }

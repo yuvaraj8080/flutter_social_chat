@@ -14,15 +14,16 @@ class PhoneNumberInputCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
+    final localizations = AppLocalizations.of(context);
 
-    final String signInWithPhoneNumber = AppLocalizations.of(context)?.signInWithPhoneNumber ?? '';
-    final String smsInformationMessage = AppLocalizations.of(context)?.smsInformationMessage ?? '';
-    final String continueText = AppLocalizations.of(context)?.continueText ?? '';
+    final String signInWithPhoneNumber = localizations?.signInWithPhoneNumber ?? '';
+    final String smsInformationMessage = localizations?.smsInformationMessage ?? '';
+    final String continueText = localizations?.continueText ?? '';
 
     return BlocBuilder<PhoneNumberSignInCubit, PhoneNumberSignInState>(
       buildWhen: (previous, current) => previous.isPhoneNumberInputValidated != current.isPhoneNumberInputValidated,
       builder: (context, state) {
-        final bool isEnabled = state.isPhoneNumberInputValidated;
+        final bool isPhoneNumberInputValidated = state.isPhoneNumberInputValidated;
 
         return Container(
           width: size.width,
@@ -52,8 +53,8 @@ class PhoneNumberInputCard extends StatelessWidget {
                 ),
                 AnimatedGradientButton(
                   text: continueText,
-                  isEnabled: isEnabled,
-                  onPressed: () => _handleSubmit(context, state),
+                  isEnabled: isPhoneNumberInputValidated,
+                  onPressed: () => _handleSubmit(context, isPhoneNumberInputValidated),
                 ),
               ],
             ),
@@ -63,11 +64,8 @@ class PhoneNumberInputCard extends StatelessWidget {
     );
   }
 
-  /// Handles the submit action when the user presses the button
-  void _handleSubmit(BuildContext context, PhoneNumberSignInState state) {
-    if (state.isPhoneNumberInputValidated) {
-      // Only initiate the sign-in process - navigation will be handled by the
-      // BlocListener in SignInView when the verificationId is received
+  void _handleSubmit(BuildContext context, bool isPhoneNumberInputValidated) {
+    if (isPhoneNumberInputValidated) {
       context.read<PhoneNumberSignInCubit>().signInWithPhoneNumber();
     }
   }

@@ -69,13 +69,11 @@ class SignInView extends StatelessWidget {
     );
   }
 
-  /// Shows error toast with appropriate message based on auth failure type
   void _showErrorToast(BuildContext context, AuthFailureEnum authFailure) {
     final errorMessage = _getErrorMessageForFailure(context, authFailure);
     BotToast.showText(text: errorMessage);
   }
 
-  /// Gets localized error message for a specific auth failure
   String _getErrorMessageForFailure(BuildContext context, AuthFailureEnum authFailure) {
     final localizations = AppLocalizations.of(context);
 
@@ -89,19 +87,15 @@ class SignInView extends StatelessWidget {
     };
   }
 
-  /// Navigate to the SMS verification screen
   void _navigateToSmsVerification(BuildContext context, PhoneNumberSignInState state) {
     // Hide loading indicator before navigation
     CustomLoadingIndicator.of(context).hide();
 
-    // Set the navigation flag to prevent re-navigation
     final updatedState = state.copyWith(hasNavigatedToVerification: true);
     context.read<PhoneNumberSignInCubit>().updateNavigationFlag(hasNavigated: true);
 
-    // Serialize state to JSON string using the codec
     final encodedState = NavigationStateCodec.encodeMap(updatedState.toJson());
 
-    // Navigate to verification screen with the serialized state
     context.push(RouterEnum.smsVerificationView.routeName, extra: encodedState);
   }
 }

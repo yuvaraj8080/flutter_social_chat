@@ -11,19 +11,22 @@ class SignInViewBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    
+
     return KeyboardDismissWrapper(
       child: Stack(
         alignment: Alignment.topCenter,
         children: [
           Container(
-      width: size.width,
-      height: size.height / 2.4,
-      decoration: const BoxDecoration(
-        color: customIndigoColor,
-              borderRadius: BorderRadius.only(bottomRight: Radius.circular(28), bottomLeft: Radius.circular(28)),
-        ),
-      ),
+            width: size.width,
+            height: size.height / 2.4,
+            decoration: const BoxDecoration(
+              color: customIndigoColor,
+              borderRadius: BorderRadius.only(
+                bottomRight: Radius.circular(28),
+                bottomLeft: Radius.circular(28),
+              ),
+            ),
+          ),
           Lottie.asset(Assets.animations.chatAnimation, repeat: true, width: size.width / 1.5),
           const PhoneNumberInputCard(),
         ],
