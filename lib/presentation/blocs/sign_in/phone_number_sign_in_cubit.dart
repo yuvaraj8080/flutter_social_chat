@@ -8,12 +8,12 @@ import 'package:flutter_social_chat/core/interfaces/i_auth_repository.dart';
 import 'package:fpdart/fpdart.dart';
 
 class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
-  final IAuthRepository _authService;
+  final IAuthRepository _authRepository;
   StreamSubscription<Either<AuthFailureEnum, (String, int?)>>? _phoneNumberSignInSubscription;
 
   final Duration verificationCodeTimeout = const Duration(seconds: 60);
 
-  PhoneNumberSignInCubit(this._authService) : super(PhoneNumberSignInState.empty());
+  PhoneNumberSignInCubit(this._authRepository) : super(PhoneNumberSignInState.empty());
 
   void phoneNumberChanged({required String phoneNumber}) {
     if (state.phoneNumber == phoneNumber) return;
@@ -77,7 +77,7 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
 
         try {
           final Either<AuthFailureEnum, Unit> failureOrSuccess =
-              await _authService.verifySmsCode(smsCode: state.smsCode, verificationId: verificationId);
+              await _authRepository.verifySmsCode(smsCode: state.smsCode, verificationId: verificationId);
 
           if (isClosed) return;
 
@@ -119,7 +119,7 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
     required bool isResend,
   }) {
     try {
-      _phoneNumberSignInSubscription = _authService
+      _phoneNumberSignInSubscription = _authRepository
           .signInWithPhoneNumber(
         phoneNumber: phoneNumber,
         timeout: verificationCodeTimeout,
