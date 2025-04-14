@@ -43,7 +43,7 @@ class AppRouter {
       _chatRoute,
       _captureAndSendPhotoRoute,
       _signInRoute,
-      _signInVerificationRoute,
+      _smsVerificationRoute,
       _createNewChatRoute,
       _onboardingRoute,
     ],
@@ -135,8 +135,8 @@ class AppRouter {
         ),
       );
 
-  GoRoute get _signInVerificationRoute => GoRoute(
-        path: RouterEnum.signInVerificationView.routeName,
+  GoRoute get _smsVerificationRoute => GoRoute(
+        path: RouterEnum.smsVerificationView.routeName,
         builder: (context, state) {
           final String? encodedExtras = state.extra as String?;
           final extras = encodedExtras != null ? PhoneNumberSignInStateCodec.decodeString(encodedExtras) : {};

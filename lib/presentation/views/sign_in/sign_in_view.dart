@@ -88,10 +88,13 @@ class SignInView extends StatelessWidget {
 
   /// Navigate to the SMS verification screen
   void _navigateToSmsVerification(BuildContext context, PhoneNumberSignInState state) {
+    // Hide loading indicator before navigation
+    CustomLoadingIndicator.of(context).hide();
+    
     // Serialize state to JSON string using the codec
     final encodedState = PhoneNumberSignInStateCodec.encodeMap(state.toJson());
 
     // Navigate to verification screen with the serialized state
-    context.push(RouterEnum.signInVerificationView.routeName, extra: encodedState);
+    context.push(RouterEnum.smsVerificationView.routeName, extra: encodedState);
   }
 }

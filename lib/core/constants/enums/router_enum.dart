@@ -6,7 +6,7 @@ enum RouterEnum {
   chatView('/chat_view'),
   captureAndSendPhotoView('/capture_and_send_photo_view'),
   signInView('/sign_in_view'),
-  signInVerificationView('/sign_in_verification_view'),
+  smsVerificationView('/sms_verification_view'),
   createNewChatView('/create_new_chat_view'),
   onboardingView('/onboarding_view');
 
