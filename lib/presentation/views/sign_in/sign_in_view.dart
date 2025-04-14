@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_social_chat/core/constants/enums/auth_failure_enum.dart';
 import 'package:flutter_social_chat/core/constants/enums/router_enum.dart';
-import 'package:flutter_social_chat/core/init/router/phone_number_sign_in_codec.dart';
+import 'package:flutter_social_chat/core/init/router/navigation_state_codec.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
@@ -96,7 +96,7 @@ class SignInView extends StatelessWidget {
     context.read<PhoneNumberSignInCubit>().updateNavigationFlag(hasNavigated: true);
     
     // Serialize state to JSON string using the codec
-    final encodedState = PhoneNumberSignInStateCodec.encodeMap(updatedState.toJson());
+    final encodedState = NavigationStateCodec.encodeMap(updatedState.toJson());
 
     // Navigate to verification screen with the serialized state
     context.push(RouterEnum.smsVerificationView.routeName, extra: encodedState);

@@ -14,7 +14,7 @@ import 'package:flutter_social_chat/presentation/views/onboarding/onboarding_pag
 import 'package:flutter_social_chat/presentation/views/profile/profile_page.dart';
 import 'package:flutter_social_chat/presentation/views/sign_in/sign_in_view.dart';
 import 'package:flutter_social_chat/presentation/views/sms_verification/sms_verification_view.dart';
-import 'package:flutter_social_chat/core/init/router/phone_number_sign_in_codec.dart';
+import 'package:flutter_social_chat/core/init/router/navigation_state_codec.dart';
 import 'package:flutter_social_chat/core/init/router/custom_page_builder_widget.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:go_router/go_router.dart';
@@ -36,7 +36,7 @@ class AppRouter {
     debugLogDiagnostics: kDebugMode,
     observers: [botToastNavigatorObserver],
     initialLocation: RouterEnum.initialLocation.routeName,
-    extraCodec: PhoneNumberSignInStateCodec(),
+    extraCodec: NavigationStateCodec(),
     routes: [
       _initialRoute,
       _bottomTabShellRoute,
@@ -139,7 +139,7 @@ class AppRouter {
         path: RouterEnum.smsVerificationView.routeName,
         builder: (context, state) {
           final String? encodedExtras = state.extra as String?;
-          final extras = encodedExtras != null ? PhoneNumberSignInStateCodec.decodeString(encodedExtras) : {};
+          final extras = encodedExtras != null ? NavigationStateCodec.decodeString(encodedExtras) : {};
 
           final phoneNumberSignInState = PhoneNumberSignInState(
             phoneNumber: extras['phoneNumber'] ?? '',
