@@ -44,24 +44,19 @@ class SmsVerificationView extends StatelessWidget {
           },
         ),
 
-        // Listen for progress state changes
+        // Listen for all PhoneNumberSignInCubit state changes
         BlocListener<PhoneNumberSignInCubit, PhoneNumberSignInState>(
-          listenWhen: (previous, current) => previous.isInProgress != current.isInProgress,
+          listenWhen: (previous, current) =>
+              previous.isInProgress != current.isInProgress ||
+              (previous.failureMessageOption != current.failureMessageOption && current.failureMessageOption.isSome()),
           listener: (context, state) {
-            // Show/hide loading indicator based on isInProgress state
             if (state.isInProgress) {
               CustomLoadingIndicator.of(context).show();
             } else {
               CustomLoadingIndicator.of(context).hide();
             }
-          },
-        ),
 
-        // Listen for verification errors
-        BlocListener<PhoneNumberSignInCubit, PhoneNumberSignInState>(
-          listenWhen: (previous, current) =>
-              previous.failureMessageOption != current.failureMessageOption && current.failureMessageOption.isSome(),
-          listener: (context, state) {
+            // Handle errors if present
             state.failureMessageOption.fold(
               () {},
               (authFailure) {
@@ -104,13 +99,11 @@ class SmsVerificationView extends StatelessWidget {
     );
   }
 
-  /// Shows error toast with appropriate message based on auth failure type
   void _showErrorToast(BuildContext context, AuthFailureEnum authFailure) {
     final errorMessage = _getErrorMessageForFailure(context, authFailure);
     BotToast.showText(text: errorMessage);
   }
 
-  /// Gets localized error message for a specific auth failure
   String _getErrorMessageForFailure(BuildContext context, AuthFailureEnum authFailure) {
     final localizations = AppLocalizations.of(context);
 
@@ -124,19 +117,17 @@ class SmsVerificationView extends StatelessWidget {
     };
   }
 
-  /// Handle back button press
   void _handleBackNavigation(BuildContext context) {
     // Ensure loading indicator is hidden first
     CustomLoadingIndicator.of(context).hide();
-    
+
     // Reset state in cubit to prevent verification ID from triggering navigation
     context.read<PhoneNumberSignInCubit>().reset();
-    
+
     // Safely navigate back with a slight delay to avoid navigation lock
     _safelyNavigateBack(context);
   }
 
-  /// Safely navigate back to prevent multiple pops or other navigation issues
   void _safelyNavigateBack(BuildContext context) {
     // Use a microtask to defer the navigation to the next frame
     // This prevents navigator lock issues during transitions

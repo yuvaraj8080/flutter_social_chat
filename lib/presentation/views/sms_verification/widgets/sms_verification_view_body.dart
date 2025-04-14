@@ -22,55 +22,48 @@ class SmsVerificationViewBody extends StatelessWidget {
     return BlocBuilder<PhoneNumberSignInCubit, PhoneNumberSignInState>(
       buildWhen: (previous, current) => previous.smsCode != current.smsCode,
       builder: (context, state) {
-        return _buildVerificationContent(context, state);
+        final screenHeight = MediaQuery.of(context).size.height;
+
+        return Container(
+          height: double.infinity,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [customIndigoColor, customIndigoColorSecondary],
+              stops: [0.4, 1],
+            ),
+          ),
+          child: Column(
+            children: [
+              // Animation - Reduced height when keyboard is visible
+              SizedBox(
+                height: screenHeight * 0.25,
+                child: Lottie.asset(
+                  Assets.animations.smsAnimation,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const ConfirmationTextWithIcon(),
+                    ConfirmationInfoTextWithIcon(phoneNumber: phoneNumber),
+                    const SizedBox(height: 40),
+                    const SmsVerificationPinField(),
+                    const SizedBox(height: 40),
+                    const ResendCodeButton(),
+                    const SizedBox(height: 24),
+                    _buildVerifyButton(context, state),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
       },
-    );
-  }
-
-  Widget _buildVerificationContent(BuildContext context, PhoneNumberSignInState state) {
-    final screenHeight = MediaQuery.of(context).size.height;
-
-    return Container(
-      height: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [customIndigoColor, customIndigoColorSecondary],
-          stops: [0.4, 1],
-        ),
-      ),
-      child: Column(
-        children: [
-          // Animation - Reduced height when keyboard is visible
-          SizedBox(
-            height: screenHeight * 0.25,
-            child: Lottie.asset(
-              Assets.animations.smsAnimation,
-              fit: BoxFit.contain,
-            ),
-          ),
-
-          // Main content
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Title and subtitle
-                const ConfirmationTextWithIcon(),
-                ConfirmationInfoTextWithIcon(phoneNumber: phoneNumber),
-                const SizedBox(height: 40),
-                const SmsVerificationPinField(),
-                const SizedBox(height: 40),
-                const ResendCodeButton(),
-                const SizedBox(height: 24),
-                _buildVerifyButton(context, state),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 

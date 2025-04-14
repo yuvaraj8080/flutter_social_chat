@@ -32,7 +32,6 @@ class ResendCodeButton extends StatelessWidget {
     );
   }
 
-  /// Handle resending the code without triggering navigation
   void _resendCode(BuildContext context) {
     // We want to resend the code but not navigate again
     // Access the cubit and resend the code using the same phone number

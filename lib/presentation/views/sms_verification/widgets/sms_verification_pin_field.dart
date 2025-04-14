@@ -15,28 +15,24 @@ class SmsVerificationPinField extends StatelessWidget {
     return Stack(
       alignment: Alignment.center,
       children: [
-        // Outer container with white border
         Container(
           margin: const EdgeInsets.only(bottom: 16),
-          width: size.width, // Accounting for parent padding
+          width: size.width,
           height: 80,
           decoration: BoxDecoration(
             border: Border.all(color: white, width: 1.5),
             borderRadius: BorderRadius.circular(8),
           ),
         ),
-
-        // PIN code field - Create fresh controller each time (safer approach)
         BlocBuilder<PhoneNumberSignInCubit, PhoneNumberSignInState>(
           buildWhen: (previous, current) => previous.smsCode != current.smsCode,
           builder: (context, state) {
             return PinCodeTextField(
               appContext: context,
+              controller: TextEditingController(text: state.smsCode),
               length: 6,
               animationType: AnimationType.fade,
-              onChanged: (value) {
-                context.read<PhoneNumberSignInCubit>().smsCodeChanged(smsCode: value);
-              },
+              onChanged: (value) => context.read<PhoneNumberSignInCubit>().smsCodeChanged(smsCode: value),
               textStyle: const TextStyle(color: white, fontWeight: FontWeight.bold, fontSize: 20),
               keyboardType: TextInputType.number,
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -57,7 +53,6 @@ class SmsVerificationPinField extends StatelessWidget {
                 activeColor: transparent,
                 inactiveColor: transparent,
               ),
-              controller: TextEditingController(text: state.smsCode),
             );
           },
         ),
