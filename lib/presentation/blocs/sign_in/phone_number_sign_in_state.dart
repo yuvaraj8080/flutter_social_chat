@@ -8,7 +8,6 @@ class PhoneNumberSignInState extends Equatable {
     this.smsCode = '',
     this.verificationIdOption = const None(),
     this.failureMessageOption = const None(),
-    this.authFailureOrSuccessOption = const None(),
     this.isInProgress = false,
     this.isPhoneNumberInputValidated = false,
     this.phoneNumberAndResendTokenPair = const ('', null),
@@ -19,11 +18,10 @@ class PhoneNumberSignInState extends Equatable {
   final String smsCode;
   final Option<String> verificationIdOption;
   final Option<AuthFailureEnum> failureMessageOption;
-  final Option<Either<AuthFailureEnum, Unit>> authFailureOrSuccessOption;
   final bool isInProgress;
   final bool isPhoneNumberInputValidated;
-  final (String, int?) phoneNumberAndResendTokenPair;
   final bool hasNavigatedToVerification;
+  final (String, int?) phoneNumberAndResendTokenPair;
 
   @override
   List<Object?> get props => [
@@ -31,19 +29,19 @@ class PhoneNumberSignInState extends Equatable {
         smsCode,
         verificationIdOption,
         failureMessageOption,
-        authFailureOrSuccessOption,
         isInProgress,
         isPhoneNumberInputValidated,
         phoneNumberAndResendTokenPair,
         hasNavigatedToVerification,
       ];
 
+  factory PhoneNumberSignInState.empty() => const PhoneNumberSignInState();
+
   PhoneNumberSignInState copyWith({
     String? phoneNumber,
     String? smsCode,
     Option<String>? verificationIdOption,
     Option<AuthFailureEnum>? failureMessageOption,
-    Option<Either<AuthFailureEnum, Unit>>? authFailureOrSuccessOption,
     bool? isInProgress,
     bool? isPhoneNumberInputValidated,
     (String, int?)? phoneNumberAndResendTokenPair,
@@ -54,7 +52,6 @@ class PhoneNumberSignInState extends Equatable {
       smsCode: smsCode ?? this.smsCode,
       verificationIdOption: verificationIdOption ?? this.verificationIdOption,
       failureMessageOption: failureMessageOption ?? this.failureMessageOption,
-      authFailureOrSuccessOption: authFailureOrSuccessOption ?? this.authFailureOrSuccessOption,
       isInProgress: isInProgress ?? this.isInProgress,
       isPhoneNumberInputValidated: isPhoneNumberInputValidated ?? this.isPhoneNumberInputValidated,
       phoneNumberAndResendTokenPair: phoneNumberAndResendTokenPair ?? this.phoneNumberAndResendTokenPair,
@@ -62,12 +59,23 @@ class PhoneNumberSignInState extends Equatable {
     );
   }
 
-  factory PhoneNumberSignInState.empty() => const PhoneNumberSignInState();
+  factory PhoneNumberSignInState.fromJson(Map<String, dynamic> json) {
+    final verificationId = json['verificationId'] as String?;
 
-  /// Converts the state to a serializable JSON map
-  ///
-  /// This extracts the needed primitive values that can be safely serialized
-  /// for navigation and storage purposes.
+    return PhoneNumberSignInState(
+      phoneNumber: json['phoneNumber'] as String? ?? '',
+      smsCode: json['smsCode'] as String? ?? '',
+      verificationIdOption: verificationId != null ? some(verificationId) : none(),
+      isInProgress: json['isInProgress'] as bool? ?? false,
+      isPhoneNumberInputValidated: json['isPhoneNumberInputValidated'] as bool? ?? false,
+      phoneNumberAndResendTokenPair: (
+        json['phoneNumberPair'] as String? ?? '',
+        json['resendToken'] as int?,
+      ),
+      hasNavigatedToVerification: json['hasNavigatedToVerification'] as bool? ?? false,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     String? verificationId;
     verificationIdOption.fold(
