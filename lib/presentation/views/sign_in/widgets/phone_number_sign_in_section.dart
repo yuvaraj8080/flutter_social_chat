@@ -5,6 +5,7 @@ import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign
 import 'package:flutter_social_chat/presentation/blocs/sign_in/phone_number_sign_in_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/styles/input_styles.dart';
+import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
 class PhoneNumberInputField extends StatefulWidget {
@@ -77,9 +78,8 @@ class _PhoneNumberInputFieldState extends State<PhoneNumberInputField> {
               cursorColor: customIndigoColor,
               keyboardType: TextInputType.number,
               validator: (_) {
-                // We're handling error display manually
                 _updateErrorText();
-                return null; // Always return null to prevent TextField's error display
+                return null;
               },
             ),
           ),
@@ -90,10 +90,7 @@ class _PhoneNumberInputFieldState extends State<PhoneNumberInputField> {
           child: _hasAttemptedValidation && !_isInputValid
               ? Padding(
                   padding: const EdgeInsets.only(left: 24, top: 4),
-                  child: Text(
-                    _errorText,
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: errorColor),
-                  ),
+                  child: CustomText(text: _errorText, color: errorColor, fontSize: 12, fontWeight: FontWeight.w400),
                 )
               : const SizedBox.shrink(),
         ),
