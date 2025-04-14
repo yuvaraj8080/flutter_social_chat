@@ -26,42 +26,45 @@ class SignInView extends StatelessWidget {
           (previous.failureMessageOption != current.failureMessageOption && current.failureMessageOption.isSome()) ||
           (previous.verificationIdOption != current.verificationIdOption && current.verificationIdOption.isSome()) ||
           previous.isInProgress != current.isInProgress,
-      listener: (context, state) {
-        // Show/hide loading indicator based on isInProgress state
-        if (state.isInProgress) {
-          CustomLoadingIndicator.of(context).show();
-        } else {
-          CustomLoadingIndicator.of(context).hide();
-        }
-
-        // Handle errors
-        state.failureMessageOption.fold(
-          () {},
-          (authFailure) {
-            // Ensure loading indicator is hidden when there's an error
-            CustomLoadingIndicator.of(context).hide();
-            _showErrorToast(context, authFailure);
-            // Reset only error state without clearing phone number
-            context.read<PhoneNumberSignInCubit>().resetErrorOnly();
-          },
-        );
-
-        // Handle navigation to SMS verification when verification ID is set
-        state.verificationIdOption.fold(
-          () {},
-          (verificationId) {
-            if (verificationId.isNotEmpty && !state.hasNavigatedToVerification) {
-              _navigateToSmsVerification(context, state);
-            }
-          },
-        );
-      },
+      listener: _handleStateChanges,
       builder: (context, state) {
         return PopScopeScaffold(
           resizeToAvoidBottomInset: false,
           body: const SignInViewBody(),
           appBar: CustomAppBar(backgroundColor: customIndigoColor, title: appBarTitle, titleColor: white),
         );
+      },
+    );
+  }
+
+  void _handleStateChanges(BuildContext context, PhoneNumberSignInState state) {
+    if (state.isInProgress) {
+      CustomLoadingIndicator.of(context).show();
+    } else {
+      CustomLoadingIndicator.of(context).hide();
+    }
+
+    state.failureMessageOption.fold(
+      () {},
+      (authFailure) {
+        // Ensure loading indicator is hidden when there's an error
+        CustomLoadingIndicator.of(context).hide();
+        _showErrorToast(context, authFailure);
+        // Reset only error state without clearing phone number
+        context.read<PhoneNumberSignInCubit>().resetErrorOnly();
+      },
+    );
+
+    // Handle navigation to SMS verification when verification ID is set
+    state.verificationIdOption.fold(
+      () {},
+      (verificationId) {
+        final isValidVerificationId = verificationId.isNotEmpty;
+        final canNavigate = isValidVerificationId && !state.hasNavigatedToVerification;
+
+        if (canNavigate) {
+          _navigateToSmsVerification(context, state);
+        }
       },
     );
   }
@@ -90,11 +93,11 @@ class SignInView extends StatelessWidget {
   void _navigateToSmsVerification(BuildContext context, PhoneNumberSignInState state) {
     // Hide loading indicator before navigation
     CustomLoadingIndicator.of(context).hide();
-    
+
     // Set the navigation flag to prevent re-navigation
     final updatedState = state.copyWith(hasNavigatedToVerification: true);
     context.read<PhoneNumberSignInCubit>().updateNavigationFlag(hasNavigated: true);
-    
+
     // Serialize state to JSON string using the codec
     final encodedState = NavigationStateCodec.encodeMap(updatedState.toJson());
 
