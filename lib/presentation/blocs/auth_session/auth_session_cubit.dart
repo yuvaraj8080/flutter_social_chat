@@ -73,16 +73,20 @@ class AuthSessionCubit extends HydratedCubit<AuthSessionState> {
     result.fold(
       (failure) {
         debugPrint('Failed to connect to chat service: $failure');
-        emit(state.copyWith(
+        emit(
+          state.copyWith(
+            authUser: authUser,
+            isInProgress: false,
+            hasError: true,
+          ),
+        );
+      },
+      (_) => emit(
+        state.copyWith(
           authUser: authUser,
           isInProgress: false,
-          hasError: true,
-        ));
-      },
-      (_) => emit(state.copyWith(
-        authUser: authUser,
-        isInProgress: false,
-      )),
+        ),
+      ),
     );
   }
 
@@ -90,9 +94,11 @@ class AuthSessionCubit extends HydratedCubit<AuthSessionState> {
   void changeUserName({required String userName}) {
     if (userName.isEmpty) return;
 
-    emit(state.copyWith(
-      authUser: state.authUser.copyWith(userName: userName),
-    ));
+    emit(
+      state.copyWith(
+        authUser: state.authUser.copyWith(userName: userName),
+      ),
+    );
   }
 
   /// Completes profile setup with the provided profile photo URL
@@ -107,13 +113,15 @@ class AuthSessionCubit extends HydratedCubit<AuthSessionState> {
         return;
       }
 
-      emit(state.copyWith(
-        isInProgress: false,
-        authUser: state.authUser.copyWith(
-          photoUrl: userProfilePhotoUrl,
-          isOnboardingCompleted: true,
+      emit(
+        state.copyWith(
+          isInProgress: false,
+          authUser: state.authUser.copyWith(
+            photoUrl: userProfilePhotoUrl,
+            isOnboardingCompleted: true,
+          ),
         ),
-      ));
+      );
     } catch (e) {
       debugPrint('Error completing profile setup: $e');
       emit(state.copyWith(isInProgress: false, hasError: true));
@@ -136,12 +144,12 @@ class AuthSessionCubit extends HydratedCubit<AuthSessionState> {
         authUser: AuthUserModel.fromJson(json['authUser'] as Map<String, dynamic>),
         isUserCheckedFromAuthService: json['isUserCheckedFromAuthService'] as bool? ?? false,
       );
-      
+
       // If the user is logged in according to cached data, verify with repository
       if (cachedState.isLoggedIn) {
         _verifyUserSession(cachedState);
       }
-      
+
       return cachedState;
     } catch (e) {
       debugPrint('Error deserializing auth session state: $e');
