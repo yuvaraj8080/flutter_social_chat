@@ -44,15 +44,17 @@
 
     "userNameCanNotBeLongerThanTwentyCharacters": "Username can not be longer than twenty characters!",
 
-    "userNameCanNotBeShorterThanThreeCharacters": "Username can not be shorter than three characters!",
+    "userNameCanNotBeShorterThanThreeCharacters": "Username cannot be shorter than 3 characters",
 
     "createYourProfile": "Create your profile!",
 
-    "animatedText1": "Say goodbye to long distance relationships and hello to easy, instant communication with our chat app!",
+    "animatedText1": "Choose a unique username to stand out in group chats",
 
-    "animatedText2": "Connect with friends and family like never before with our chat app!",
+    "animatedText2": "Adding a profile photo helps friends recognize you easily",
 
-    "animatedText3": "Stay in touch with the people you care about, no matter where you are!",
+    "animatedText3": "Your profile will be visible to all your contacts",
+
+    "animatedText4": "Complete your profile to unlock all features and connect with people",
 
     "createdAtText": "Created at",
 
@@ -102,5 +104,40 @@
     
     "phoneNumberRequired": "Phone number is required",
     
-    "invalidPhoneNumber": "Please enter a valid phone number"
+    "invalidPhoneNumber": "Please enter a valid phone number",
+
+    "welcomeToSocialChat": "Welcome to Social Chat",
+
+    "letsSetupYourProfile": "Let's set up your profile",
+
+    "addYourDetails": "Add your details",
+
+    "changePhoto": "Change photo",
+
+    "addPhoto": "Add photo",
+
+    "addPhotoOptional": "Add photo (optional)",
+
+    "profilePhotoAdded": "Profile photo added",
+    
+    "chooseAnOption": "Choose an option",
+    
+    "chooseFromGallery": "Choose from gallery",
+    
+    "removePhoto": "Remove photo",
+    
+    "errorSelectingImage": "Error selecting image: {error}",
+    "@errorSelectingImage": {
+      "placeholders": {
+        "error": {}
+      }
+    },
+
+    "tips": "Tips",
+
+    "invalidUsername": "Username can only contain letters, numbers, underscores and hyphens",
+
+    "usernameValidationMessage": "Username must be between 3-20 characters with no special characters",
+
+    "ok": "OK"
 }
