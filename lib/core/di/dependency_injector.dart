@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_social_chat/data/repository/auth/auth_repository.dart';
 import 'package:flutter_social_chat/data/repository/camera/camera_repository.dart';
 import 'package:flutter_social_chat/data/repository/chat/chat_repository.dart';
@@ -36,7 +35,6 @@ void injectionSetup() {
   // Firebase services
   getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
   getIt.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
-  getIt.registerLazySingleton<FirebaseStorage>(() => FirebaseStorage.instance);
 
   // Domain repositories
   getIt.registerLazySingleton<IMicrophoneRepository>(() => MicrophoneRepository());
@@ -64,7 +62,6 @@ void injectionSetup() {
   getIt.registerLazySingleton<ProfileManagerCubit>(
     () => ProfileManagerCubit(
       authRepository: getIt<IAuthRepository>(),
-      firebaseStorage: getIt<FirebaseStorage>(),
       firebaseFirestore: getIt<FirebaseFirestore>(),
       authSessionCubit: getIt<AuthSessionCubit>(),
     ),

@@ -26,13 +26,53 @@ class AuthRepository implements IAuthRepository {
 
   @override
   Stream<AuthUserModel> get authStateChanges {
-    return _firebaseAuth.authStateChanges().map(
-          (User? user) => user?.toDomain() ?? AuthUserModel.empty(),
-        );
+    return _firebaseAuth.authStateChanges().asyncMap((User? user) async {
+      if (user == null) return AuthUserModel.empty();
+      
+      // Get the base user model from Firebase Auth
+      final baseUserModel = user.toDomain();
+      
+      try {
+        // Fetch the user document from Firestore to get isOnboardingCompleted
+        final userDoc = await _firestore.collection('users').doc(user.uid).get();
+        
+        if (userDoc.exists) {
+          final userData = userDoc.data();
+          final bool isOnboardingCompleted = userData?['isOnboardingCompleted'] as bool? ?? false;
+          
+          // Return user model with the correct isOnboardingCompleted value from Firestore
+          return baseUserModel.copyWith(isOnboardingCompleted: isOnboardingCompleted);
+        }
+      } catch (e) {
+        debugPrint('Error fetching user data from Firestore: $e');
+      }
+      
+      // If Firestore fetch fails, return the base model
+      return baseUserModel;
+    });
   }
 
   @override
-  Future<Option<AuthUserModel>> getSignedInUser() async => optionOf(_firebaseAuth.currentUser?.toDomain());
+  Future<Option<AuthUserModel>> getSignedInUser() async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) return none();
+    
+    try {
+      final baseUserModel = user.toDomain();
+      final userDoc = await _firestore.collection('users').doc(user.uid).get();
+      
+      if (userDoc.exists) {
+        final userData = userDoc.data();
+        final bool isOnboardingCompleted = userData?['isOnboardingCompleted'] as bool? ?? false;
+        return some(baseUserModel.copyWith(isOnboardingCompleted: isOnboardingCompleted));
+      }
+      
+      return some(baseUserModel);
+    } catch (e) {
+      debugPrint('Error getting signed in user data: $e');
+      return optionOf(user.toDomain());
+    }
+  }
 
   @override
   Future<void> signOut() async {

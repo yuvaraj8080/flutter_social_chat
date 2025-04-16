@@ -1,41 +1,34 @@
 // ignore_for_file: avoid_redundant_argument_values
 
-import 'dart:io';
-
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_chat/presentation/blocs/profile_management/profile_manager_state.dart';
 import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_cubit.dart';
 import 'package:flutter_social_chat/core/interfaces/i_auth_repository.dart';
 import 'package:flutter/foundation.dart';
-import 'package:image_picker/image_picker.dart';
 
 /// Manages user profile creation and validation
 ///
 /// This cubit handles the profile creation process, including:
 /// - Username validation
-/// - Profile image selection and upload
-/// - User profile data updates
+/// - User profile data updates with default image
 class ProfileManagerCubit extends Cubit<ProfileManagerState> {
   ProfileManagerCubit({
     required IAuthRepository authRepository,
-    required FirebaseStorage firebaseStorage,
     required FirebaseFirestore firebaseFirestore,
     required AuthSessionCubit authSessionCubit,
   })  : _authRepository = authRepository,
-        _firebaseStorage = firebaseStorage,
         _firebaseFirestore = firebaseFirestore,
         _authSessionCubit = authSessionCubit,
         super(ProfileManagerState.empty());
 
   final IAuthRepository _authRepository;
-  final FirebaseStorage _firebaseStorage;
   final FirebaseFirestore _firebaseFirestore;
   final AuthSessionCubit _authSessionCubit;
 
-  // Default image path from assets
-  static const String _defaultProfileImagePath = 'assets/images/user.png';
+  // Default remote image URL
+  static const String defaultProfileImageUrl =
+      'https://t4.ftcdn.net/jpg/07/98/49/59/360_F_798495984_UQAwbOvQaxxBc41ZwGpe49WTlIZK00T3.jpg';
 
   /// Validates the username and updates the state
   ///
@@ -45,37 +38,8 @@ class ProfileManagerCubit extends Cubit<ProfileManagerState> {
     emit(state.copyWith(isUserNameValid: isValid));
   }
 
-  /// Handles profile image selection from the image picker
+  /// Creates a user profile with the validated username and default profile image
   ///
-  /// If the picker returns null (user canceled), keeps the current state
-  /// If successful, updates the state with the selected image path
-  Future<void> selectProfileImage({
-    required Future<XFile?> pickedImage,
-  }) async {
-    if (state.isInProgress) return;
-
-    try {
-      emit(state.copyWith(isInProgress: true));
-
-      final imageFile = await pickedImage;
-
-      if (imageFile == null) {
-        emit(state.copyWith(isInProgress: false));
-        return;
-      }
-
-      emit(
-        state.copyWith(selectedImagePath: File(imageFile.path).path, isInProgress: false),
-      );
-    } catch (e) {
-      debugPrint('Error selecting profile image: $e');
-      emit(state.copyWith(isInProgress: false));
-    }
-  }
-
-  /// Creates a user profile with the validated username and optional profile image
-  ///
-  /// If no profile image is selected, uses the default user.png image
   /// Returns the profile photo URL if successful, empty string if fails
   Future<String> createUserProfile() async {
     if (state.isInProgress) return '';
@@ -94,11 +58,8 @@ class ProfileManagerCubit extends Cubit<ProfileManagerState> {
         return '';
       }
 
-      // Process profile image (use selected or default)
-      final String profileImageUrl =
-          state.selectedImagePath.isNotEmpty ? await _uploadProfileImageAndGetUrl(userId) : _defaultProfileImagePath;
-
-      if (profileImageUrl.isEmpty) return ''; // Error already emitted in _uploadProfileImageAndGetUrl
+      // Use the default profile image URL
+      final String profileImageUrl = defaultProfileImageUrl;
 
       // Update profile data in Firebase Auth and Firestore
       await _persistUserProfileData(userId, username, profileImageUrl);
@@ -117,27 +78,6 @@ class ProfileManagerCubit extends Cubit<ProfileManagerState> {
           isInProgress: false,
         ),
       );
-      return '';
-    }
-  }
-
-  /// Uploads the selected profile image to Firebase Storage and returns the download URL
-  ///
-  /// If upload fails, emits an error state and returns empty string
-  Future<String> _uploadProfileImageAndGetUrl(String userId) async {
-    try {
-      final imageRef = _firebaseStorage.ref('users/$userId/profile.jpg');
-      final uploadTask = await imageRef.putFile(File(state.selectedImagePath));
-
-      if (uploadTask.state != TaskState.success) {
-        emit(state.copyWith(isInProgress: false));
-        return '';
-      }
-
-      return await imageRef.getDownloadURL();
-    } catch (e) {
-      debugPrint('Error uploading profile image: $e');
-      emit(state.copyWith(isInProgress: false));
       return '';
     }
   }

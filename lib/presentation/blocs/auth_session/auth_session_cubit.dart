@@ -136,9 +136,25 @@ class AuthSessionCubit extends HydratedCubit<AuthSessionState> {
 
   @override
   AuthSessionState? fromJson(Map<String, dynamic> json) {
-    return AuthSessionState.empty().copyWith(
+    // Create a base state from the cached data
+    final cachedState = AuthSessionState.empty().copyWith(
       authUser: AuthUserModel.fromJson(json['authUser']),
       isUserCheckedFromAuthService: json['isUserCheckedFromAuthService'],
     );
+    
+    // If the user is logged in according to cached data, we'll verify with repository
+    // In the next cycle, the auth stream will update with the latest data
+    if (cachedState.isLoggedIn) {
+      // We don't await here intentionally - returning initial state from cache
+      // while the auth stream will update with fresh data
+      _authRepository.getSignedInUser().then((userOption) {
+        userOption.fold(
+          () => emit(AuthSessionState.empty().copyWith(isUserCheckedFromAuthService: true)),
+          (latestUserData) => emit(cachedState.copyWith(authUser: latestUserData)),
+        );
+      });
+    }
+    
+    return cachedState;
   }
 }
