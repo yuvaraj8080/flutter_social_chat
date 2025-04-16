@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_social_chat/presentation/blocs/profile_management/profile_manager_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/profile_management/profile_manager_state.dart';
-import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_cubit.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/animated_gradient_button.dart';
 import 'package:rounded_loading_button_plus/rounded_loading_button.dart';
@@ -17,7 +16,6 @@ class OnboardingSubmitButton extends StatefulWidget {
 
 class _OnboardingSubmitButtonState extends State<OnboardingSubmitButton> {
   late final RoundedLoadingButtonController _buttonController;
-
   static const Duration _resetDuration = Duration(seconds: 2);
 
   @override
@@ -32,7 +30,8 @@ class _OnboardingSubmitButtonState extends State<OnboardingSubmitButton> {
 
     return BlocConsumer<ProfileManagerCubit, ProfileManagerState>(
       listenWhen: (previous, current) =>
-          previous.userProfilePhotoUrl != current.userProfilePhotoUrl || previous.error != current.error,
+          previous.userProfilePhotoUrl != current.userProfilePhotoUrl || 
+          previous.error != current.error,
       listener: (context, state) {
         if (state.userProfilePhotoUrl.isNotEmpty) {
           _buttonController.success();
@@ -42,14 +41,12 @@ class _OnboardingSubmitButtonState extends State<OnboardingSubmitButton> {
       },
       buildWhen: (previous, current) => previous.isUserNameValid != current.isUserNameValid,
       builder: (context, state) {
-        final bool isButtonEnabled = state.isUserNameValid;
-
         return Stack(
           children: [
             AnimatedGradientButton(
               text: appLocalizations?.createYourProfile ?? '',
-              onPressed: isButtonEnabled ? () => _handleSubmit(context) : null,
-              isEnabled: isButtonEnabled,
+              onPressed: state.isUserNameValid ? () => _handleSubmit(context) : null,
+              isEnabled: state.isUserNameValid,
               height: 56,
               borderRadius: 14,
             ),
@@ -101,10 +98,11 @@ class _OnboardingSubmitButtonState extends State<OnboardingSubmitButton> {
     });
   }
 
+  /// Handle submit button press
+  /// ProfileManagerCubit now handles both profile creation and updating AuthSessionCubit
   void _handleSubmit(BuildContext context) {
     _buttonController.start();
-    final saveProfilePhoto = context.read<ProfileManagerCubit>().createProfile();
-    context.read<AuthSessionCubit>().completeProfileSetup(saveProfilePhoto);
+    context.read<ProfileManagerCubit>().createUserProfile();
   }
 
   void _showErrorSnackBar(BuildContext context, String message) {
@@ -118,9 +116,7 @@ class _OnboardingSubmitButtonState extends State<OnboardingSubmitButton> {
         action: SnackBarAction(
           label: appLocalizations?.ok ?? '',
           textColor: white,
-          onPressed: () {
-            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          },
+          onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
         ),
       ),
     );

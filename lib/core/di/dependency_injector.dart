@@ -63,10 +63,10 @@ void injectionSetup() {
   );
   getIt.registerLazySingleton<ProfileManagerCubit>(
     () => ProfileManagerCubit(
-      authService: getIt<IAuthRepository>(),
+      authRepository: getIt<IAuthRepository>(),
       firebaseStorage: getIt<FirebaseStorage>(),
       firebaseFirestore: getIt<FirebaseFirestore>(),
-      authCubit: getIt<AuthSessionCubit>(),
+      authSessionCubit: getIt<AuthSessionCubit>(),
     ),
   );
   getIt.registerFactory<PhoneNumberSignInCubit>(() => PhoneNumberSignInCubit(getIt<IAuthRepository>()));

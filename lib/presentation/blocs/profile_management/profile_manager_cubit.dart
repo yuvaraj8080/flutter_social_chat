@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_redundant_argument_values
+
 import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
@@ -7,7 +9,6 @@ import 'package:flutter_social_chat/presentation/blocs/profile_management/profil
 import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_cubit.dart';
 import 'package:flutter_social_chat/core/interfaces/i_auth_repository.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_social_chat/presentation/gen/assets.gen.dart';
 import 'package:image_picker/image_picker.dart';
 
 /// Manages user profile creation and validation
@@ -18,30 +19,30 @@ import 'package:image_picker/image_picker.dart';
 /// - User profile data updates
 class ProfileManagerCubit extends Cubit<ProfileManagerState> {
   ProfileManagerCubit({
-    required IAuthRepository authService,
+    required IAuthRepository authRepository,
     required FirebaseStorage firebaseStorage,
     required FirebaseFirestore firebaseFirestore,
-    required AuthSessionCubit authCubit,
-  })  : _authService = authService,
+    required AuthSessionCubit authSessionCubit,
+  })  : _authRepository = authRepository,
         _firebaseStorage = firebaseStorage,
         _firebaseFirestore = firebaseFirestore,
-        _authCubit = authCubit,
+        _authSessionCubit = authSessionCubit,
         super(ProfileManagerState.empty());
 
-  final IAuthRepository _authService;
+  final IAuthRepository _authRepository;
   final FirebaseStorage _firebaseStorage;
   final FirebaseFirestore _firebaseFirestore;
-  final AuthSessionCubit _authCubit;
-  
+  final AuthSessionCubit _authSessionCubit;
+
   // Default image path from assets
-  static const String _defaultImagePath = 'assets/images/user.png';
+  static const String _defaultProfileImagePath = 'assets/images/user.png';
 
   /// Validates the username and updates the state
-  /// 
+  ///
   /// The username validation rules are handled in the UI (UsernameFormField)
   /// This method simply stores the validation result in the state
-  void validateUserName({required bool isUserNameValid}) {
-    emit(state.copyWith(isUserNameValid: isUserNameValid));
+  void updateUsernameValidity({required bool isValid}) {
+    emit(state.copyWith(isUserNameValid: isValid));
   }
 
   /// Handles profile image selection from the image picker
@@ -49,22 +50,23 @@ class ProfileManagerCubit extends Cubit<ProfileManagerState> {
   /// If the picker returns null (user canceled), keeps the current state
   /// If successful, updates the state with the selected image path
   Future<void> selectProfileImage({
-    required Future<XFile?> userFileImg,
+    required Future<XFile?> pickedImage,
   }) async {
     if (state.isInProgress) return;
-    
+
     try {
       emit(state.copyWith(isInProgress: true, error: null));
 
-      final fileImg = await userFileImg;
+      final imageFile = await pickedImage;
 
-      if (fileImg == null) {
+      if (imageFile == null) {
         emit(state.copyWith(isInProgress: false));
         return;
       }
 
-      final selectedImagePath = File(fileImg.path).path;
-      emit(state.copyWith(selectedImagePath: selectedImagePath, isInProgress: false));
+      emit(
+        state.copyWith(selectedImagePath: File(imageFile.path).path, isInProgress: false),
+      );
     } catch (e) {
       debugPrint('Error selecting profile image: $e');
       emit(state.copyWith(isInProgress: false, error: 'Failed to select image'));
@@ -75,7 +77,7 @@ class ProfileManagerCubit extends Cubit<ProfileManagerState> {
   ///
   /// If no profile image is selected, uses the default user.png image
   /// Returns the profile photo URL if successful, empty string if fails
-  Future<String> createProfile() async {
+  Future<String> createUserProfile() async {
     if (state.isInProgress) return '';
     if (!state.isUserNameValid) {
       emit(state.copyWith(error: 'Please enter a valid username'));
@@ -85,59 +87,55 @@ class ProfileManagerCubit extends Cubit<ProfileManagerState> {
     emit(state.copyWith(isInProgress: true, error: null));
 
     try {
-      final uid = _authCubit.state.authUser.id;
-      final userName = _authCubit.state.authUser.userName;
-      
-      // Validate username from auth state
-      if (userName == null || userName.isEmpty) {
+      final userId = _authSessionCubit.state.authUser.id;
+      final username = _authSessionCubit.state.authUser.userName;
+
+      if (username == null || username.isEmpty) {
         emit(state.copyWith(isInProgress: false, error: 'Username cannot be empty'));
         return '';
       }
 
-      String photoUrl;
-      
-      // Process profile image if one was selected
-      if (state.selectedImagePath.isNotEmpty) {
-        photoUrl = await _uploadAndGetProfileImage(uid);
-        if (photoUrl.isEmpty) return ''; // Error already emitted in _uploadAndGetProfileImage
-      } else {
-        // Use default image path
-        photoUrl = _defaultImagePath;
-      }
-      
-      // Update user profile data
-      await _updateUserProfileData(uid, userName, photoUrl);
-      
-      emit(state.copyWith(
-        isInProgress: false, 
-        userProfilePhotoUrl: photoUrl,
-        error: null
-      ));
-      
-      return photoUrl;
+      // Process profile image (use selected or default)
+      final String profileImageUrl =
+          state.selectedImagePath.isNotEmpty ? await _uploadProfileImageAndGetUrl(userId) : _defaultProfileImagePath;
+
+      if (profileImageUrl.isEmpty) return ''; // Error already emitted in _uploadProfileImageAndGetUrl
+
+      // Update profile data in Firebase Auth and Firestore
+      await _persistUserProfileData(userId, username, profileImageUrl);
+
+      // Update local state with success
+      emit(state.copyWith(isInProgress: false, userProfilePhotoUrl: profileImageUrl, error: null));
+
+      // Update auth session status
+      await _authSessionCubit.completeProfileSetup(Future.value(profileImageUrl));
+
+      return profileImageUrl;
     } catch (e) {
       debugPrint('Error creating profile: $e');
-      emit(state.copyWith(
-        isInProgress: false, 
-        error: 'Failed to create profile',
-      ));
+      emit(
+        state.copyWith(
+          isInProgress: false,
+          error: 'Failed to create profile',
+        ),
+      );
       return '';
     }
   }
-  
+
   /// Uploads the selected profile image to Firebase Storage and returns the download URL
   ///
   /// If upload fails, emits an error state and returns empty string
-  Future<String> _uploadAndGetProfileImage(String uid) async {
+  Future<String> _uploadProfileImageAndGetUrl(String userId) async {
     try {
-      final imageRef = _firebaseStorage.ref('users/$uid/profile.jpg');
+      final imageRef = _firebaseStorage.ref('users/$userId/profile.jpg');
       final uploadTask = await imageRef.putFile(File(state.selectedImagePath));
-          
+
       if (uploadTask.state != TaskState.success) {
         emit(state.copyWith(isInProgress: false, error: 'Failed to upload image'));
         return '';
       }
-      
+
       return await imageRef.getDownloadURL();
     } catch (e) {
       debugPrint('Error uploading profile image: $e');
@@ -145,22 +143,22 @@ class ProfileManagerCubit extends Cubit<ProfileManagerState> {
       return '';
     }
   }
-  
+
   /// Updates user profile data in both Firebase Auth and Firestore
   ///
   /// Sets isOnboardingCompleted to true to mark completion of the onboarding process
-  Future<void> _updateUserProfileData(String uid, String userName, String photoUrl) async {
+  Future<void> _persistUserProfileData(String userId, String username, String profileImageUrl) async {
     try {
       await Future.wait([
-        _authService.updateUserProfile(
-          displayName: userName,
-          photoURL: photoUrl,
+        _authRepository.updateUserProfile(
+          displayName: username,
+          photoURL: profileImageUrl,
           isOnboardingCompleted: true,
         ),
-        _firebaseFirestore.collection('users').doc(uid).set(
+        _firebaseFirestore.collection('users').doc(userId).set(
           {
-            'photoUrl': photoUrl,
-            'displayName': userName,
+            'photoUrl': profileImageUrl,
+            'displayName': username,
             'isOnboardingCompleted': true,
             'lastUpdated': FieldValue.serverTimestamp(),
           },
@@ -172,14 +170,21 @@ class ProfileManagerCubit extends Cubit<ProfileManagerState> {
       throw Exception('Failed to update user profile data: $e');
     }
   }
-  
+
+  /// Retries profile creation after an error
+  Future<String> retryProfileCreation() async {
+    if (state.error == null) return '';
+    emit(state.copyWith(error: null));
+    return createUserProfile();
+  }
+
   /// Clears any error in the state
   void clearError() {
     if (state.error != null) {
       emit(state.copyWith(error: null));
     }
   }
-  
+
   /// Resets the state to its initial values
   void reset() {
     emit(ProfileManagerState.empty());

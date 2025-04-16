@@ -99,7 +99,7 @@ class OnboardingProfileImage extends StatelessWidget {
 
       if (pickedFile != null && context.mounted) {
         context.read<ProfileManagerCubit>().selectProfileImage(
-              userFileImg: Future.value(pickedFile),
+              pickedImage: Future.value(pickedFile),
             );
       }
     } catch (e) {

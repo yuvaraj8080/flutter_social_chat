@@ -21,44 +21,42 @@ class _OnboardingPageState extends State<OnboardingPage> {
   @override
   void initState() {
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkOnboardingStatus();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _redirectIfOnboardingCompleted());
   }
 
-  /// Checks if onboarding is already completed and navigates accordingly
-  void _checkOnboardingStatus() {
-    final bool isOnboardingCompleted = context.read<AuthSessionCubit>().state.authUser.isOnboardingCompleted;
+  /// Check onboarding status on initialization and redirect if needed
+  void _redirectIfOnboardingCompleted() {
+    final isOnboardingCompleted = context.read<AuthSessionCubit>().state.authUser.isOnboardingCompleted;
     if (isOnboardingCompleted) {
-      context.go(RouterEnum.channelsView.routeName);
+      _navigateToChannelsView();
     }
+  }
+
+  /// Helper method to navigate to the channels view
+  void _navigateToChannelsView() {
+    context.go(RouterEnum.channelsView.routeName);
   }
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocListener(
       listeners: [
-        // Listen for onboarding completion in the AuthSessionCubit
+        // Listen for onboarding completion in AuthSessionCubit
         BlocListener<AuthSessionCubit, AuthSessionState>(
           listenWhen: (previous, current) =>
-              previous.authUser.isOnboardingCompleted != current.authUser.isOnboardingCompleted,
+              !previous.authUser.isOnboardingCompleted && current.authUser.isOnboardingCompleted,
           listener: (context, state) {
-            if (state.authUser.isOnboardingCompleted) {
-              CustomLoadingIndicator.of(context).hide();
-              context.go(RouterEnum.channelsView.routeName);
-            }
+            CustomLoadingIndicator.of(context).hide();
+            _navigateToChannelsView();
           },
         ),
         // Listen for loading state changes in ProfileManagerCubit
         BlocListener<ProfileManagerCubit, ProfileManagerState>(
           listenWhen: (previous, current) => previous.isInProgress != current.isInProgress,
           listener: (context, state) {
-            if (state.isInProgress) {
-              CustomLoadingIndicator.of(context).show();
-            } else {
-              CustomLoadingIndicator.of(context).hide();
-            }
+            state.isInProgress
+                ? CustomLoadingIndicator.of(context).show()
+                : CustomLoadingIndicator.of(context).hide();
           },
         ),
       ],

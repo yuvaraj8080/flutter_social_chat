@@ -80,7 +80,7 @@ class OnboardingUsernameFormField extends StatelessWidget {
 
   void _validateUsername(BuildContext context, String? userName) {
     final bool isValid = _isUsernameValid(userName);
-    context.read<ProfileManagerCubit>().validateUserName(isUserNameValid: isValid);
+    context.read<ProfileManagerCubit>().updateUsernameValidity(isValid: isValid);
   }
 
   bool _isUsernameValid(String? userName) {
