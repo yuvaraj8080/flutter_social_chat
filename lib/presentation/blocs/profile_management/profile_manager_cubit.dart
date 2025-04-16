@@ -55,7 +55,7 @@ class ProfileManagerCubit extends Cubit<ProfileManagerState> {
     if (state.isInProgress) return;
 
     try {
-      emit(state.copyWith(isInProgress: true, error: null));
+      emit(state.copyWith(isInProgress: true));
 
       final imageFile = await pickedImage;
 
@@ -69,7 +69,7 @@ class ProfileManagerCubit extends Cubit<ProfileManagerState> {
       );
     } catch (e) {
       debugPrint('Error selecting profile image: $e');
-      emit(state.copyWith(isInProgress: false, error: 'Failed to select image'));
+      emit(state.copyWith(isInProgress: false));
     }
   }
 
@@ -80,18 +80,17 @@ class ProfileManagerCubit extends Cubit<ProfileManagerState> {
   Future<String> createUserProfile() async {
     if (state.isInProgress) return '';
     if (!state.isUserNameValid) {
-      emit(state.copyWith(error: 'Please enter a valid username'));
       return '';
     }
 
-    emit(state.copyWith(isInProgress: true, error: null));
+    emit(state.copyWith(isInProgress: true));
 
     try {
       final userId = _authSessionCubit.state.authUser.id;
       final username = _authSessionCubit.state.authUser.userName;
 
       if (username == null || username.isEmpty) {
-        emit(state.copyWith(isInProgress: false, error: 'Username cannot be empty'));
+        emit(state.copyWith(isInProgress: false));
         return '';
       }
 
@@ -105,7 +104,7 @@ class ProfileManagerCubit extends Cubit<ProfileManagerState> {
       await _persistUserProfileData(userId, username, profileImageUrl);
 
       // Update local state with success
-      emit(state.copyWith(isInProgress: false, userProfilePhotoUrl: profileImageUrl, error: null));
+      emit(state.copyWith(isInProgress: false, userProfilePhotoUrl: profileImageUrl));
 
       // Update auth session status
       await _authSessionCubit.completeProfileSetup(Future.value(profileImageUrl));
@@ -116,7 +115,6 @@ class ProfileManagerCubit extends Cubit<ProfileManagerState> {
       emit(
         state.copyWith(
           isInProgress: false,
-          error: 'Failed to create profile',
         ),
       );
       return '';
@@ -132,14 +130,14 @@ class ProfileManagerCubit extends Cubit<ProfileManagerState> {
       final uploadTask = await imageRef.putFile(File(state.selectedImagePath));
 
       if (uploadTask.state != TaskState.success) {
-        emit(state.copyWith(isInProgress: false, error: 'Failed to upload image'));
+        emit(state.copyWith(isInProgress: false));
         return '';
       }
 
       return await imageRef.getDownloadURL();
     } catch (e) {
       debugPrint('Error uploading profile image: $e');
-      emit(state.copyWith(isInProgress: false, error: 'Failed to upload profile image'));
+      emit(state.copyWith(isInProgress: false));
       return '';
     }
   }
@@ -173,16 +171,7 @@ class ProfileManagerCubit extends Cubit<ProfileManagerState> {
 
   /// Retries profile creation after an error
   Future<String> retryProfileCreation() async {
-    if (state.error == null) return '';
-    emit(state.copyWith(error: null));
     return createUserProfile();
-  }
-
-  /// Clears any error in the state
-  void clearError() {
-    if (state.error != null) {
-      emit(state.copyWith(error: null));
-    }
   }
 
   /// Resets the state to its initial values

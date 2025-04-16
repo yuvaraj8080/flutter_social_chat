@@ -137,7 +137,5 @@
 
     "invalidUsername": "Username can only contain letters, numbers, underscores and hyphens",
 
-    "usernameValidationMessage": "Username must be between 3-20 characters with no special characters",
-
-    "ok": "OK"
+    "usernameValidationMessage": "Username must be between 3-20 characters with no special characters"
 }

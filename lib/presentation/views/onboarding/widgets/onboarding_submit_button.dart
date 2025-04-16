@@ -16,7 +16,6 @@ class OnboardingSubmitButton extends StatefulWidget {
 
 class _OnboardingSubmitButtonState extends State<OnboardingSubmitButton> {
   late final RoundedLoadingButtonController _buttonController;
-  static const Duration _resetDuration = Duration(seconds: 2);
 
   @override
   void initState() {
@@ -29,14 +28,10 @@ class _OnboardingSubmitButtonState extends State<OnboardingSubmitButton> {
     final appLocalizations = AppLocalizations.of(context);
 
     return BlocConsumer<ProfileManagerCubit, ProfileManagerState>(
-      listenWhen: (previous, current) =>
-          previous.userProfilePhotoUrl != current.userProfilePhotoUrl || 
-          previous.error != current.error,
+      listenWhen: (previous, current) => previous.userProfilePhotoUrl != current.userProfilePhotoUrl,
       listener: (context, state) {
         if (state.userProfilePhotoUrl.isNotEmpty) {
           _buttonController.success();
-        } else if (state.error != null) {
-          _handleError(context, state.error!);
         }
       },
       buildWhen: (previous, current) => previous.isUserNameValid != current.isUserNameValid,
@@ -86,39 +81,10 @@ class _OnboardingSubmitButtonState extends State<OnboardingSubmitButton> {
     }
   }
 
-  void _handleError(BuildContext context, String errorMessage) {
-    _buttonController.error();
-    _showErrorSnackBar(context, errorMessage);
-
-    Future.delayed(_resetDuration, () {
-      if (mounted) {
-        _buttonController.reset();
-        context.read<ProfileManagerCubit>().clearError();
-      }
-    });
-  }
-
   /// Handle submit button press
   /// ProfileManagerCubit now handles both profile creation and updating AuthSessionCubit
   void _handleSubmit(BuildContext context) {
     _buttonController.start();
     context.read<ProfileManagerCubit>().createUserProfile();
-  }
-
-  void _showErrorSnackBar(BuildContext context, String message) {
-    final appLocalizations = AppLocalizations.of(context);
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: errorColor,
-        behavior: SnackBarBehavior.floating,
-        action: SnackBarAction(
-          label: appLocalizations?.ok ?? '',
-          textColor: white,
-          onPressed: () => ScaffoldMessenger.of(context).hideCurrentSnackBar(),
-        ),
-      ),
-    );
   }
 }
