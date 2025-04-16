@@ -137,5 +137,21 @@
 
     "invalidUsername": "Username can only contain letters, numbers, underscores and hyphens",
 
-    "usernameValidationMessage": "Username must be between 3-20 characters with no special characters"
+    "usernameValidationMessage": "Username must be between 3-20 characters with no special characters",
+
+    "appName": "Flutter Social Chat",
+
+    "appTagline": "Stay connected with friends and family",
+
+    "justAMoment": "Just a moment",
+
+    "startingUp": "Starting up",
+
+    "verifyingAccount": "Verifying account",
+
+    "accountVerified": "Account verified",
+
+    "loadingChats": "Loading your chats",
+
+    "takingToChats": "Taking you to your chats"
 }
