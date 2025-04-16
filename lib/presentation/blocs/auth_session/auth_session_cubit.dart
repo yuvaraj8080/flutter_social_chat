@@ -7,6 +7,8 @@ import 'package:flutter_social_chat/core/interfaces/i_chat_repository.dart';
 import 'package:flutter_social_chat/domain/models/auth/auth_user_model.dart';
 import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_state.dart';
 
+/// Manages the authentication session state of the application
+/// using HydratedBloc for persistence between app restarts
 class AuthSessionCubit extends HydratedCubit<AuthSessionState> {
   AuthSessionCubit({
     required IAuthRepository authRepository,
@@ -14,7 +16,7 @@ class AuthSessionCubit extends HydratedCubit<AuthSessionState> {
   })  : _authRepository = authRepository,
         _chatRepository = chatRepository,
         super(AuthSessionState.empty()) {
-    _authUserSubscription = _authRepository.authStateChanges.listen(_listenAuthStateChangesStream);
+    _authUserSubscription = _authRepository.authStateChanges.listen(_handleAuthStateChanges);
   }
 
   final IAuthRepository _authRepository;
@@ -56,8 +58,8 @@ class AuthSessionCubit extends HydratedCubit<AuthSessionState> {
     }
   }
 
-  /// Handles auth state changes by connecting to chat service when logged in
-  Future<void> _listenAuthStateChangesStream(AuthUserModel authUser) async {
+  /// Handles authentication state changes by connecting to chat service when logged in
+  Future<void> _handleAuthStateChanges(AuthUserModel authUser) async {
     emit(state.copyWith(isInProgress: true, authUser: authUser, isUserCheckedFromAuthService: true));
 
     if (authUser == AuthUserModel.empty()) {
@@ -71,20 +73,16 @@ class AuthSessionCubit extends HydratedCubit<AuthSessionState> {
     result.fold(
       (failure) {
         debugPrint('Failed to connect to chat service: $failure');
-        emit(
-          state.copyWith(
-            authUser: authUser,
-            isInProgress: false,
-            hasError: true,
-          ),
-        );
-      },
-      (_) => emit(
-        state.copyWith(
+        emit(state.copyWith(
           authUser: authUser,
           isInProgress: false,
-        ),
-      ),
+          hasError: true,
+        ));
+      },
+      (_) => emit(state.copyWith(
+        authUser: authUser,
+        isInProgress: false,
+      )),
     );
   }
 
@@ -92,11 +90,9 @@ class AuthSessionCubit extends HydratedCubit<AuthSessionState> {
   void changeUserName({required String userName}) {
     if (userName.isEmpty) return;
 
-    emit(
-      state.copyWith(
-        authUser: state.authUser.copyWith(userName: userName),
-      ),
-    );
+    emit(state.copyWith(
+      authUser: state.authUser.copyWith(userName: userName),
+    ));
   }
 
   /// Completes profile setup with the provided profile photo URL
@@ -111,15 +107,13 @@ class AuthSessionCubit extends HydratedCubit<AuthSessionState> {
         return;
       }
 
-      emit(
-        state.copyWith(
-          isInProgress: false,
-          authUser: state.authUser.copyWith(
-            photoUrl: userProfilePhotoUrl,
-            isOnboardingCompleted: true,
-          ),
+      emit(state.copyWith(
+        isInProgress: false,
+        authUser: state.authUser.copyWith(
+          photoUrl: userProfilePhotoUrl,
+          isOnboardingCompleted: true,
         ),
-      );
+      ));
     } catch (e) {
       debugPrint('Error completing profile setup: $e');
       emit(state.copyWith(isInProgress: false, hasError: true));
@@ -136,25 +130,35 @@ class AuthSessionCubit extends HydratedCubit<AuthSessionState> {
 
   @override
   AuthSessionState? fromJson(Map<String, dynamic> json) {
-    // Create a base state from the cached data
-    final cachedState = AuthSessionState.empty().copyWith(
-      authUser: AuthUserModel.fromJson(json['authUser']),
-      isUserCheckedFromAuthService: json['isUserCheckedFromAuthService'],
-    );
-    
-    // If the user is logged in according to cached data, we'll verify with repository
-    // In the next cycle, the auth stream will update with the latest data
-    if (cachedState.isLoggedIn) {
-      // We don't await here intentionally - returning initial state from cache
-      // while the auth stream will update with fresh data
-      _authRepository.getSignedInUser().then((userOption) {
-        userOption.fold(
-          () => emit(AuthSessionState.empty().copyWith(isUserCheckedFromAuthService: true)),
-          (latestUserData) => emit(cachedState.copyWith(authUser: latestUserData)),
-        );
-      });
+    try {
+      // Create a base state from the cached data
+      final cachedState = AuthSessionState.empty().copyWith(
+        authUser: AuthUserModel.fromJson(json['authUser'] as Map<String, dynamic>),
+        isUserCheckedFromAuthService: json['isUserCheckedFromAuthService'] as bool? ?? false,
+      );
+      
+      // If the user is logged in according to cached data, verify with repository
+      if (cachedState.isLoggedIn) {
+        _verifyUserSession(cachedState);
+      }
+      
+      return cachedState;
+    } catch (e) {
+      debugPrint('Error deserializing auth session state: $e');
+      return AuthSessionState.empty();
     }
-    
-    return cachedState;
+  }
+
+  /// Verifies the user session against the repository
+  /// This is used during hydration to ensure cached data is still valid
+  void _verifyUserSession(AuthSessionState cachedState) {
+    // We don't await here intentionally - returning initial state from cache
+    // while the auth stream will update with fresh data
+    _authRepository.getSignedInUser().then((userOption) {
+      userOption.fold(
+        () => emit(AuthSessionState.empty().copyWith(isUserCheckedFromAuthService: true)),
+        (latestUserData) => emit(cachedState.copyWith(authUser: latestUserData)),
+      );
+    });
   }
 }
