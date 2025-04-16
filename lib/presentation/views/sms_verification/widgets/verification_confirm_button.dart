@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_social_chat/presentation/blocs/phone_number_sign_in/phone_number_sign_in_cubit.dart';
@@ -14,53 +13,61 @@ class VerificationConfirmButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
-    final String confirmText = AppLocalizations.of(context)?.confirm ?? '';
-    final bool isEnabled = state.smsCode.isNotEmpty;
+    final String verifyCodeText = AppLocalizations.of(context)?.verifyCode ?? '';
+    final bool isEnabled = state.smsCode.isNotEmpty && state.smsCode.length == 6;
 
-    return GestureDetector(
-      onTap: isEnabled
-          ? () {
-              // Add haptic feedback for better UX
-              HapticFeedback.mediumImpact();
-              context.read<PhoneNumberSignInCubit>().verifySmsCode();
-            }
-          : null,
-      child: Opacity(
-        opacity: isEnabled ? 1 : 0.6,
-        child: Container(
-          margin: const EdgeInsets.only(top: 76, left: 24, right: 24, bottom: 24),
-          width: size.width,
-          height: size.height / 12,
-          decoration: BoxDecoration(
-            color: black.withValues(alpha: 0.25),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 20),
-                child: CustomText(
-                  text: confirmText,
-                  color: white,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 26,
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 120),
+      curve: Curves.easeInOut,
+      width: double.infinity,
+      height: 56,
+      decoration: BoxDecoration(
+        color: isEnabled ? white : white.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: isEnabled
+            ? [
+                BoxShadow(
+                  color: white.withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
                 ),
+              ]
+            : null,
+      ),
+      child: Material(
+        color: transparent,
+        child: InkWell(
+          onTap: isEnabled ? () => context.read<PhoneNumberSignInCubit>().verifySmsCode() : null,
+          borderRadius: BorderRadius.circular(12),
+          child: Center(
+            child: AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 300),
+              style: TextStyle(
+                color: isEnabled ? customIndigoColor : customIndigoColor.withValues(alpha: 0.5),
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
               ),
-              Container(
-                width: 75,
-                height: size.height / 12,
-                decoration: const BoxDecoration(
-                  color: white,
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(8),
-                    bottomRight: Radius.circular(8),
+              child: Row(
+                spacing: 8,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CustomText(
+                    text: verifyCodeText,
+                    color: isEnabled ? customIndigoColor : customIndigoColor.withValues(alpha: 0.5),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                   ),
-                ),
-                child: const Icon(Icons.arrow_forward, size: 36, color: white),
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    child: Icon(
+                      Icons.arrow_forward_rounded,
+                      size: 20,
+                      color: isEnabled ? customIndigoColor : customIndigoColor.withValues(alpha: 0.5),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

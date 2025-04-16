@@ -92,7 +92,6 @@ class SmsVerificationView extends StatelessWidget {
           backgroundColor: customIndigoColor,
           title: appBarTitle,
           titleColor: white,
-          titleFontWeight: FontWeight.w600,
         ),
         body: SmsVerificationViewBody(phoneNumber: phoneNumber),
       ),
