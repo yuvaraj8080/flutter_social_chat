@@ -1,40 +1,110 @@
+import 'dart:async';
+
+import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_social_chat/presentation/blocs/phone_number_sign_in/phone_number_sign_in_cubit.dart';
+import 'package:flutter_social_chat/presentation/blocs/phone_number_sign_in/phone_number_sign_in_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
+import 'package:flutter_social_chat/presentation/design_system/widgets/custom_loading_indicator.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
 
-class ResendCodeButton extends StatelessWidget {
+class ResendCodeButton extends StatefulWidget {
   const ResendCodeButton({super.key});
+
+  @override
+  State<ResendCodeButton> createState() => _ResendCodeButtonState();
+}
+
+class _ResendCodeButtonState extends State<ResendCodeButton> {
+  bool _isResending = false;
+  Timer? _safetyTimer;
+
+  @override
+  void dispose() {
+    _safetyTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final String resendCodeText = AppLocalizations.of(context)?.resendCode ?? '';
 
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: InkWell(
-        onTap: () => _resendCode(context),
-        borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            spacing: 8,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.refresh_rounded, size: 18, color: white),
-              CustomText(text: resendCodeText, color: white, fontSize: 14),
-            ],
+    return BlocConsumer<PhoneNumberSignInCubit, PhoneNumberSignInState>(
+      listenWhen: (previous, current) => 
+          previous.isInProgress != current.isInProgress ||
+          (previous.failureMessageOption != current.failureMessageOption && 
+           current.failureMessageOption.isSome()),
+      listener: (context, state) {
+        // When the state changes from in-progress to not in-progress during a resend operation
+        if (_isResending) {
+          if (!state.isInProgress) {
+            setState(() => _isResending = false);
+            _safetyTimer?.cancel();
+            
+            state.failureMessageOption.fold(
+              () {
+                // Success case
+                BotToast.showText(text: 'Code resent');
+              },
+              (_) {
+                // Error is already handled by the parent view
+              },
+            );
+          }
+        }
+      },
+      buildWhen: (previous, current) => previous.isInProgress != current.isInProgress,
+      builder: (context, state) {
+        final bool isDisabled = state.isInProgress || _isResending;
+        
+        return Align(
+          alignment: Alignment.centerLeft,
+          child: InkWell(
+            onTap: isDisabled ? null : () => _resendCode(context),
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.refresh_rounded, size: 18, color: white),
+                  const SizedBox(width: 8),
+                  CustomText(
+                    text: resendCodeText,
+                    color: white.withOpacity(isDisabled ? 0.5 : 1.0),
+                    fontSize: 14,
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
   void _resendCode(BuildContext context) {
-    // We want to resend the code but not navigate again
-    // Access the cubit and resend the code using the same phone number
+    // Already resending, don't trigger again
+    if (_isResending) return;
+    
+    // Cancel any existing safety timer
+    _safetyTimer?.cancel();
+    
+    // Track that we're in a resend operation
+    setState(() => _isResending = true);
+    
+    // Use a safety timer as a backup - if after 8 seconds we're still resending,
+    // reset our state
+    _safetyTimer = Timer(const Duration(seconds: 8), () {
+      if (mounted && _isResending) {
+        setState(() => _isResending = false);
+        debugPrint('ResendCodeButton safety timer fired');
+      }
+    });
+    
+    // Initiate the resend through the cubit
     context.read<PhoneNumberSignInCubit>().resendCode();
   }
 }

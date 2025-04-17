@@ -121,8 +121,16 @@ class AuthRepository implements IAuthRepository {
           }
         },
         codeSent: (String verificationId, int? resendToken) async {
-          debugPrint('SMS code sent successfully, verification ID: $verificationId');
+          final resendMessage = resendToken != null ? ' (RESEND)' : '';
+          debugPrint('SMS code sent successfully$resendMessage, verification ID: $verificationId');
           streamController.add(right((verificationId, resendToken)));
+          
+          // Ensure stream completes after delivering results for resend
+          if (resendToken != null) {
+            debugPrint('Completing resend code stream');
+            await Future.delayed(const Duration(milliseconds: 100));
+            await cleanUp();
+          }
         },
         codeAutoRetrievalTimeout: (String verificationId) {
           debugPrint('SMS code auto retrieval timed out');

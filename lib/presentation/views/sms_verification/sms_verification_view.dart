@@ -117,11 +117,17 @@ class _SmsVerificationViewState extends State<SmsVerificationView> {
     if (state.isInProgress) {
       _safelyShowLoadingIndicator(context);
     } else {
-      _safelyHideLoadingIndicator(context);
+      // Always reset completely when not in progress
+      CustomLoadingIndicator.forceClose();
 
       // Handle errors if present
       state.failureMessageOption.fold(
-        () {}, // No error, do nothing
+        () {
+          // Log successful operations for debugging
+          if (state.verificationIdOption.isSome()) {
+            debugPrint('Successfully completed phone operation (Verification/Resend)');
+          }
+        },
         (authFailure) {
           _showErrorToast(context, authFailure);
 
@@ -142,21 +148,19 @@ class _SmsVerificationViewState extends State<SmsVerificationView> {
     if (!mounted) return;
 
     try {
+      // Always reset first - this ensures we don't have multiple indicators
+      CustomLoadingIndicator.reset();
       CustomLoadingIndicator.of(context).show();
     } catch (e) {
       // Ignore errors showing loading indicator
+      debugPrint('Error showing loading indicator: $e');
     }
   }
 
   /// Safely hides the loading indicator
   void _safelyHideLoadingIndicator(BuildContext context) {
     if (!mounted) return;
-
-    try {
-      CustomLoadingIndicator.of(context).hide();
-    } catch (e) {
-      // Ignore errors hiding loading indicator
-    }
+    CustomLoadingIndicator.forceClose();
   }
 
   /// Shows an error toast with the appropriate message

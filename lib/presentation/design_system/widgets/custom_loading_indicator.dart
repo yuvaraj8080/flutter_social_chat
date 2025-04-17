@@ -1,11 +1,13 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 
 /// A customizable loading indicator that shows a semi-transparent overlay with a circular progress indicator.
 ///
 /// This indicator blocks user interaction while displayed and can be shown/hidden programmatically.
-/// It uses a singleton pattern to ensure only one indicator is shown at a time, and includes
-/// safety checks to prevent common errors related to disposed contexts or navigator state.
+/// It ensures only one indicator is shown at a time across the entire app.
 ///
 /// Usage:
 /// ```dart
@@ -19,92 +21,14 @@ import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 /// CustomLoadingIndicator.reset();
 /// ```
 class CustomLoadingIndicator {
+  // Static variables to maintain global state
+  static bool _isGloballyShowing = false;
+  static Timer? _safetyTimer;
+  static OverlayEntry? _overlayEntry;
+  
+  // Per-instance context
   final BuildContext _context;
-  bool _isShowing = false;
-  static CustomLoadingIndicator? _instance;
-
-  /// Hides the loading indicator if it's currently showing
-  ///
-  /// Safely handles cases where the context is no longer valid or the navigator is unavailable.
-  void hide() {
-    if (_isShowing) {
-      try {
-        if (!_isNavigatorMounted()) {
-          _isShowing = false;
-          return;
-        }
-        
-        // Use Navigator.pop with rootNavigator to only pop the dialog
-        // This won't interfere with GoRouter navigation stack
-        Navigator.of(_context, rootNavigator: true).pop();
-        _isShowing = false;
-      } catch (e) {
-        // Reset state even if there's an error
-        _isShowing = false;
-      }
-    }
-  }
-
-  /// Shows the loading indicator as a modal dialog
-  ///
-  /// Safely handles cases where the context is no longer valid or the navigator is unavailable.
-  void show() {
-    if (!_isShowing) {
-      if (!_isNavigatorMounted()) {
-        // Cannot show the indicator if context is not valid
-        return;
-      }
-      
-      try {
-        _isShowing = true;
-        showDialog(
-          context: _context,
-          barrierDismissible: false,
-          useSafeArea: false,
-          barrierColor: transparent,
-          builder: (_) => const LoadingIndicator(),
-        ).then((_) => _isShowing = false);
-      } catch (e) {
-        // Reset state if showing fails
-        _isShowing = false;
-      }
-    }
-  }
-
-  /// Returns whether the loading indicator is currently showing
-  bool get isShowing => _isShowing;
-
-  /// Checks if the navigator is still mounted and can be used
-  bool _isNavigatorMounted() {
-    try {
-      if (!_context.mounted) return false;
-      
-      // This will throw if the Navigator is not available
-      final navigator = Navigator.of(_context, rootNavigator: true);
-      return navigator.mounted;
-    } catch (e) {
-      // If any error occurs, consider the navigator not mounted
-      return false;
-    }
-  }
-
-  /// Resets the internal instance
-  /// 
-  /// This should be called when:
-  /// - Signing out
-  /// - Major navigation occurs (like going back to login)
-  /// - App state is being cleared
-  static void reset() {
-    if (_instance != null && _instance!._isShowing) {
-      try {
-        _instance!.hide();
-      } catch (e) {
-        // Ignore errors when forcibly resetting
-      }
-    }
-    _instance = null;
-  }
-
+  
   /// Private constructor for singleton pattern
   CustomLoadingIndicator._create(this._context);
 
@@ -112,13 +36,105 @@ class CustomLoadingIndicator {
   /// 
   /// Always recreates the instance to ensure we have the latest context
   factory CustomLoadingIndicator.of(BuildContext context) {
-    // Check for valid context
     if (!context.mounted) {
       throw StateError('Cannot create CustomLoadingIndicator with unmounted context');
     }
     
-    _instance = CustomLoadingIndicator._create(context);
-    return _instance!;
+    return CustomLoadingIndicator._create(context);
+  }
+
+  /// Shows the loading indicator
+  void show() {
+    // If already showing globally, don't show again
+    if (_isGloballyShowing) return;
+    
+    if (!_context.mounted) return;
+    
+    try {
+      // Set global flag
+      _isGloballyShowing = true;
+      
+      // Cancel any existing safety timer
+      _safetyTimer?.cancel();
+      
+      // Use overlay instead of dialog for more reliable cleanup
+      _showOverlay();
+      
+      // Add safety timer to auto-hide after 15 seconds
+      _safetyTimer = Timer(const Duration(seconds: 15), () {
+        debugPrint('Global safety timer fired - force closing indicator');
+        forceClose();
+      });
+    } catch (e) {
+      debugPrint('Error showing loading indicator: $e');
+      _isGloballyShowing = false;
+    }
+  }
+  
+  /// Shows the indicator using an overlay for more reliable cleanup
+  void _showOverlay() {
+    try {
+      final overlay = Overlay.of(_context);
+      
+      // Remove any existing overlay first
+      _removeOverlay();
+      
+      // Create and insert a new overlay
+      _overlayEntry = OverlayEntry(
+        builder: (context) => const LoadingIndicator(),
+      );
+      
+      overlay.insert(_overlayEntry!);
+    } catch (e) {
+      debugPrint('Error showing overlay: $e');
+    }
+  }
+  
+  /// Removes the overlay entry
+  static void _removeOverlay() {
+    try {
+      _overlayEntry?.remove();
+      _overlayEntry = null;
+    } catch (e) {
+      debugPrint('Error removing overlay: $e');
+    }
+  }
+
+  /// Hides the loading indicator if it's showing
+  void hide() {
+    _cancelSafetyTimer();
+    
+    if (_isGloballyShowing) {
+      _removeOverlay();
+      _isGloballyShowing = false;
+    }
+  }
+  
+  /// Cancels the safety timer if one is active
+  static void _cancelSafetyTimer() {
+    _safetyTimer?.cancel();
+    _safetyTimer = null;
+  }
+
+  /// Returns whether the loading indicator is currently showing
+  bool get isShowing => _isGloballyShowing;
+
+  /// Resets the internal state - use when navigating between major screens
+  static void reset() {
+    _cancelSafetyTimer();
+    _removeOverlay();
+    _isGloballyShowing = false;
+  }
+
+  /// Force closes any open loading indicators, even if we don't have the original context
+  static void forceClose() {
+    debugPrint('Force closing any active loading indicators');
+    reset();
+    
+    // Force rebuild UI just to be sure
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      reset();
+    });
   }
   
   /// Show a loading indicator temporarily for a specific operation
@@ -136,6 +152,8 @@ class CustomLoadingIndicator {
       } finally {
         if (context.mounted) {
           indicator.hide();
+        } else {
+          forceClose();
         }
       }
     } catch (e) {
@@ -153,9 +171,7 @@ class LoadingIndicator extends StatelessWidget {
     return PopScope(
       canPop: false,
       child: Container(
-        decoration: BoxDecoration(
-          color: black.withValues(alpha: 0.3),
-        ),
+        color: black.withAlpha(120),
         child: const Center(
           child: Card(
             elevation: 4,

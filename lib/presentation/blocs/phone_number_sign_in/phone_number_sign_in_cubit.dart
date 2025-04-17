@@ -62,6 +62,16 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
       resendToken: state.phoneNumberAndResendTokenPair.$2,
       isResend: true,
     );
+    
+    // Add a safety timer to ensure isInProgress is reset after a max timeout
+    // This prevents the loading indicator from getting stuck
+    Future.delayed(const Duration(seconds: 10), () {
+      if (isClosed) return;
+      if (state.isInProgress) {
+        debugPrint('Safety timer fired for resendCode - resetting isInProgress');
+        emit(state.copyWith(isInProgress: false));
+      }
+    });
   }
 
   void verifySmsCode() {
@@ -153,6 +163,11 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
           );
         },
         onError: (error) => _handleError('signInWithPhoneNumber', error),
+        onDone: () {
+          if (isResend && state.isInProgress) {
+            emit(state.copyWith(isInProgress: false));
+          }
+        },
       );
     } catch (e) {
       _handleError('signInWithPhoneNumber', e);
