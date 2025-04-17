@@ -36,12 +36,12 @@ class ProfilePage extends StatelessWidget {
           return BlocBuilder<ChatSessionCubit, ChatSessionState>(
             builder: (context, chatState) {
               final l10n = AppLocalizations.of(context);
-              
+
               // If still loading chat user data, show loading indicator
               if (!chatState.isUserCheckedFromChatService) {
                 return const CustomProgressIndicator(progressIndicatorColor: black);
               }
-              
+
               // Get user information from auth and chat states
               final userName = authState.authUser.userName ?? '';
               final userPhotoUrl = authState.authUser.photoUrl ?? '';
