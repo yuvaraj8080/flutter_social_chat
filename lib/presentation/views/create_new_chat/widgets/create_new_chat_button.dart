@@ -49,6 +49,10 @@ class _CreateNewChatButtonState extends State<CreateNewChatButton> with SingleTi
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ChatManagementCubit, ChatManagementState>(
+      buildWhen: (previous, current) => 
+        previous.listOfSelectedUserIDs != current.listOfSelectedUserIDs ||
+        previous.isChannelNameValid != current.isChannelNameValid ||
+        previous.isInProgress != current.isInProgress,
       builder: (context, state) {
         // For group chat: require valid name AND at least 2 selected users
         // For private chat: require only 1 selected user
@@ -58,12 +62,15 @@ class _CreateNewChatButtonState extends State<CreateNewChatButton> with SingleTi
             : isUserSelected;
         
         final bool shouldEnableButton = hasEnoughUsers && 
-            (widget.isCreateNewChatPageForCreatingGroup ? state.isChannelNameValid : true);
+            (widget.isCreateNewChatPageForCreatingGroup ? state.isChannelNameValid : true) &&
+            !state.isInProgress;
         
         // Get appropriate button text based on state
-        final String buttonText = widget.isCreateNewChatPageForCreatingGroup
-            ? (shouldEnableButton ? 'Create Group Chat' : 'Select Users & Name Group')
-            : (shouldEnableButton ? 'Start Chat' : 'Select a User to Chat With');
+        final String buttonText = state.isInProgress
+            ? (widget.isCreateNewChatPageForCreatingGroup ? 'Creating Group...' : 'Starting Chat...')
+            : widget.isCreateNewChatPageForCreatingGroup
+                ? (shouldEnableButton ? 'Create Group Chat' : 'Select Users & Name Group')
+                : (shouldEnableButton ? 'Start Chat' : 'Select a User to Chat With');
             
         return Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
@@ -80,7 +87,7 @@ class _CreateNewChatButtonState extends State<CreateNewChatButton> with SingleTi
               borderRadius: BorderRadius.circular(12),
               color: Colors.transparent,
               child: Tooltip(
-                message: shouldEnableButton 
+                message: shouldEnableButton || state.isInProgress
                     ? '' 
                     : widget.isCreateNewChatPageForCreatingGroup
                         ? 'Select at least 2 users and provide a valid group name'
@@ -116,22 +123,27 @@ class _CreateNewChatButtonState extends State<CreateNewChatButton> with SingleTi
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       gradient: LinearGradient(
-                        colors: shouldEnableButton
-                            ? (_isPressed 
-                                ? [
-                                    customIndigoColor.withOpacity(0.8),
-                                    customIndigoColor,
-                                  ]
+                        colors: state.isInProgress
+                            ? [
+                                customIndigoColor.withOpacity(0.7),
+                                customIndigoColor.withOpacity(0.6),
+                              ]
+                            : shouldEnableButton
+                                ? (_isPressed 
+                                    ? [
+                                        customIndigoColor.withOpacity(0.8),
+                                        customIndigoColor,
+                                      ]
+                                    : [
+                                        customIndigoColor,
+                                        customIndigoColor.withOpacity(0.8),
+                                      ])
                                 : [
-                                    customIndigoColor,
-                                    customIndigoColor.withOpacity(0.8),
-                                  ])
-                            : [
-                                customGreyColor400,
-                                customGreyColor300,
-                              ],
+                                    customGreyColor400,
+                                    customGreyColor300,
+                                  ],
                       ),
-                      boxShadow: shouldEnableButton
+                      boxShadow: shouldEnableButton && !state.isInProgress
                           ? [
                               BoxShadow(
                                 color: customIndigoColor.withOpacity(0.3),
@@ -145,13 +157,23 @@ class _CreateNewChatButtonState extends State<CreateNewChatButton> with SingleTi
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
-                            widget.isCreateNewChatPageForCreatingGroup
-                                ? Icons.group_add_rounded
-                                : Icons.chat_bubble_outline_rounded,
-                            color: white,
-                            size: 24,
-                          ),
+                          if (state.isInProgress)
+                            SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(white),
+                              ),
+                            )
+                          else
+                            Icon(
+                              widget.isCreateNewChatPageForCreatingGroup
+                                  ? Icons.group_add_rounded
+                                  : Icons.chat_bubble_outline_rounded,
+                              color: white,
+                              size: 24,
+                            ),
                           const SizedBox(width: 12),
                           Text(
                             buttonText,

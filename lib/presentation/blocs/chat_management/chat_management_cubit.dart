@@ -101,6 +101,12 @@ class ChatManagementCubit extends Cubit<ChatManagementState> {
       return;
     }
 
+    // Check if we have necessary data
+    if (state.listOfSelectedUserIDs.isEmpty) {
+      emit(state.copyWith(error: ChatFailureEnum.channelCreateFailure));
+      return;
+    }
+
     // Initialize channel details
     String channelImageUrl = '';
     String channelName = state.channelName;
@@ -108,53 +114,83 @@ class ChatManagementCubit extends Cubit<ChatManagementState> {
 
     // Always include current user in the channel
     final currentUserId = _authCubit.state.authUser.id;
-    listOfMemberIDs.add(currentUserId);
-
-    // Handle different channel creation scenarios
-    if (isCreateNewChatPageForCreatingGroup) {
-      // Group chat case: use provided name and default group image
-      channelName = state.channelName;
-      channelImageUrl = randomGroupProfilePhoto;
-    } else {
-      // One-to-one chat case: use selected user's name and profile image
-      if (listOfMemberIDs.length == 2) {
-        // Find the other user's ID (not current user)
-        final String selectedUserId = listOfMemberIDs.where((memberID) => memberID != currentUserId).toList().first;
-
-        // Fetch user data from Firestore
-        try {
-          final selectedUserFromFirestore = await _firebaseFirestore.userDocument(userId: selectedUserId);
-          final getSelectedUserDataFromFirestore = await selectedUserFromFirestore.get();
-          final selectedUserData = getSelectedUserDataFromFirestore.data() as Map<String, dynamic>?;
-
-          // Use selected user's display name and photo for the channel
-          channelName = selectedUserData?['displayName'] ?? '';
-          channelImageUrl = selectedUserData?['photoUrl'] ?? '';
-        } catch (e) {
-          // If user data fetch fails, use defaults
-          channelName = 'Chat';
-          channelImageUrl = randomGroupProfilePhoto;
-        }
-      }
+    if (!listOfMemberIDs.contains(currentUserId)) {
+      listOfMemberIDs.add(currentUserId);
     }
 
-    // For one-to-one chats, we don't need to validate the channel name
-    final isChannelNameValid = !isCreateNewChatPageForCreatingGroup ? true : state.isChannelNameValid;
+    // Validate according to chat type
+    final bool hasEnoughMembers = listOfMemberIDs.length >= 2;
+    final bool isValidName = isCreateNewChatPageForCreatingGroup ? state.isChannelNameValid : true;
+    
+    if (!hasEnoughMembers || !isValidName) {
+      emit(state.copyWith(error: ChatFailureEnum.channelCreateFailure));
+      return;
+    }
+    
+    // Start operation and show loading
+    emit(state.copyWith(isInProgress: true, isChannelCreated: false, error: null));
 
-    // Only create channel if we have at least 2 members and a valid name
-    if (listOfMemberIDs.length >= 2 && isChannelNameValid) {
-      emit(state.copyWith(isInProgress: true, isChannelCreated: false));
+    try {
+      // Handle different channel creation scenarios
+      if (isCreateNewChatPageForCreatingGroup) {
+        // Group chat case: use provided name and default group image
+        channelName = state.channelName;
+        channelImageUrl = randomGroupProfilePhoto;
+      } else {
+        // One-to-one chat case: use selected user's name and profile image
+        if (listOfMemberIDs.length == 2) {
+          // Find the other user's ID (not current user)
+          final String selectedUserId = listOfMemberIDs.where((memberID) => memberID != currentUserId).toList().first;
 
+          // Fetch user data from Firestore
+          try {
+            final selectedUserFromFirestore = await _firebaseFirestore.userDocument(userId: selectedUserId);
+            final getSelectedUserDataFromFirestore = await selectedUserFromFirestore.get();
+            final selectedUserData = getSelectedUserDataFromFirestore.data() as Map<String, dynamic>?;
+
+            if (selectedUserData != null) {
+              // Use selected user's display name and photo for the channel
+              channelName = selectedUserData['displayName'] ?? 'Chat';
+              channelImageUrl = selectedUserData['photoUrl'] ?? randomGroupProfilePhoto;
+            } else {
+              channelName = 'Chat';
+              channelImageUrl = randomGroupProfilePhoto;
+            }
+          } catch (e) {
+            // If user data fetch fails, use defaults
+            channelName = 'Chat';
+            channelImageUrl = randomGroupProfilePhoto;
+          }
+        }
+      }
+
+      // Create the channel
       final result = await _chatService.createNewChannel(
         listOfMemberIDs: listOfMemberIDs.toList(),
         channelName: channelName,
         channelImageUrl: channelImageUrl,
       );
 
+      // Handle result
       result.fold(
         (failure) => emit(state.copyWith(isInProgress: false, isChannelCreated: false, error: failure)),
-        (_) => emit(state.copyWith(isInProgress: false, isChannelCreated: true)),
+        (_) => emit(state.copyWith(
+          isInProgress: false, 
+          isChannelCreated: true,
+          // Reset user selection and channel name after successful creation
+          listOfSelectedUsers: {},
+          listOfSelectedUserIDs: {},
+          channelName: '',
+          isChannelNameValid: false,
+        )),
       );
+    } catch (e) {
+      // Handle unexpected errors
+      emit(state.copyWith(
+        isInProgress: false,
+        isChannelCreated: false,
+        error: ChatFailureEnum.channelCreateFailure,
+      ));
     }
   }
 
