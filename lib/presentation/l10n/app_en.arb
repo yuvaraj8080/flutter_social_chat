@@ -185,5 +185,17 @@
 
     "regularUser": "Regular User",
 
-    "accountDetails": "Account Details"
+    "accountDetails": "Account Details",
+
+    "startGroupChat": "Create Group Chat",
+    
+    "startPrivateChat": "Start Chat",
+    
+    "chatButtonDisabled": "Select users to start",
+    
+    "readyToCreateGroup": "Ready to create group!",
+    
+    "selectUserToChat": "Select a user to chat with",
+    
+    "deselectUser": "Tap to deselect"
 }

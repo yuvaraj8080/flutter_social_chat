@@ -162,11 +162,11 @@ class ChatManagementCubit extends Cubit<ChatManagementState> {
   // User selection methods
   //
 
-  /// Selects a user when creating a chat
+  /// Selects or deselects a user when creating a chat
   /// 
   /// Behavior differs based on [isCreateNewChatPageForCreatingGroup]:
-  /// - For one-to-one chats, only one user can be selected
-  /// - For group chats, multiple users can be selected
+  /// - For one-to-one chats, only one user can be selected, and can be toggled
+  /// - For group chats, multiple users can be selected or deselected
   void selectUserWhenCreatingAGroup({
     required User user,
     required bool isCreateNewChatPageForCreatingGroup,
@@ -174,16 +174,27 @@ class ChatManagementCubit extends Cubit<ChatManagementState> {
     final listOfSelectedUserIDs = {...state.listOfSelectedUserIDs};
     final listOfSelectedUsers = {...state.listOfSelectedUsers};
 
-    if (!isCreateNewChatPageForCreatingGroup) {
-      // One-to-one chat: only select if no other users are selected
-      if (listOfSelectedUserIDs.isEmpty) {
+    // Check if the user is already selected
+    final isUserAlreadySelected = listOfSelectedUserIDs.contains(user.id);
+
+    if (isUserAlreadySelected) {
+      // If user is already selected, remove them (toggle off)
+      listOfSelectedUserIDs.remove(user.id);
+      listOfSelectedUsers.removeWhere((u) => u.id == user.id);
+    } else {
+      // If user is not selected yet
+      if (!isCreateNewChatPageForCreatingGroup) {
+        // For private chat: Clear any existing selection first (max 1)
+        listOfSelectedUserIDs.clear();
+        listOfSelectedUsers.clear();
+        // Then add the new selection
+        listOfSelectedUserIDs.add(user.id);
+        listOfSelectedUsers.add(user);
+      } else {
+        // For group chat: Add to existing selections
         listOfSelectedUserIDs.add(user.id);
         listOfSelectedUsers.add(user);
       }
-    } else {
-      // Group chat: can select multiple users
-      listOfSelectedUserIDs.add(user.id);
-      listOfSelectedUsers.add(user);
     }
 
     emit(

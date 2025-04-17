@@ -10,12 +10,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// This widget provides animated options for creating either a one-to-one chat
 /// or a group chat with smooth animations and visual feedback.
 class AnimatedChatButton extends StatefulWidget {
-  const AnimatedChatButton({
-    super.key,
-    required this.userListController,
-  });
-
-  final StreamUserListController userListController;
+  const AnimatedChatButton({super.key});
 
   @override
   State<AnimatedChatButton> createState() => _AnimatedChatButtonState();
@@ -102,12 +97,37 @@ class _AnimatedChatButtonState extends State<AnimatedChatButton> with SingleTick
     });
   }
 
+  // Create a fresh StreamUserListController for the new chat view
+  StreamUserListController _createUserListController() {
+    final client = StreamChat.of(context).client;
+    final currentUser = client.state.currentUser;
+
+    if (currentUser == null) {
+      throw Exception('Cannot create user list controller: No authenticated user found');
+    }
+
+    return StreamUserListController(
+      client: client,
+      limit: 25,
+      filter: Filter.and([
+        Filter.notEqual('id', currentUser.id),
+      ]),
+      sort: [
+        const SortOption('name', direction: 1),
+      ],
+    );
+  }
+
   void _navigateToCreateChat(bool isGroup) {
     _toggleMenu();
+
+    // Create a fresh controller just for this navigation
+    final controller = _createUserListController();
+
     context.go(
       RouterEnum.createNewChatView.routeName,
       extra: {
-        'userListController': widget.userListController,
+        'userListController': controller,
         'isCreateNewChatPageForCreatingGroup': isGroup,
       },
     );
@@ -115,9 +135,6 @@ class _AnimatedChatButtonState extends State<AnimatedChatButton> with SingleTick
 
   @override
   Widget build(BuildContext context) {
-    // Calculate safe area to ensure FAB is properly positioned
-    final bottomPadding = MediaQuery.of(context).padding.bottom;
-
     // Calculate offset to center option buttons with main FAB
     final optionHorizontalOffset = (_mainButtonSize - _optionButtonSize) / 2;
 
@@ -152,7 +169,7 @@ class _AnimatedChatButtonState extends State<AnimatedChatButton> with SingleTick
           ),
 
           // Main Button
-          _buildMainButton(bottomPadding),
+          _buildMainButton(),
         ],
       ),
     );
@@ -241,7 +258,7 @@ class _AnimatedChatButtonState extends State<AnimatedChatButton> with SingleTick
     );
   }
 
-  Widget _buildMainButton(double bottomPadding) {
+  Widget _buildMainButton() {
     return Positioned(
       right: 0,
       bottom: 0,

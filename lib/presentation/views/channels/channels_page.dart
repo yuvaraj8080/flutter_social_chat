@@ -63,6 +63,10 @@ class _ChannelsPageState extends State<ChannelsPage> {
       _userListController?.dispose();
     } catch (e) {
       // Ignore disposal errors
+      debugPrint('Error disposing controllers: $e');
+    } finally {
+      _streamChannelListController = null;
+      _userListController = null;
     }
   }
 
@@ -155,9 +159,9 @@ class _ChannelsPageState extends State<ChannelsPage> {
 
   /// Builds the floating action button if controllers are initialized
   Widget? _buildFloatingActionButton() {
-    if (!_isInitialized || _userListController == null) return null;
+    if (!_isInitialized) return null;
 
-    return AnimatedChatButton(userListController: _userListController!);
+    return const AnimatedChatButton();
   }
 
   /// Builds the app bar with the "Chats" title

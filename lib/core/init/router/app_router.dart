@@ -166,10 +166,17 @@ class AppRouter {
             throw Exception('Missing required parameters for CreateNewChatPage');
           }
 
-          final userListController = extraParameters.entries
-              .where((entries) => entries.key == 'userListController')
-              .single
-              .value as StreamUserListController?;
+          // Allow a null controller - CreateNewChatPage will create one if needed
+          StreamUserListController? userListController;
+          try {
+            userListController = extraParameters.entries
+                .where((entries) => entries.key == 'userListController')
+                .single
+                .value as StreamUserListController?;
+          } catch (e) {
+            // If there's an error accessing the controller, we'll let the page create its own
+            debugPrint('Error accessing userListController: $e');
+          }
 
           final isCreateNewChatPageForCreatingGroup = extraParameters.entries
               .where((entries) => entries.key == 'isCreateNewChatPageForCreatingGroup')
@@ -177,7 +184,17 @@ class AppRouter {
               .value as bool;
 
           return CreateNewChatPage(
-            userListController: userListController!,
+            userListController: userListController ??
+                StreamUserListController(
+                  client: StreamChat.of(context).client,
+                  limit: 25,
+                  filter: Filter.and([
+                    Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
+                  ]),
+                  sort: [
+                    const SortOption('name', direction: 1),
+                  ],
+                ),
             isCreateNewChatPageForCreatingGroup: isCreateNewChatPageForCreatingGroup,
           );
         },
