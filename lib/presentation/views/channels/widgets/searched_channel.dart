@@ -5,8 +5,15 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat_management/chat_management_cubit.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
+import 'package:flutter_social_chat/presentation/design_system/widgets/custom_progress_indicator.dart';
+import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
+import 'package:intl/intl.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// A beautifully designed widget that displays a single chat channel in the channels list
+///
+/// This widget handles both one-to-one and group chats, showing appropriate
+/// title, avatar, and last message preview with modern design elements.
 class SearchedChannel extends StatelessWidget {
   const SearchedChannel({
     super.key,
@@ -16,65 +23,344 @@ class SearchedChannel extends StatelessWidget {
     required this.defaultWidget,
   });
 
+  /// List of all available channels
   final List<Channel> listOfChannels;
+
+  /// Current search query text
   final String searchedText;
+
+  /// Index of this channel in the list
   final int index;
+
+  /// Default widget provided by StreamChannelListView
   final StreamChannelListTile defaultWidget;
 
   @override
   Widget build(BuildContext context) {
     final channel = listOfChannels[index];
-
-    final channelMembers = channel.state!.members;
-
+    final channelMembers = channel.state?.members ?? [];
     final lengthOfTheChannelMembers = channelMembers.length;
+    final currentUserId = context.read<AuthSessionCubit>().state.authUser.id;
 
-    final oneToOneChatMember =
-        channelMembers.where((member) => member.userId != context.read<AuthSessionCubit>().state.authUser.id).first.user!;
+    // Find the other user in a one-to-one chat
+    Member? otherMember;
+    if (lengthOfTheChannelMembers > 0) {
+      try {
+        otherMember = channelMembers.firstWhere((member) => member.userId != currentUserId);
+      } catch (e) {
+        // If we can't find another member, default to first member (might be the current user)
+        otherMember = channelMembers.isNotEmpty ? channelMembers.first : null;
+      }
+    }
 
-    final isTheSearchedChannelExist = context.read<ChatManagementCubit>().searchInsideExistingChannels(
-          listOfChannels: listOfChannels,
-          searchedText: searchedText,
-          index: index,
-          oneToOneChatMember: oneToOneChatMember,
-          lengthOfTheChannelMembers: lengthOfTheChannelMembers,
-        );
+    final oneToOneChatMember = otherMember?.user;
 
-    final lastMessage = channel.state!.lastMessage == null
-        ? AppLocalizations.of(context)?.beDeepIntoTheConversation
-        : channel.state!.lastMessage!.attachments.isNotEmpty
-            ? AppLocalizations.of(context)?.attachment
-            : channel.state!.lastMessage!.text;
+    // Check if this channel should be shown based on search criteria
+    final isTheSearchedChannelExist = oneToOneChatMember != null &&
+        context.read<ChatManagementCubit>().searchInsideExistingChannels(
+              listOfChannels: listOfChannels,
+              searchedText: searchedText,
+              index: index,
+              oneToOneChatMember: oneToOneChatMember,
+              lengthOfTheChannelMembers: lengthOfTheChannelMembers,
+            );
 
-    if (isTheSearchedChannelExist) {
-      return defaultWidget.copyWith(
-        contentPadding: const EdgeInsets.only(left: 15, right: 15, bottom: 8),
-        channel: channel,
-        leading: CachedNetworkImage(
-          imageUrl: lengthOfTheChannelMembers == 2 ? oneToOneChatMember.image! : channel.image!,
-          imageBuilder: (context, imageProvider) => CircleAvatar(
-            radius: 40,
-            backgroundImage: imageProvider,
+    // Don't render anything if this channel doesn't match search criteria
+    if (!isTheSearchedChannelExist) {
+      return const SizedBox.shrink();
+    }
+
+    // Extract message details
+    final lastMessage = channel.state?.lastMessage;
+    final messageText = _getMessageText(context, lastMessage);
+
+    // Determine name and image based on chat type
+    final isOneToOneChat = lengthOfTheChannelMembers == 2;
+    final String displayName = isOneToOneChat ? oneToOneChatMember.name : channel.name ?? 'Unnamed Group';
+    final String? imageUrl = isOneToOneChat ? oneToOneChatMember.image : channel.image;
+
+    // Get unread count and online status
+    final unreadCount = channel.state?.unreadCount ?? 0;
+    final isUserOnline = isOneToOneChat && (otherMember?.user?.online ?? false);
+
+    // Format timestamp for last message
+    final lastMessageAt = channel.lastMessageAt;
+    final String timeString = lastMessageAt != null ? _formatTimestamp(lastMessageAt) : '';
+
+    // Check if this is the sender of the last message
+    final isCurrentUserLastMessageSender = lastMessage?.user?.id == currentUserId;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      child: Material(
+        color: transparent,
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          splashColor: customIndigoColor.withValues(alpha: 0.1),
+          highlightColor: customIndigoColor.withValues(alpha: 0.05),
+          onTap: () => defaultWidget.onTap?.call(),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+            child: Row(
+              children: [
+                // Avatar with online status indicator
+                Stack(
+                  children: [
+                    _buildAvatar(imageUrl, isOneToOneChat),
+                    if (isUserOnline)
+                      Positioned(
+                        right: 2,
+                        bottom: 2,
+                        child: Container(
+                          width: 14,
+                          height: 14,
+                          decoration: BoxDecoration(
+                            color: successColor,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: white, width: 2),
+                            boxShadow: [
+                              BoxShadow(
+                                color: customGreyColor600.withValues(alpha: 0.3),
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(width: 16),
+
+                // Message content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Name and timestamp
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: CustomText(
+                              text: displayName,
+                              fontSize: 16,
+                              fontWeight: unreadCount > 0 ? FontWeight.w700 : FontWeight.w600,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              if (unreadCount > 0)
+                                Container(
+                                  margin: const EdgeInsets.only(right: 8),
+                                  width: 8,
+                                  height: 8,
+                                  decoration: const BoxDecoration(
+                                    color: customIndigoColor,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              if (timeString.isNotEmpty)
+                                CustomText(
+                                  text: timeString,
+                                  fontSize: 12,
+                                  color: unreadCount > 0 ? customIndigoColor : customGreyColor600,
+                                  fontWeight: unreadCount > 0 ? FontWeight.w600 : FontWeight.w400,
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+
+                      // Message preview and unread count
+                      Row(
+                        children: [
+                          // Message prefix for own messages
+                          if (isCurrentUserLastMessageSender && lastMessage != null)
+                            const Padding(
+                              padding: EdgeInsets.only(right: 4),
+                              child: CustomText(
+                                text: 'You: ',
+                                fontSize: 14,
+                                color: customGreyColor800,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+
+                          // Message content preview
+                          Expanded(
+                            child: CustomText(
+                              text: messageText,
+                              fontSize: 14,
+                              color: unreadCount > 0 ? customGreyColor800 : customGreyColor700,
+                              fontWeight: unreadCount > 0 ? FontWeight.w500 : FontWeight.w400,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+
+                          // Unread message indicator
+                          if (unreadCount > 0)
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              margin: const EdgeInsets.only(left: 8),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [customIndigoColor, customIndigoColorSecondary],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: customIndigoColor.withValues(alpha: 0.3),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: CustomText(
+                                text: unreadCount > 99 ? '99+' : '$unreadCount',
+                                fontSize: 12,
+                                color: white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-          placeholder: (context, url) => const CircleAvatar(
-            radius: 40,
-            child: CircularProgressIndicator(color: black),
+        ),
+      ),
+    );
+  }
+
+  /// Gets the message text to display as preview
+  String _getMessageText(BuildContext context, Message? lastMessage) {
+    if (lastMessage == null) {
+      return AppLocalizations.of(context)?.beDeepIntoTheConversation ?? 'Be deep into the conversation!..';
+    }
+
+    if (lastMessage.attachments.isNotEmpty) {
+      final attachmentType = lastMessage.attachments.first.type;
+
+      switch (attachmentType) {
+        case 'image':
+          return '📷 ${AppLocalizations.of(context)?.attachment ?? 'Photo'}';
+        case 'video':
+          return '🎬 ${AppLocalizations.of(context)?.attachment ?? 'Video'}';
+        case 'file':
+          return '📎 ${AppLocalizations.of(context)?.attachment ?? 'File'}';
+        case 'audio':
+          return '🎵 ${AppLocalizations.of(context)?.attachment ?? 'Audio'}';
+        default:
+          return '${AppLocalizations.of(context)?.attachment ?? 'Attachment'}';
+      }
+    }
+
+    return lastMessage.text ?? '';
+  }
+
+  /// Builds the avatar for the channel
+  Widget _buildAvatar(String? imageUrl, bool isOneToOneChat) {
+    final double avatarSize = 56;
+    final Widget placeholderWidget = const CustomProgressIndicator(
+      size: 20,
+      progressIndicatorColor: customIndigoColor,
+    );
+
+    final Widget defaultAvatar = Container(
+      width: avatarSize,
+      height: avatarSize,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            customIndigoColor.withValues(alpha: 0.2),
+            customIndigoColorSecondary.withValues(alpha: 0.3),
+          ],
+        ),
+      ),
+      child: Center(
+        child: Icon(
+          isOneToOneChat ? Icons.person : Icons.group,
+          color: customIndigoColor,
+          size: avatarSize / 2.2,
+        ),
+      ),
+    );
+
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return defaultAvatar;
+    }
+
+    return CachedNetworkImage(
+      imageUrl: imageUrl,
+      imageBuilder: (context, imageProvider) => Container(
+        width: avatarSize,
+        height: avatarSize,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          image: DecorationImage(
+            image: imageProvider,
+            fit: BoxFit.cover,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: customGreyColor400.withValues(alpha: 0.4),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+          border: Border.all(
+            color: white,
+            width: 2,
           ),
         ),
-        title: Text(
-          lengthOfTheChannelMembers == 2 ? oneToOneChatMember.name : channel.name!,
-          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17),
-          overflow: TextOverflow.ellipsis,
-        ),
-        subtitle: Text(
-          lastMessage!,
-          style: const TextStyle(fontSize: 15),
-          overflow: TextOverflow.ellipsis,
-        ),
-        visualDensity: const VisualDensity(vertical: 3),
-      );
+      ),
+      placeholder: (context, url) => SizedBox(
+        width: avatarSize,
+        height: avatarSize,
+        child: Center(child: placeholderWidget),
+      ),
+      errorWidget: (context, url, error) => defaultAvatar,
+    );
+  }
+
+  /// Formats a timestamp into a readable string
+  String _formatTimestamp(DateTime dateTime) {
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inDays > 365) {
+      // More than a year ago
+      return DateFormat('MMM d, yy').format(dateTime);
+    } else if (difference.inDays > 7) {
+      // More than a week ago - show date
+      return DateFormat('MMM d').format(dateTime);
+    } else if (difference.inDays > 0) {
+      // Less than a week but more than a day
+      return DateFormat('E').format(dateTime); // Day name
+    } else if (difference.inHours > 0) {
+      // Today but hours ago
+      return DateFormat('h:mm a').format(dateTime);
+    } else if (difference.inMinutes > 0) {
+      // Minutes ago
+      return '${difference.inMinutes}m ago';
     } else {
-      return Container();
+      // Just now
+      return 'now';
     }
   }
 }

@@ -20,7 +20,7 @@
 
     "searchSomeone": "Search someone...",
 
-    "beDeepIntoTheConversation": "Be deep into the conversation!..",
+    "beDeepIntoTheConversation": "Start a new conversation here",
 
     "attachment": "Attachment",
 
@@ -155,7 +155,7 @@
 
     "accountVerified": "Account verified",
 
-    "loadingChats": "Loading your chats",
+    "loadingChats": "Loading chats...",
 
     "takingToChats": "Taking you to your chats",
 
@@ -197,5 +197,21 @@
     
     "selectUserToChat": "Select a user to chat with",
     
-    "deselectUser": "Tap to deselect"
+    "deselectUser": "Tap to deselect",
+
+    "online": "Online",
+
+    "yourMessages": "Your messages",
+
+    "tapToChat": "Tap below to chat with friends",
+
+    "newLabel": "New",
+
+    "chatNotFound": "Chat not found",
+
+    "chatNotExist": "The chat you are looking for does not exist.",
+
+    "somethingWentWrong": "Something went wrong",
+
+    "retry": "Retry"
 }

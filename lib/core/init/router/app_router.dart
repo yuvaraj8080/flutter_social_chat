@@ -101,8 +101,15 @@ class AppRouter {
   GoRoute get _chatRoute => GoRoute(
         path: RouterEnum.chatView.routeName,
         builder: (context, state) {
-          final channel = state.extra as Channel?;
-          return ChatPage(channel: channel!);
+          if (state.extra is Map<String, dynamic>) {
+            final extraParameters = state.extra as Map<String, dynamic>;
+            final channel = extraParameters['channel'] as Channel?;
+            return ChatPage(channel: channel!);
+          } else {
+            // For backward compatibility
+            final channel = state.extra as Channel?;
+            return ChatPage(channel: channel!);
+          }
         },
       );
 
