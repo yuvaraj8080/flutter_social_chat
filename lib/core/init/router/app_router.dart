@@ -2,10 +2,10 @@ import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_social_chat/core/constants/enums/router_enum.dart';
+import 'package:flutter_social_chat/core/init/router/navigation_state_codec.dart';
+import 'package:flutter_social_chat/core/init/router/custom_page_builder_widget.dart';
 import 'package:flutter_social_chat/presentation/blocs/phone_number_sign_in/phone_number_sign_in_state.dart';
 import 'package:flutter_social_chat/presentation/views/bottom_tab/bottom_tab.dart';
-import 'package:flutter_social_chat/presentation/views/camera/camera_page.dart';
-import 'package:flutter_social_chat/presentation/views/capture_and_send_photo/capture_and_send_photo_page.dart';
 import 'package:flutter_social_chat/presentation/views/channels/channels_page.dart';
 import 'package:flutter_social_chat/presentation/views/chat/chat_page.dart';
 import 'package:flutter_social_chat/presentation/views/create_new_chat/create_new_chat_page.dart';
@@ -14,11 +14,9 @@ import 'package:flutter_social_chat/presentation/views/onboarding/onboarding_pag
 import 'package:flutter_social_chat/presentation/views/profile/profile_page.dart';
 import 'package:flutter_social_chat/presentation/views/sign_in/sign_in_view.dart';
 import 'package:flutter_social_chat/presentation/views/sms_verification/sms_verification_view.dart';
-import 'package:flutter_social_chat/core/init/router/navigation_state_codec.dart';
-import 'package:flutter_social_chat/core/init/router/custom_page_builder_widget.dart';
-import 'package:fpdart/fpdart.dart';
 import 'package:go_router/go_router.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:fpdart/fpdart.dart';
 
 class AppRouter {
   AppRouter();
@@ -41,7 +39,6 @@ class AppRouter {
       _initialRoute,
       _bottomTabShellRoute,
       _chatRoute,
-      _captureAndSendPhotoRoute,
       _signInRoute,
       _smsVerificationRoute,
       _createNewChatRoute,
@@ -80,14 +77,6 @@ class AppRouter {
             },
           ),
           GoRoute(
-            path: RouterEnum.cameraView.routeName,
-            pageBuilder: (context, state) => customPageBuilderWidget(
-              context,
-              state,
-              const CameraPage(),
-            ),
-          ),
-          GoRoute(
             path: RouterEnum.profileView.routeName,
             pageBuilder: (context, state) => customPageBuilderWidget(
               context,
@@ -110,26 +99,6 @@ class AppRouter {
             final channel = state.extra as Channel?;
             return ChatPage(channel: channel!);
           }
-        },
-      );
-
-  GoRoute get _captureAndSendPhotoRoute => GoRoute(
-        path: RouterEnum.captureAndSendPhotoView.routeName,
-        builder: (context, state) {
-          final extraParameters = state.extra as Map<String, dynamic>?;
-          if (extraParameters == null) {
-            throw Exception('Missing required parameters for CaptureAndSendPhotoPage');
-          }
-
-          final pathOfTheTakenPhoto =
-              extraParameters.entries.where((entries) => entries.key == 'pathOfTheTakenPhoto').single.value as String;
-          final sizeOfTheTakenPhoto =
-              extraParameters.entries.where((entries) => entries.key == 'sizeOfTheTakenPhoto').single.value as int;
-
-          return CaptureAndSendPhotoPage(
-            pathOfTheTakenPhoto: pathOfTheTakenPhoto,
-            sizeOfTheTakenPhoto: sizeOfTheTakenPhoto,
-          );
         },
       );
 

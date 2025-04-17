@@ -12,11 +12,6 @@
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
 
-    <!-- Permissions options for the `camera` group -->
-    <uses-permission android:name="android.permission.CAMERA"/>
-
-    <!-- Permissions options for the `microphone` or `speech` group -->
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     
     <application

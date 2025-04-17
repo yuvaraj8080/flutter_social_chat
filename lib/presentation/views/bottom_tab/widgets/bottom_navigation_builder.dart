@@ -33,17 +33,31 @@ Widget bottomNavigationBuilder(BuildContext context) {
             ),
             _buildNavItem(
               context: context,
+              icon: CupertinoIcons.heart,
+              activeIcon: CupertinoIcons.heart_fill,
+              isSelected: false,
+              onTap: () {},
+            ),
+            _buildNavItem(
+              context: context,
               icon: CupertinoIcons.camera,
               activeIcon: CupertinoIcons.camera_fill,
-              isSelected: currentIndex == 1,
-              onTap: () => _onItemTapped(1, context),
+              isSelected: false,
+              onTap: () {},
+            ),
+            _buildNavItem(
+              context: context,
+              icon: CupertinoIcons.bookmark,
+              activeIcon: CupertinoIcons.bookmark_fill,
+              isSelected: false,
+              onTap: () {},
             ),
             _buildNavItem(
               context: context,
               icon: CupertinoIcons.person,
               activeIcon: CupertinoIcons.person_fill,
-              isSelected: currentIndex == 2,
-              onTap: () => _onItemTapped(2, context),
+              isSelected: currentIndex == 1,
+              onTap: () => _onItemTapped(1, context),
             ),
           ],
         ),
@@ -88,11 +102,8 @@ int _calculateSelectedIndex(BuildContext context) {
   if (location == RouterEnum.channelsView.routeName) {
     return 0;
   }
-  if (location == RouterEnum.cameraView.routeName) {
-    return 1;
-  }
   if (location == RouterEnum.profileView.routeName) {
-    return 2;
+    return 1;
   }
   return 0;
 }
@@ -103,9 +114,6 @@ void _onItemTapped(int index, BuildContext context) {
       GoRouter.of(context).go(RouterEnum.channelsView.routeName);
       break;
     case 1:
-      GoRouter.of(context).go(RouterEnum.cameraView.routeName);
-      break;
-    case 2:
       GoRouter.of(context).go(RouterEnum.profileView.routeName);
       break;
   }
