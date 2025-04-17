@@ -16,64 +16,40 @@ import 'package:flutter_social_chat/presentation/design_system/widgets/popscope_
 import 'package:flutter_social_chat/presentation/views/sms_verification/widgets/sms_verification_view_body.dart';
 import 'package:go_router/go_router.dart';
 
-class SmsVerificationView extends StatelessWidget {
+/// A view for SMS verification during the sign-in process
+class SmsVerificationView extends StatefulWidget {
   const SmsVerificationView({super.key, required this.state});
 
   final PhoneNumberSignInState state;
 
   @override
+  State<SmsVerificationView> createState() => _SmsVerificationViewState();
+}
+
+class _SmsVerificationViewState extends State<SmsVerificationView> {
+  bool _hasNavigatedAway = false;
+
+  @override
   Widget build(BuildContext context) {
-    final String phoneNumber = state.phoneNumber;
+    final String phoneNumber = widget.state.phoneNumber;
     final String appBarTitle = AppLocalizations.of(context)?.verification ?? '';
 
     return MultiBlocListener(
       listeners: [
         // Listen for authentication success
         BlocListener<AuthSessionCubit, AuthSessionState>(
-          listenWhen: (previous, current) => previous.isLoggedIn != current.isLoggedIn,
-          listener: (context, state) {
-            if (state.isLoggedIn) {
-              // Ensure loading indicator is hidden before navigation
-              CustomLoadingIndicator.of(context).hide();
-              context.go(
-                state.authUser.isOnboardingCompleted
-                    ? RouterEnum.channelsView.routeName
-                    : RouterEnum.onboardingView.routeName,
-              );
-            }
-          },
+          listenWhen: (previous, current) =>
+              previous.isLoggedIn != current.isLoggedIn ||
+              previous.authUser.isOnboardingCompleted != current.authUser.isOnboardingCompleted,
+          listener: _handleAuthStateChanges,
         ),
 
-        // Listen for all PhoneNumberSignInCubit state changes
+        // Listen for phone number sign-in state changes
         BlocListener<PhoneNumberSignInCubit, PhoneNumberSignInState>(
           listenWhen: (previous, current) =>
               previous.isInProgress != current.isInProgress ||
               (previous.failureMessageOption != current.failureMessageOption && current.failureMessageOption.isSome()),
-          listener: (context, state) {
-            if (state.isInProgress) {
-              CustomLoadingIndicator.of(context).show();
-            } else {
-              CustomLoadingIndicator.of(context).hide();
-            }
-
-            // Handle errors if present
-            state.failureMessageOption.fold(
-              () {},
-              (authFailure) {
-                // Ensure loading indicator is hidden when there's an error
-                CustomLoadingIndicator.of(context).hide();
-                _showErrorToast(context, authFailure);
-
-                if (authFailure == AuthFailureEnum.serverError || authFailure == AuthFailureEnum.sessionExpired) {
-                  // For critical errors, go back to the sign-in screen
-                  _safelyNavigateBack(context);
-                } else {
-                  // For validation errors like invalid code, just clear the error state
-                  context.read<PhoneNumberSignInCubit>().resetErrorOnly();
-                }
-              },
-            );
-          },
+          listener: _handleSignInStateChanges,
         ),
       ],
       child: PopScopeScaffold(
@@ -98,11 +74,98 @@ class SmsVerificationView extends StatelessWidget {
     );
   }
 
+  /// Handles authentication state changes
+  void _handleAuthStateChanges(BuildContext context, AuthSessionState state) {
+    if (!state.isLoggedIn || _hasNavigatedAway) return;
+
+    // Prevent multiple navigations
+    setState(() => _hasNavigatedAway = true);
+
+    // Hide loading indicator before navigation
+    _safelyHideLoadingIndicator(context);
+
+    // Determine destination route based on onboarding status
+    final route =
+        state.authUser.isOnboardingCompleted ? RouterEnum.channelsView.routeName : RouterEnum.onboardingView.routeName;
+
+    // Navigate to appropriate route
+    _safelyNavigateTo(context, route);
+  }
+
+  /// Safely navigates to the specified route
+  void _safelyNavigateTo(BuildContext context, String route) {
+    if (!mounted) return;
+
+    Future.microtask(() {
+      if (mounted) {
+        try {
+          context.go(route);
+        } catch (e) {
+          // If navigation fails, try again in the next frame
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              context.go(route);
+            }
+          });
+        }
+      }
+    });
+  }
+
+  /// Handles sign-in state changes
+  void _handleSignInStateChanges(BuildContext context, PhoneNumberSignInState state) {
+    if (state.isInProgress) {
+      _safelyShowLoadingIndicator(context);
+    } else {
+      _safelyHideLoadingIndicator(context);
+
+      // Handle errors if present
+      state.failureMessageOption.fold(
+        () {}, // No error, do nothing
+        (authFailure) {
+          _showErrorToast(context, authFailure);
+
+          if (authFailure == AuthFailureEnum.serverError || authFailure == AuthFailureEnum.sessionExpired) {
+            // For critical errors, go back to the sign-in screen
+            _safelyNavigateBack(context);
+          } else {
+            // For validation errors like invalid code, just clear the error state
+            context.read<PhoneNumberSignInCubit>().resetErrorOnly();
+          }
+        },
+      );
+    }
+  }
+
+  /// Safely shows the loading indicator
+  void _safelyShowLoadingIndicator(BuildContext context) {
+    if (!mounted) return;
+
+    try {
+      CustomLoadingIndicator.of(context).show();
+    } catch (e) {
+      // Ignore errors showing loading indicator
+    }
+  }
+
+  /// Safely hides the loading indicator
+  void _safelyHideLoadingIndicator(BuildContext context) {
+    if (!mounted) return;
+
+    try {
+      CustomLoadingIndicator.of(context).hide();
+    } catch (e) {
+      // Ignore errors hiding loading indicator
+    }
+  }
+
+  /// Shows an error toast with the appropriate message
   void _showErrorToast(BuildContext context, AuthFailureEnum authFailure) {
     final errorMessage = _getErrorMessageForFailure(context, authFailure);
     BotToast.showText(text: errorMessage);
   }
 
+  /// Gets the appropriate error message for an auth failure
   String _getErrorMessageForFailure(BuildContext context, AuthFailureEnum authFailure) {
     final localizations = AppLocalizations.of(context);
 
@@ -116,30 +179,34 @@ class SmsVerificationView extends StatelessWidget {
     };
   }
 
+  /// Handles back navigation
   void _handleBackNavigation(BuildContext context) {
-    // Ensure loading indicator is hidden first
-    CustomLoadingIndicator.of(context).hide();
+    _safelyHideLoadingIndicator(context);
 
     // Reset state in cubit to prevent verification ID from triggering navigation
     context.read<PhoneNumberSignInCubit>().reset();
 
-    // Safely navigate back with a slight delay to avoid navigation lock
+    // Navigate back
     _safelyNavigateBack(context);
   }
 
+  /// Safely navigates back to the previous screen
   void _safelyNavigateBack(BuildContext context) {
+    if (_hasNavigatedAway) return;
+
+    setState(() => _hasNavigatedAway = true);
+
     // Use a microtask to defer the navigation to the next frame
-    // This prevents navigator lock issues during transitions
     Future.microtask(() {
+      if (!mounted) return;
+
       try {
         context.pop();
       } catch (e) {
-        debugPrint('Error in back navigation: $e');
         // If pop fails, try to go to sign-in view directly
-        // Also defer this to avoid nested navigation
-        Future.microtask(() {
+        if (mounted) {
           context.go(RouterEnum.signInView.routeName);
-        });
+        }
       }
     });
   }

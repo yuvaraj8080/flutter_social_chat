@@ -258,12 +258,25 @@ class AuthRepository implements IAuthRepository {
       // Create or update the user document
       final user = _firebaseAuth.currentUser;
       if (user != null) {
-        await _updateUserDataInFirestore({
-          'userName': user.displayName ?? 'User',
-          'phoneNumber': user.phoneNumber ?? '',
-          'isOnboardingCompleted': false,
-          'lastLogin': FieldValue.serverTimestamp(),
-        });
+        // First check if the user document already exists
+        final userDoc = _firestore.collection('users').doc(user.uid);
+        final docSnapshot = await userDoc.get();
+        
+        if (docSnapshot.exists) {
+          // User exists, only update lastLogin
+          await userDoc.update({
+            'lastLogin': FieldValue.serverTimestamp(),
+          });
+        } else {
+          // New user, create a document with isOnboardingCompleted = false
+          await userDoc.set({
+            'userName': user.displayName ?? 'User',
+            'phoneNumber': user.phoneNumber ?? '',
+            'isOnboardingCompleted': false,
+            'createdAt': FieldValue.serverTimestamp(),
+            'lastLogin': FieldValue.serverTimestamp(),
+          });
+        }
       }
 
       return right(unit);

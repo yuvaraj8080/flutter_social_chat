@@ -2,48 +2,134 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_social_chat/core/constants/enums/router_enum.dart';
+import 'package:flutter_social_chat/core/di/dependency_injector.dart';
 import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_cubit.dart';
+import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_state.dart';
+import 'package:flutter_social_chat/presentation/blocs/chat_management/chat_management_cubit.dart';
+import 'package:flutter_social_chat/presentation/blocs/chat_session/chat_session_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/phone_number_sign_in/phone_number_sign_in_cubit.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
+import 'package:flutter_social_chat/presentation/design_system/widgets/custom_loading_indicator.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-class ProfileSignOutButton extends StatelessWidget {
+/// A button that handles the sign-out process including confirmation dialog,
+/// disconnection from Stream Chat, and navigation to the sign-in view.
+class ProfileSignOutButton extends StatefulWidget {
   const ProfileSignOutButton({super.key});
+
+  @override
+  State<ProfileSignOutButton> createState() => _ProfileSignOutButtonState();
+}
+
+class _ProfileSignOutButtonState extends State<ProfileSignOutButton> {
+  /// Flag to prevent multiple simultaneous sign-out attempts
+  bool _isSigningOut = false;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: () {
-          _showSignOutConfirmationDialog(context);
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: customIndigoColor,
-          foregroundColor: white,
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+    return BlocListener<AuthSessionCubit, AuthSessionState>(
+      listenWhen: (previous, current) =>
+          !_isSigningOut || // When not signing out already
+          (previous.isInProgress != current.isInProgress) || // When progress state changes
+          (previous.isLoggedIn && !current.isLoggedIn), // When actually logged out
+      listener: _handleAuthStateChanges,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: _isSigningOut ? null : () => _showSignOutConfirmationDialog(context),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: customIndigoColor,
+            foregroundColor: white,
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            elevation: 2,
+            shadowColor: black.withValues(alpha: 0.2),
           ),
-          elevation: 2,
-          shadowColor: black.withValues(alpha: 0.2),
-        ),
-        child: Row(
-          spacing: 8,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.logout_rounded, color: white, size: 18),
-            CustomText(text: l10n?.signOut ?? '', fontSize: 15, fontWeight: FontWeight.w600, color: white),
-          ],
+          child: _buildButtonContent(l10n),
         ),
       ),
     );
   }
 
+  /// Builds the button content with icon and text
+  Widget _buildButtonContent(AppLocalizations? l10n) {
+    return Row(
+      spacing: 8,
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Icon(Icons.logout_rounded, color: white, size: 18),
+        CustomText(
+          text: l10n?.signOut ?? '',
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+          color: white,
+        ),
+      ],
+    );
+  }
+
+  /// Handles auth state changes, managing loading indicator and navigation
+  void _handleAuthStateChanges(BuildContext context, AuthSessionState state) {
+    if (state.isInProgress) {
+      _safelyShowLoadingIndicator(context);
+    } else {
+      _safelyHideLoadingIndicator(context);
+
+      // Handle successful sign out - navigate only if we're actually signed out
+      if (!state.isLoggedIn && !state.isInProgress && mounted && _isSigningOut) {
+        _safelyNavigateToSignIn(context);
+      }
+    }
+  }
+
+  /// Safely shows the loading indicator
+  void _safelyShowLoadingIndicator(BuildContext context) {
+    if (!mounted) return;
+
+    try {
+      CustomLoadingIndicator.of(context).show();
+    } catch (e) {
+      // Ignore loading indicator errors
+    }
+  }
+
+  /// Safely hides the loading indicator
+  void _safelyHideLoadingIndicator(BuildContext context) {
+    if (!mounted) return;
+
+    try {
+      CustomLoadingIndicator.of(context).hide();
+    } catch (e) {
+      // Ignore loading indicator errors
+    }
+  }
+
+  /// Safely navigates to the sign-in view
+  void _safelyNavigateToSignIn(BuildContext context) {
+    Future.microtask(() {
+      if (!mounted) return;
+
+      try {
+        context.go(RouterEnum.signInView.routeName);
+        setState(() => _isSigningOut = false);
+      } catch (e) {
+        // If first navigation attempt fails, try again on next frame
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            GoRouter.of(context).go(RouterEnum.signInView.routeName);
+          }
+        });
+      }
+    });
+  }
+
+  /// Shows a confirmation dialog before signing out
   void _showSignOutConfirmationDialog(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
@@ -60,7 +146,10 @@ class ProfileSignOutButton extends StatelessWidget {
             fontWeight: FontWeight.bold,
             color: customGreyColor900,
           ),
-          content: CustomText(text: l10n?.signOutConfirmation ?? '', color: customGreyColor800),
+          content: CustomText(
+            text: l10n?.signOutConfirmation ?? '',
+            color: customGreyColor800,
+          ),
           actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           actionsAlignment: MainAxisAlignment.center,
           actions: [
@@ -68,38 +157,13 @@ class ProfileSignOutButton extends StatelessWidget {
               spacing: 12,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                // Cancel button
                 Expanded(
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.of(dialogContext).pop();
-                    },
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: CustomText(text: l10n?.cancel ?? '', color: customGreyColor700),
-                  ),
+                  child: _buildCancelButton(dialogContext, l10n),
                 ),
+                // Confirm button
                 Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(dialogContext).pop();
-                      context.read<AuthSessionCubit>().signOut();
-                      context.read<PhoneNumberSignInCubit>().reset();
-                      context.go(RouterEnum.signInView.routeName);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: customIndigoColor,
-                      foregroundColor: white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: CustomText(text: l10n?.signOut ?? '', color: white),
-                  ),
+                  child: _buildConfirmButton(dialogContext, context, l10n),
                 ),
               ],
             ),
@@ -107,5 +171,148 @@ class ProfileSignOutButton extends StatelessWidget {
         );
       },
     );
+  }
+
+  /// Builds the cancel button for the confirmation dialog
+  Widget _buildCancelButton(BuildContext dialogContext, AppLocalizations? l10n) {
+    return TextButton(
+      onPressed: () => Navigator.of(dialogContext).pop(),
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      child: CustomText(
+        text: l10n?.cancel ?? '',
+        color: customGreyColor700,
+      ),
+    );
+  }
+
+  /// Builds the confirm button for the confirmation dialog
+  Widget _buildConfirmButton(BuildContext dialogContext, BuildContext parentContext, AppLocalizations? l10n) {
+    return ElevatedButton(
+      onPressed: () {
+        Navigator.of(dialogContext).pop();
+        _performSignOut(parentContext);
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: customIndigoColor,
+        foregroundColor: white,
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+      child: CustomText(text: l10n?.signOut ?? '', color: white),
+    );
+  }
+
+  /// Carefully handles Stream Chat disconnection to prevent race conditions
+  Future<void> _disconnectStreamChat() async {
+    // Store reference to ChatManagementCubit to avoid context use during async operation
+    ChatManagementCubit? chatManagementCubit;
+    if (mounted) {
+      try {
+        chatManagementCubit = context.read<ChatManagementCubit>();
+      } catch (e) {
+        // Ignore error getting cubit reference
+      }
+    }
+
+    try {
+      final client = getIt<StreamChatClient>();
+
+      // Only proceed if there's a current user connected
+      if (client.state.currentUser != null) {
+        // Reset Chat Management cubit to clean up subscriptions
+        if (chatManagementCubit != null) {
+          await chatManagementCubit.reset();
+        }
+
+        // Disconnect in stages to prevent race conditions
+        await _disconnectChannels(client);
+        await _disconnectUser(client);
+      }
+    } catch (e) {
+      // Ignore Stream Chat disconnect errors - proceed with sign-out anyway
+    }
+  }
+
+  /// Disconnects all active channels
+  Future<void> _disconnectChannels(StreamChatClient client) async {
+    // Close all active channels
+    for (final entry in client.state.channels.entries) {
+      try {
+        entry.value.dispose();
+      } catch (e) {
+        // Ignore individual channel disposal errors
+      }
+    }
+
+    // Allow time for channel disposal to complete
+    await Future.delayed(const Duration(milliseconds: 100));
+  }
+
+  /// Disconnects the user from Stream Chat
+  Future<void> _disconnectUser(StreamChatClient client) async {
+    try {
+      // Disconnect with persistence flush
+      await client.disconnectUser(flushChatPersistence: true);
+
+      // Allow time for disconnection to complete
+      await Future.delayed(const Duration(milliseconds: 100));
+    } catch (e) {
+      // Ignore disconnection errors
+    }
+  }
+
+  /// Performs the sign-out process
+  Future<void> _performSignOut(BuildContext context) async {
+    // Prevent multiple sign-out attempts
+    if (_isSigningOut) return;
+    setState(() => _isSigningOut = true);
+
+    // Get references to required cubits before async operations
+    final cubits = _getCubitReferences(context);
+
+    // Show loading indicator
+    CustomLoadingIndicator.reset();
+    _safelyShowLoadingIndicator(context);
+
+    // Perform sign-out steps in sequence
+    await _disconnectStreamChat();
+    await _resetCubits(cubits);
+    await _clearStorage();
+
+    // Finally trigger auth sign-out
+    cubits.authCubit.signOut();
+  }
+
+  /// Gets references to all required cubits
+  ({PhoneNumberSignInCubit phoneCubit, ChatSessionCubit chatCubit, AuthSessionCubit authCubit}) _getCubitReferences(
+    BuildContext context,
+  ) {
+    return (
+      phoneCubit: context.read<PhoneNumberSignInCubit>(),
+      chatCubit: context.read<ChatSessionCubit>(),
+      authCubit: context.read<AuthSessionCubit>()
+    );
+  }
+
+  /// Resets all cubits to clear state
+  Future<void> _resetCubits(
+    ({PhoneNumberSignInCubit phoneCubit, ChatSessionCubit chatCubit, AuthSessionCubit authCubit}) cubits,
+  ) async {
+    cubits.phoneCubit.reset();
+    cubits.chatCubit.reset();
+  }
+
+  /// Clears the hydrated storage
+  Future<void> _clearStorage() async {
+    try {
+      await HydratedBloc.storage.clear();
+    } catch (e) {
+      // Ignore storage clearing errors
+    }
   }
 }

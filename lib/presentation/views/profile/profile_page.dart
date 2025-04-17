@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_social_chat/core/constants/enums/router_enum.dart';
+import 'package:flutter_social_chat/core/di/dependency_injector.dart';
 import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_state.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat_session/chat_session_cubit.dart';
@@ -16,75 +17,145 @@ import 'package:flutter_social_chat/presentation/views/profile/widgets/profile_s
 import 'package:flutter_social_chat/presentation/views/profile/widgets/profile_header.dart';
 import 'package:flutter_social_chat/presentation/views/profile/widgets/profile_details.dart';
 import 'package:go_router/go_router.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// Displays the user's profile information and account settings.
+///
+/// This page shows:
+/// - User profile information (name, photo, ID)
+/// - Account activity and status
+/// - Account creation date
+/// - Contact information
+/// - Sign-out functionality
+///
+/// It handles both authentication state and Stream Chat connection state
+/// to ensure the display of accurate and up-to-date user information.
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // First listen for auth changes to handle navigation
     return BlocListener<AuthSessionCubit, AuthSessionState>(
       listenWhen: (previous, current) => previous.isLoggedIn != current.isLoggedIn,
-      listener: (context, state) {
-        if (!state.isLoggedIn) {
-          context.go(RouterEnum.signInView.routeName);
-        }
-      },
-      // Build UI based on auth and chat states
-      child: BlocBuilder<AuthSessionCubit, AuthSessionState>(
-        builder: (context, authState) {
-          return BlocBuilder<ChatSessionCubit, ChatSessionState>(
-            builder: (context, chatState) {
-              final l10n = AppLocalizations.of(context);
+      listener: _handleAuthStateChanges,
+      child: _buildProfileContent(context),
+    );
+  }
 
-              // If still loading chat user data, show loading indicator
-              if (!chatState.isUserCheckedFromChatService) {
-                return const CustomProgressIndicator(progressIndicatorColor: black);
-              }
+  /// Handles authentication state changes for navigation
+  void _handleAuthStateChanges(BuildContext context, AuthSessionState state) {
+    if (!state.isLoggedIn) {
+      _safelyNavigateToSignIn(context);
+    }
+  }
 
-              // Get user information from auth and chat states
-              final userName = authState.authUser.userName ?? '';
-              final userPhotoUrl = authState.authUser.photoUrl ?? '';
-              final userId = authState.authUser.id.replaceRange(8, 25, '*****');
-              final userPhoneNumber = authState.authUser.phoneNumber;
-              final createdAt = chatState.chatUser.createdAt;
-              final isUserBannedStatus = chatState.chatUser.isUserBanned;
+  /// Safely navigates to the sign-in view
+  void _safelyNavigateToSignIn(BuildContext context) {
+    try {
+      context.go(RouterEnum.signInView.routeName);
+    } catch (e) {
+      // Ignore navigation errors
+    }
+  }
 
-              return Container(
-                color: backgroundGrey,
-                child: Column(
-                  children: [
-                    _buildProfileHeader(
-                      context: context,
-                      userName: userName,
-                      userPhotoUrl: userPhotoUrl,
-                      userId: userId,
-                      userPhoneNumber: userPhoneNumber,
-                    ),
-                    _buildActivityStatusCard(
-                      context: context,
-                      l10n: l10n,
-                      isUserBannedStatus: isUserBannedStatus,
-                    ),
-                    _buildProfileDetails(
-                      context: context,
-                      createdAt: createdAt,
-                      isUserBannedStatus: isUserBannedStatus,
-                    ),
-                    _buildContactInformationCard(
-                      context: context,
-                      l10n: l10n,
-                      userPhoneNumber: userPhoneNumber,
-                      userId: userId,
-                    ),
-                    _buildSignOutButton(context: context),
-                  ],
-                ),
+  /// Builds the main profile content with state awareness
+  Widget _buildProfileContent(BuildContext context) {
+    return BlocBuilder<AuthSessionCubit, AuthSessionState>(
+      builder: (context, authState) {
+        return BlocBuilder<ChatSessionCubit, ChatSessionState>(
+          builder: (context, chatState) {
+            final l10n = AppLocalizations.of(context);
+
+            // Check if Stream Chat is ready
+            if (!_isStreamChatReady(context, chatState)) {
+              return const Center(
+                child: CustomProgressIndicator(progressIndicatorColor: black),
               );
-            },
-          );
-        },
-      ),
+            }
+
+            // Extract user information
+            final userInfo = _extractUserInfo(authState, chatState);
+
+            // Build profile UI
+            return Container(
+              color: backgroundGrey,
+              child: Column(
+                children: [
+                  _buildProfileHeader(
+                    context: context,
+                    userName: userInfo.userName,
+                    userPhotoUrl: userInfo.photoUrl,
+                    userId: userInfo.userId,
+                    userPhoneNumber: userInfo.phoneNumber,
+                  ),
+                  _buildActivityStatusCard(
+                    context: context,
+                    l10n: l10n,
+                    isUserBannedStatus: userInfo.isUserBanned,
+                  ),
+                  _buildProfileDetails(
+                    context: context,
+                    createdAt: userInfo.createdAt,
+                    isUserBannedStatus: userInfo.isUserBanned,
+                  ),
+                  _buildContactInformationCard(
+                    context: context,
+                    l10n: l10n,
+                    userPhoneNumber: userInfo.phoneNumber,
+                    userId: userInfo.userId,
+                  ),
+                  _buildSignOutButton(context: context),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  /// Checks if Stream Chat is ready for use
+  /// Returns true if chat is ready or successfully connected
+  bool _isStreamChatReady(BuildContext context, ChatSessionState chatState) {
+    // If chat service is already initialized, we're good to go
+    if (chatState.isUserCheckedFromChatService) {
+      return true;
+    }
+
+    // If not initialized, check if Stream Chat is actually connected
+    try {
+      final client = getIt<StreamChatClient>();
+      final isStreamChatConnected = client.state.currentUser != null;
+      
+      if (isStreamChatConnected) {
+        // Force a sync if client is connected but state doesn't reflect it
+        context.read<ChatSessionCubit>().syncWithClientState();
+        return true;
+      }
+    } catch (e) {
+      // If error checking connection, return false
+    }
+
+    // Chat is not ready
+    return false;
+  }
+
+  /// Extracts and formats user information from state objects
+  ({
+    String userName,
+    String photoUrl,
+    String userId,
+    String phoneNumber,
+    String createdAt,
+    bool isUserBanned
+  }) _extractUserInfo(AuthSessionState authState, ChatSessionState chatState) {
+    return (
+      userName: authState.authUser.userName ?? '',
+      photoUrl: authState.authUser.photoUrl ?? '',
+      userId: authState.authUser.id.replaceRange(8, 25, '*****'),
+      phoneNumber: authState.authUser.phoneNumber,
+      createdAt: chatState.chatUser.createdAt,
+      isUserBanned: chatState.chatUser.isUserBanned
     );
   }
 

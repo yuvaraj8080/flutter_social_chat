@@ -5,31 +5,61 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat_management/chat_management_state.dart';
 import 'package:flutter_social_chat/core/interfaces/i_chat_repository.dart';
+import 'package:flutter_social_chat/core/constants/enums/chat_failure_enum.dart';
 import 'package:flutter_social_chat/data/extensions/auth/database_extensions.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// Manages chat-related functionality including channel creation, user selection,
+/// message sending, and channel subscriptions.
 class ChatManagementCubit extends Cubit<ChatManagementState> {
+  /// Default image URL for new group chats
   final String randomGroupProfilePhoto = 'https://picsum.photos/200/300';
 
   final IChatRepository _chatService;
   final FirebaseFirestore _firebaseFirestore;
   final AuthSessionCubit _authCubit;
 
-  late StreamSubscription<List<Channel>>? _currentUserChannelsSubscription;
+  /// Subscription to channel changes for the current user
+  StreamSubscription<List<Channel>>? _currentUserChannelsSubscription;
 
   ChatManagementCubit(this._chatService, this._firebaseFirestore, this._authCubit)
       : super(ChatManagementState.empty()) {
-    _currentUserChannelsSubscription =
-        _chatService.channelsThatTheUserIsIncluded.listen(_listenCurrentUserChannelsChangeStream);
+    _subscribeToChannels();
   }
 
   @override
   Future<void> close() async {
-    await _currentUserChannelsSubscription?.cancel();
+    await _cancelSubscriptions();
     super.close();
   }
 
-  void reset() {
+  //
+  // Channel subscription methods
+  //
+
+  /// Subscribes to channel changes from the chat service
+  void _subscribeToChannels() {
+    _currentUserChannelsSubscription = 
+        _chatService.channelsThatTheUserIsIncluded.listen(_listenCurrentUserChannelsChangeStream);
+  }
+
+  /// Cancels all active subscriptions
+  /// This is used when signing out or when cleaning up resources
+  Future<void> _cancelSubscriptions() async {
+    await _currentUserChannelsSubscription?.cancel();
+    _currentUserChannelsSubscription = null;
+  }
+
+  /// Updates state when channel list changes
+  Future<void> _listenCurrentUserChannelsChangeStream(List<Channel> currentUserChannels) async {
+    emit(state.copyWith(currentUserChannels: currentUserChannels));
+  }
+
+  /// Resets the cubit state and cancels subscriptions
+  /// Used during sign-out or when needing to clear all state
+  Future<void> reset() async {
+    await _cancelSubscriptions();
+    
     emit(
       state.copyWith(
         isInProgress: false,
@@ -38,92 +68,80 @@ class ChatManagementCubit extends Cubit<ChatManagementState> {
         listOfSelectedUsers: {},
         listOfSelectedUserIDs: {},
         channelName: '',
+        currentUserChannels: [],
       ),
     );
   }
 
+  //
+  // Channel management methods
+  //
+
+  /// Updates the channel name in state
   void channelNameChanged({required String channelName}) {
     emit(state.copyWith(channelName: channelName));
   }
 
+  /// Updates channel name validation status
   void validateChannelName({required bool isChannelNameValid}) {
     emit(
       state.copyWith(isChannelNameValid: isChannelNameValid),
     );
   }
 
-  Future<void> _listenCurrentUserChannelsChangeStream(List<Channel> currentUserChannels) async {
-    emit(state.copyWith(currentUserChannels: currentUserChannels));
-  }
-
-  Future<void> sendCapturedPhotoToSelectedUsers({
-    required String pathOfTheTakenPhoto,
-    required int sizeOfTheTakenPhoto,
-  }) async {
-    if (state.isInProgress) {
-      return;
-    }
-
-    emit(state.copyWith(isInProgress: true));
-
-    final channelId = state.currentUserChannels[state.userIndex].id;
-
-    // To show the progress indicator, and well UX.
-    await Future.delayed(const Duration(seconds: 1));
-
-    final result = await _chatService.sendPhotoAsMessageToTheSelectedUser(
-      channelId: channelId!,
-      pathOfTheTakenPhoto: pathOfTheTakenPhoto,
-      sizeOfTheTakenPhoto: sizeOfTheTakenPhoto,
-    );
-
-    result.fold(
-      (failure) => emit(state.copyWith(isInProgress: false, isCapturedPhotoSent: false, error: failure)),
-      (_) => emit(state.copyWith(isInProgress: false, isCapturedPhotoSent: true)),
-    );
-  }
-
+  /// Creates a new chat channel based on selected users
+  /// 
+  /// If [isCreateNewChatPageForCreatingGroup] is true, creates a group chat with multiple users
+  /// Otherwise creates a one-to-one chat with a single selected user
   Future<void> createNewChannel({
     required bool isCreateNewChatPageForCreatingGroup,
   }) async {
+    // Prevent multiple simultaneous operations
     if (state.isInProgress) {
       return;
     }
 
+    // Initialize channel details
     String channelImageUrl = '';
     String channelName = state.channelName;
     final listOfMemberIDs = {...state.listOfSelectedUserIDs};
 
+    // Always include current user in the channel
     final currentUserId = _authCubit.state.authUser.id;
     listOfMemberIDs.add(currentUserId);
 
+    // Handle different channel creation scenarios
     if (isCreateNewChatPageForCreatingGroup) {
-      // If page opened for creating group case:
-      // We can directly enter the group name and upload the image.
+      // Group chat case: use provided name and default group image
       channelName = state.channelName;
       channelImageUrl = randomGroupProfilePhoto;
-    } else if (!isCreateNewChatPageForCreatingGroup) {
-      // If page opened for creating [1-1 chat] case:
-      // Channel name will be selected user's name, and the image of the channel
-      // will be image of the selected user.
-
+    } else {
+      // One-to-one chat case: use selected user's name and profile image
       if (listOfMemberIDs.length == 2) {
-        final String selectedUserId = listOfMemberIDs.where((memberIDs) => memberIDs != currentUserId).toList().first;
+        // Find the other user's ID (not current user)
+        final String selectedUserId = listOfMemberIDs.where((memberID) => memberID != currentUserId).toList().first;
 
-        final selectedUserFromFirestore = await _firebaseFirestore.userDocument(userId: selectedUserId);
+        // Fetch user data from Firestore
+        try {
+          final selectedUserFromFirestore = await _firebaseFirestore.userDocument(userId: selectedUserId);
+          final getSelectedUserDataFromFirestore = await selectedUserFromFirestore.get();
+          final selectedUserData = getSelectedUserDataFromFirestore.data() as Map<String, dynamic>?;
 
-        final getSelectedUserDataFromFirestore = await selectedUserFromFirestore.get();
-
-        final selectedUserData = getSelectedUserDataFromFirestore.data() as Map<String, dynamic>?;
-
-        channelName = selectedUserData?['displayName'];
-
-        channelImageUrl = selectedUserData?['photoUrl'];
+          // Use selected user's display name and photo for the channel
+          channelName = selectedUserData?['displayName'] ?? '';
+          channelImageUrl = selectedUserData?['photoUrl'] ?? '';
+        } catch (e) {
+          // If user data fetch fails, use defaults
+          channelName = 'Chat';
+          channelImageUrl = randomGroupProfilePhoto;
+        }
       }
     }
 
+    // For one-to-one chats, we don't need to validate the channel name
     final isChannelNameValid = !isCreateNewChatPageForCreatingGroup ? true : state.isChannelNameValid;
 
+    // Only create channel if we have at least 2 members and a valid name
     if (listOfMemberIDs.length >= 2 && isChannelNameValid) {
       emit(state.copyWith(isInProgress: true, isChannelCreated: false));
 
@@ -140,6 +158,15 @@ class ChatManagementCubit extends Cubit<ChatManagementState> {
     }
   }
 
+  //
+  // User selection methods
+  //
+
+  /// Selects a user when creating a chat
+  /// 
+  /// Behavior differs based on [isCreateNewChatPageForCreatingGroup]:
+  /// - For one-to-one chats, only one user can be selected
+  /// - For group chats, multiple users can be selected
   void selectUserWhenCreatingAGroup({
     required User user,
     required bool isCreateNewChatPageForCreatingGroup,
@@ -148,29 +175,26 @@ class ChatManagementCubit extends Cubit<ChatManagementState> {
     final listOfSelectedUsers = {...state.listOfSelectedUsers};
 
     if (!isCreateNewChatPageForCreatingGroup) {
+      // One-to-one chat: only select if no other users are selected
       if (listOfSelectedUserIDs.isEmpty) {
         listOfSelectedUserIDs.add(user.id);
         listOfSelectedUsers.add(user);
       }
-      emit(
-        state.copyWith(
-          listOfSelectedUserIDs: listOfSelectedUserIDs,
-          listOfSelectedUsers: listOfSelectedUsers,
-        ),
-      );
-    } else if (isCreateNewChatPageForCreatingGroup) {
+    } else {
+      // Group chat: can select multiple users
       listOfSelectedUserIDs.add(user.id);
       listOfSelectedUsers.add(user);
-
-      emit(
-        state.copyWith(
-          listOfSelectedUserIDs: listOfSelectedUserIDs,
-          listOfSelectedUsers: listOfSelectedUsers,
-        ),
-      );
     }
+
+    emit(
+      state.copyWith(
+        listOfSelectedUserIDs: listOfSelectedUserIDs,
+        listOfSelectedUsers: listOfSelectedUsers,
+      ),
+    );
   }
 
+  /// Selects a user and channel to send a captured photo to
   void selectUserToSendCapturedPhoto({
     required User user,
     required int userIndex,
@@ -184,17 +208,67 @@ class ChatManagementCubit extends Cubit<ChatManagementState> {
     emit(state.copyWith(listOfSelectedUserIDs: listOfSelectedUserIDs, userIndex: userIndex));
   }
 
+  /// Removes a user from the selection for sending captured photo
   void removeUserToSendCapturedPhoto({
     required User user,
   }) {
     final listOfSelectedUserIDs = {...state.listOfSelectedUserIDs};
-
     listOfSelectedUserIDs.remove(user.id);
-
     emit(state.copyWith(listOfSelectedUserIDs: listOfSelectedUserIDs, userIndex: 0));
   }
 
-  /// If there is no a searched channel in the list of channels, then return false. If there is, return true.
+  //
+  // Message sending methods
+  //
+
+  /// Sends a captured photo to selected users in a channel
+  Future<void> sendCapturedPhotoToSelectedUsers({
+    required String pathOfTheTakenPhoto,
+    required int sizeOfTheTakenPhoto,
+  }) async {
+    // Prevent multiple simultaneous operations
+    if (state.isInProgress) {
+      return;
+    }
+
+    emit(state.copyWith(isInProgress: true));
+
+    // Get the channel ID for the selected user
+    final channelId = state.currentUserChannels[state.userIndex].id;
+    if (channelId == null) {
+      emit(state.copyWith(
+        isInProgress: false, 
+        isCapturedPhotoSent: false, 
+        error: ChatFailureEnum.channelCreateFailure
+      ));
+      return;
+    }
+
+    // Add a small delay to show loading indicator for better UX
+    await Future.delayed(const Duration(seconds: 1));
+
+    // Send the photo through the chat service
+    final result = await _chatService.sendPhotoAsMessageToTheSelectedUser(
+      channelId: channelId,
+      pathOfTheTakenPhoto: pathOfTheTakenPhoto,
+      sizeOfTheTakenPhoto: sizeOfTheTakenPhoto,
+    );
+
+    // Update state based on result
+    result.fold(
+      (failure) => emit(state.copyWith(isInProgress: false, isCapturedPhotoSent: false, error: failure)),
+      (_) => emit(state.copyWith(isInProgress: false, isCapturedPhotoSent: true)),
+    );
+  }
+
+  //
+  // Search methods
+  //
+
+  /// Searches for a channel in the existing channels list
+  /// 
+  /// Returns true if the channel at [index] matches the [searchedText]
+  /// based on channel name or member name for one-to-one chats.
   bool searchInsideExistingChannels({
     required List<Channel> listOfChannels,
     required String searchedText,
@@ -202,31 +276,35 @@ class ChatManagementCubit extends Cubit<ChatManagementState> {
     required int lengthOfTheChannelMembers,
     required User oneToOneChatMember,
   }) {
-    int result;
+    // Clean up search text for case-insensitive comparison
     final editedSearchedText = searchedText.toLowerCase().trim();
+    
+    // Default result if nothing is found
+    int result = -1;
 
     if (lengthOfTheChannelMembers == 2) {
+      // For one-to-one chats, search by member name
       final filteredChannels = listOfChannels
           .where(
             (channel) => oneToOneChatMember.name.toLowerCase().trim().contains(editedSearchedText),
           )
           .toList();
 
+      // Check if the channel at index is in the filtered list
       result = filteredChannels.indexOf(listOfChannels[index]);
     } else {
+      // For group chats, search by channel name
       final filteredChannels = listOfChannels
           .where(
-            (channel) => channel.name!.toLowerCase().trim().contains(editedSearchedText),
+            (channel) => (channel.name ?? '').toLowerCase().trim().contains(editedSearchedText),
           )
           .toList();
 
+      // Check if the channel at index is in the filtered list
       result = filteredChannels.indexOf(listOfChannels[index]);
     }
 
-    if (result == -1) {
-      return false;
-    } else {
-      return true;
-    }
+    // Return true if the channel was found in the search results
+    return result != -1;
   }
 }
