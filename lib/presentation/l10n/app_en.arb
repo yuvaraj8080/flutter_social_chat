@@ -28,6 +28,10 @@
 
     "createNewOneToOneChat": "Create a new one to one chat!",
 
+    "privateChatOption": "Private Chat",
+
+    "groupChatOption": "Group Chat",
+
     "groupName": "Group Name",
 
     "yourInspirationalGroupName": "My inspirational group name is...",
