@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_chat/presentation/blocs/profile_management/profile_manager_state.dart';
 import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_cubit.dart';
 import 'package:flutter_social_chat/core/interfaces/i_auth_repository.dart';
+import 'package:flutter_social_chat/core/interfaces/i_chat_repository.dart';
 import 'package:flutter/foundation.dart';
 
 /// Manages user profile creation and validation
@@ -17,14 +18,17 @@ class ProfileManagerCubit extends Cubit<ProfileManagerState> {
     required IAuthRepository authRepository,
     required FirebaseFirestore firebaseFirestore,
     required AuthSessionCubit authSessionCubit,
+    required IChatRepository chatRepository,
   })  : _authRepository = authRepository,
         _firebaseFirestore = firebaseFirestore,
         _authSessionCubit = authSessionCubit,
+        _chatRepository = chatRepository,
         super(ProfileManagerState.empty());
 
   final IAuthRepository _authRepository;
   final FirebaseFirestore _firebaseFirestore;
   final AuthSessionCubit _authSessionCubit;
+  final IChatRepository _chatRepository;
 
   // Default remote image URL
   static const String defaultProfileImageUrl =
@@ -70,6 +74,9 @@ class ProfileManagerCubit extends Cubit<ProfileManagerState> {
       // Update auth session status
       await _authSessionCubit.completeProfileSetup(Future.value(profileImageUrl));
 
+      // Reconnect to GetStream to sync the updated profile data
+      await _reconnectToGetStream();
+
       return profileImageUrl;
     } catch (e) {
       debugPrint('Error creating profile: $e');
@@ -79,6 +86,27 @@ class ProfileManagerCubit extends Cubit<ProfileManagerState> {
         ),
       );
       return '';
+    }
+  }
+
+  /// Reconnects to GetStream to sync updated profile information
+  Future<void> _reconnectToGetStream() async {
+    try {
+      // Disconnect first to ensure a clean reconnection
+      await _chatRepository.disconnectUser();
+      
+      // Short delay to ensure disconnection completes
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      // Reconnect with the updated profile information
+      final result = await _chatRepository.connectTheCurrentUser();
+      
+      result.fold(
+        (failure) => debugPrint('Failed to reconnect to GetStream: $failure'),
+        (_) => debugPrint('Successfully reconnected to GetStream with updated profile'),
+      );
+    } catch (e) {
+      debugPrint('Error reconnecting to GetStream: $e');
     }
   }
 

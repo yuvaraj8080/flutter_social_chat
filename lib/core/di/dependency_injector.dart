@@ -64,6 +64,7 @@ void injectionSetup() {
       authRepository: getIt<IAuthRepository>(),
       firebaseFirestore: getIt<FirebaseFirestore>(),
       authSessionCubit: getIt<AuthSessionCubit>(),
+      chatRepository: getIt<IChatRepository>(),
     ),
   );
   getIt.registerFactory<PhoneNumberSignInCubit>(() => PhoneNumberSignInCubit(getIt<IAuthRepository>()));
