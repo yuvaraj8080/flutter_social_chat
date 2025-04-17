@@ -11,6 +11,9 @@ const Color successColor = Colors.green;
 const Color customIndigoColor = Color.fromRGBO(65, 71, 220, 1);
 const Color customIndigoColorSecondary = Color.fromRGBO(112, 87, 210, 1);
 
+/// Background colors
+const Color backgroundGrey = Color.fromRGBO(245, 247, 250, 1);
+
 /// White with opacity variants
 const Color whiteWithOpacity30 = Color.fromRGBO(255, 255, 255, 0.3);
 const Color whiteWithOpacity10 = Color.fromRGBO(255, 255, 255, 0.1);

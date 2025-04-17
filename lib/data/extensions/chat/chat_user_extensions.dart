@@ -6,7 +6,6 @@ extension ChatUserMapperExtensions on OwnUser {
   ChatUserModel toDomain() {
     return ChatUserModel(
       createdAt: formatDate(createdAt ?? DateTime.now(), [yyyy, '-', mm, '-', dd]),
-      userRole: role?.toUpperCase() ?? '?',
       isUserBanned: banned,
     );
   }

@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_state.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat_session/chat_session_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat_session/chat_session_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_progress_indicator.dart';
+import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
 import 'package:flutter_social_chat/presentation/gen/assets.gen.dart';
-import 'package:flutter_social_chat/presentation/views/profile/widgets/custom_profile_button.dart';
-import 'package:flutter_social_chat/presentation/views/profile/widgets/profile_core.dart';
-import 'package:flutter_social_chat/presentation/views/profile/widgets/user_details.dart';
+import 'package:flutter_social_chat/presentation/views/profile/widgets/profile_activity_status_widget.dart';
+import 'package:flutter_social_chat/presentation/views/profile/widgets/profile_contact_info_widget.dart';
+import 'package:flutter_social_chat/presentation/views/profile/widgets/profile_sign_out_button.dart';
+import 'package:flutter_social_chat/presentation/views/profile/widgets/profile_header.dart';
+import 'package:flutter_social_chat/presentation/views/profile/widgets/profile_details.dart';
 import 'package:go_router/go_router.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -28,71 +32,137 @@ class ProfilePage extends StatelessWidget {
               }
             },
             builder: (context, authState) {
+              final l10n = AppLocalizations.of(context);
               final String? userName = authState.authUser.userName;
               final String? userPhotoUrl = authState.authUser.photoUrl;
               final String userId = authState.authUser.id.replaceRange(8, 25, '*****');
               final String userPhoneNumber = authState.authUser.phoneNumber;
 
-              final String userRole = chatSetupState.chatUser.userRole;
               final String createdAt = chatSetupState.chatUser.createdAt;
               final bool isUserBannedStatus = chatSetupState.chatUser.isUserBanned;
 
               return Scaffold(
-                body: Padding(
-                  padding: const EdgeInsets.only(top: 50),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
+                backgroundColor: backgroundGrey,
+                body: Column(
+                  children: [
+                    Container(
+                      height: MediaQuery.of(context).size.height * 0.22,
+                      width: double.infinity,
+                      margin: const EdgeInsets.fromLTRB(16, 52, 16, 12),
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage(Assets.images.flutter.path),
+                          fit: BoxFit.cover,
+                          colorFilter: ColorFilter.mode(black.withValues(alpha: 0.3), BlendMode.darken),
+                        ),
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(color: black.withValues(alpha: 0.2), blurRadius: 10, offset: const Offset(0, 5)),
+                        ],
+                      ),
+                      child: Stack(
+                        alignment: Alignment.bottomCenter,
                         children: [
-                          Stack(
-                            alignment: Alignment.bottomLeft,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  top: 15,
-                                  right: 15,
-                                  left: 15,
-                                  bottom: 100,
-                                ),
-                                child: Container(
-                                  constraints: BoxConstraints(
-                                    maxHeight: MediaQuery.of(context).size.height / 2.8,
-                                    maxWidth: MediaQuery.of(context).size.width,
-                                  ),
-                                  decoration:  BoxDecoration(
-                                    image: DecorationImage(
-                                      fit: BoxFit.cover,
-                                      image: AssetImage(
-                                        Assets.images.flutter.path,
-                                      ),
-                                    ),
-                                    borderRadius:const  BorderRadius.only(
-                                      topLeft: Radius.circular(20),
-                                      topRight: Radius.circular(20),
-                                      bottomRight: Radius.circular(20),
-                                    ),
-                                  ),
-                                ),
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(24),
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [transparent, black.withValues(alpha: 0.7)],
+                                stops: const [0.6, 1],
                               ),
-                              ProfileCore(
-                                userName: userName!,
-                                userPhoneNumber: userPhoneNumber,
-                                userPhotoUrl: userPhotoUrl!,
-                                userId: userId,
-                              ),
-                            ],
+                            ),
                           ),
-                          ProfileDetails(
-                            createdAt: createdAt,
-                            userRole: userRole,
-                            isUserBannedStatus: isUserBannedStatus,
+                          Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: ProfileHeader(
+                              userName: userName!,
+                              userPhoneNumber: userPhoneNumber,
+                              userPhotoUrl: userPhotoUrl!,
+                              userId: userId,
+                            ),
                           ),
                         ],
                       ),
-                      const CustomProfileButton(),
-                    ],
-                  ),
+                    ),
+                    Container(
+                      margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(color: black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 5)),
+                        ],
+                      ),
+                      child: Row(
+                        spacing: 16,
+                        children: [
+                          ProfileActivityStatusWidget(
+                            title: l10n?.accountActivity ?? '',
+                            value: l10n?.activeStatus ?? '',
+                            icon: Icons.notifications_active_outlined,
+                            color: customIndigoColor,
+                          ),
+                          ProfileActivityStatusWidget(
+                            title: l10n?.accountStatus ?? '',
+                            value: isUserBannedStatus ? l10n?.restrictedStatus ?? '' : l10n?.normalStatus ?? '',
+                            icon: isUserBannedStatus ? Icons.block : Icons.check_circle,
+                            color: isUserBannedStatus ? errorColor : successColor,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: ProfileDetails(
+                        createdAt: createdAt,
+                        isUserBannedStatus: isUserBannedStatus,
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(color: black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 5)),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CustomText(
+                              text: l10n?.contactInformation ?? '',
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: customGreyColor900,
+                            ),
+                            const SizedBox(height: 12),
+                            ProfileContactInfoWidget(
+                              icon: Icons.phone,
+                              title: l10n?.phoneNumber ?? '',
+                              value: userPhoneNumber,
+                            ),
+                            const Divider(height: 16),
+                            ProfileContactInfoWidget(
+                              icon: Icons.tag,
+                              title: l10n?.userId ?? '',
+                              value: userId,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    // Sign out button at the bottom
+                    const ProfileSignOutButton(),
+                    const SizedBox(height: 16),
+                  ],
                 ),
               );
             },

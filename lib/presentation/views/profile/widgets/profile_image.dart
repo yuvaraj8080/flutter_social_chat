@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
+import 'package:flutter_social_chat/presentation/design_system/widgets/custom_progress_indicator.dart';
 
 class ProfileImage extends StatelessWidget {
   const ProfileImage({super.key, required this.userPhotoUrl});
@@ -9,55 +10,31 @@ class ProfileImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final imageSize = size.width * 0.22;
 
-    return Padding(
-      padding: const EdgeInsets.only(left: 35, bottom: 10),
-      child: CachedNetworkImage(
-        imageUrl: userPhotoUrl,
-        imageBuilder: (context, imageProvider) => Container(
-          constraints: BoxConstraints(
-            maxWidth: size.height / 6.5,
-            maxHeight: size.height / 6.5,
+    return Container(
+      width: imageSize,
+      height: imageSize,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: white, width: 3),
+        boxShadow: [
+          BoxShadow(color: black.withValues(alpha: 0.2), blurRadius: 8, offset: const Offset(0, 3)),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(imageSize),
+        child: CachedNetworkImage(
+          imageUrl: userPhotoUrl,
+          fit: BoxFit.cover,
+          placeholder: (context, url) => Container(
+            color: customGreyColor800,
+            child: const CustomProgressIndicator(progressIndicatorColor: white, strokeWidth: 2),
           ),
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              bottomRight: Radius.circular(20),
-            ),
-            border: Border.all(
-              color: customGreyColor600,
-              width: 4,
-            ),
-            image: DecorationImage(
-              image: imageProvider,
-              fit: BoxFit.cover,
-            ),
-          ),
+          errorWidget: (context, url, error) {
+            return Container(color: customGreyColor800, child: const Icon(Icons.person, color: white, size: 30));
+          },
         ),
-        placeholder: (context, url) => Container(
-          constraints: BoxConstraints(
-            maxWidth: size.height / 6.5,
-            maxHeight: size.height / 6.5,
-          ),
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              bottomRight: Radius.circular(20),
-            ),
-            border: Border.all(
-              color: white,
-              width: 4,
-            ),
-          ),
-          child: const Center(
-            child: CircularProgressIndicator(
-              color: black,
-            ),
-          ),
-        ),
-        errorWidget: (context, url, error) {
-          return Container();
-        },
       ),
     );
   }
