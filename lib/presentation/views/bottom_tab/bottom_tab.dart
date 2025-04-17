@@ -228,6 +228,7 @@ class _BottomTabPageState extends State<BottomTabPage> {
   /// Builds the main app UI with bottom navigation
   Widget _buildMainAppUI() {
     return PopScopeScaffold(
+      backgroundColor: backgroundGrey,
       body: widget.child ?? const SizedBox.shrink(),
       bottomNavigationBar: bottomNavigationBuilder(context),
     );
