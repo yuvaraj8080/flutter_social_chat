@@ -10,7 +10,7 @@ import 'package:flutter_social_chat/presentation/views/chat/widgets/chat_page_bo
 import 'package:go_router/go_router.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-class ChatPage extends StatelessWidget {
+class ChatPage extends StatefulWidget {
   const ChatPage({
     super.key,
     required this.channel,
@@ -19,26 +19,54 @@ class ChatPage extends StatelessWidget {
   final Channel channel;
 
   @override
+  State<ChatPage> createState() => _ChatPageState();
+}
+
+class _ChatPageState extends State<ChatPage> {
+  @override
+  void initState() {
+    super.initState();
+    _markChannelAsRead();
+  }
+
+  void _markChannelAsRead() {
+    widget.channel.markRead();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final channelMembers = channel.state!.members;
-    final lengthOfTheChannelMembers = channelMembers.length;
-
-    final oneToOneChatMember =
-        channelMembers.where((member) => member.userId != context.read<AuthSessionCubit>().state.authUser.id).first.user!;
-
     return StreamChannel(
-      channel: channel,
+      channel: widget.channel,
       child: Scaffold(
-        appBar: _buildAppBar(context, oneToOneChatMember, lengthOfTheChannelMembers),
+        appBar: _buildAppBar(context),
         body: const ChatPageBody(),
       ),
     );
   }
   
-  PreferredSizeWidget _buildAppBar(BuildContext context, User oneToOneChatMember, int membersCount) {
-    final isOneToOneChat = membersCount == 2;
-    final displayName = isOneToOneChat ? oneToOneChatMember.name : channel.name!;
-    final imageUrl = isOneToOneChat ? oneToOneChatMember.image : channel.image;
+  PreferredSizeWidget _buildAppBar(BuildContext context) {
+    final currentUserId = context.read<AuthSessionCubit>().state.authUser.id;
+    final channelMembers = widget.channel.state?.members ?? [];
+    final isOneToOneChat = channelMembers.length == 2;
+    
+    User? otherUser;
+    if (isOneToOneChat) {
+      try {
+        otherUser = channelMembers
+            .firstWhere((member) => member.userId != currentUserId)
+            .user;
+      } catch (e) {
+        // No other user found
+      }
+    }
+    
+    final displayName = isOneToOneChat && otherUser != null
+        ? otherUser.name
+        : widget.channel.name ?? 'Unnamed Group';
+    
+    final imageUrl = isOneToOneChat && otherUser != null
+        ? otherUser.image
+        : widget.channel.image;
     
     return AppBar(
       backgroundColor: white,
@@ -64,7 +92,7 @@ class ChatPage extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                if (isOneToOneChat && oneToOneChatMember.online == true)
+                if (isOneToOneChat && otherUser?.online == true)
                   const CustomText(
                     text: 'Online',
                     fontSize: 12,
@@ -77,6 +105,12 @@ class ChatPage extends StatelessWidget {
       ),
       actions: [
         IconButton(
+          icon: const Icon(Icons.call, color: customGreyColor800),
+          onPressed: () {
+            // Handle call action
+          },
+        ),
+        IconButton(
           icon: const Icon(Icons.more_vert, color: customGreyColor800),
           onPressed: () {
             // Show channel options menu
@@ -87,11 +121,11 @@ class ChatPage extends StatelessWidget {
   }
   
   Widget _buildAvatar(String? imageUrl, bool isOneToOneChat) {
-    final double avatarSize = 36;
+    const double avatarSize = 36;
     
     final Widget defaultAvatar = CircleAvatar(
       radius: avatarSize / 2,
-      backgroundColor: customIndigoColor.withValues(alpha: 0.1),
+      backgroundColor: customIndigoColor.withValues(alpha: 26), // 0.1 * 255 ≈ 26
       child: Icon(
         isOneToOneChat ? Icons.person : Icons.group,
         color: customIndigoColor,
@@ -103,23 +137,21 @@ class ChatPage extends StatelessWidget {
       return defaultAvatar;
     }
 
-    final Widget avatarWidget = CachedNetworkImage(
+    return CachedNetworkImage(
       imageUrl: imageUrl,
       imageBuilder: (context, imageProvider) => CircleAvatar(
         radius: avatarSize / 2,
         backgroundImage: imageProvider,
       ),
-      placeholder: (context, url) => CircleAvatar(
-        radius: avatarSize / 2,
+      placeholder: (context, url) => const CircleAvatar(
+        radius: 36 / 2,
         backgroundColor: customGreyColor200,
-        child: const CustomProgressIndicator(
+        child: CustomProgressIndicator(
           size: 20,
           progressIndicatorColor: customIndigoColor,
         ),
       ),
       errorWidget: (context, url, error) => defaultAvatar,
     );
-    
-    return avatarWidget;
   }
 }
