@@ -25,7 +25,7 @@ class ProfileHeader extends StatelessWidget {
         ProfileImage(userPhotoUrl: userPhotoUrl),
         const SizedBox(height: 8),
         CustomText(text: '@$userName', fontWeight: FontWeight.w700, fontSize: 18, color: white),
-        CustomText(text: 'ID: $userId', fontWeight: FontWeight.w400, fontSize: 12, color: whiteWithOpacity30),
+        CustomText(text: userId, fontWeight: FontWeight.w400, fontSize: 12, color: whiteWithOpacity30),
       ],
     );
   }

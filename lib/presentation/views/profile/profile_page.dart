@@ -22,158 +22,229 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ChatSessionCubit, ChatSessionState>(
-      builder: (context, chatSetupState) {
-        if (chatSetupState.isChatUserConnected) {
-          return BlocConsumer<AuthSessionCubit, AuthSessionState>(
-            listenWhen: (p, c) => p.isLoggedIn != c.isLoggedIn,
-            listener: (context, state) {
-              if (!state.isLoggedIn) {
-                context.go(RouterEnum.signInView.routeName);
-              }
-            },
-            builder: (context, authState) {
+    // First listen for auth changes to handle navigation
+    return BlocListener<AuthSessionCubit, AuthSessionState>(
+      listenWhen: (previous, current) => previous.isLoggedIn != current.isLoggedIn,
+      listener: (context, state) {
+        if (!state.isLoggedIn) {
+          context.go(RouterEnum.signInView.routeName);
+        }
+      },
+      // Build UI based on auth and chat states
+      child: BlocBuilder<AuthSessionCubit, AuthSessionState>(
+        builder: (context, authState) {
+          return BlocBuilder<ChatSessionCubit, ChatSessionState>(
+            builder: (context, chatState) {
               final l10n = AppLocalizations.of(context);
-              final String? userName = authState.authUser.userName;
-              final String? userPhotoUrl = authState.authUser.photoUrl;
-              final String userId = authState.authUser.id.replaceRange(8, 25, '*****');
-              final String userPhoneNumber = authState.authUser.phoneNumber;
+              
+              // If still loading chat user data, show loading indicator
+              if (!chatState.isUserCheckedFromChatService) {
+                return const CustomProgressIndicator(progressIndicatorColor: black);
+              }
+              
+              // Get user information from auth and chat states
+              final userName = authState.authUser.userName ?? '';
+              final userPhotoUrl = authState.authUser.photoUrl ?? '';
+              final userId = authState.authUser.id.replaceRange(8, 25, '*****');
+              final userPhoneNumber = authState.authUser.phoneNumber;
+              final createdAt = chatState.chatUser.createdAt;
+              final isUserBannedStatus = chatState.chatUser.isUserBanned;
 
-              final String createdAt = chatSetupState.chatUser.createdAt;
-              final bool isUserBannedStatus = chatSetupState.chatUser.isUserBanned;
-
-              return Scaffold(
-                backgroundColor: backgroundGrey,
-                body: Column(
+              return Container(
+                color: backgroundGrey,
+                child: Column(
                   children: [
-                    Container(
-                      height: MediaQuery.of(context).size.height * 0.22,
-                      width: double.infinity,
-                      margin: const EdgeInsets.fromLTRB(16, 52, 16, 12),
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: AssetImage(Assets.images.flutter.path),
-                          fit: BoxFit.cover,
-                          colorFilter: ColorFilter.mode(black.withValues(alpha: 0.3), BlendMode.darken),
-                        ),
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
-                          BoxShadow(color: black.withValues(alpha: 0.2), blurRadius: 10, offset: const Offset(0, 5)),
-                        ],
-                      ),
-                      child: Stack(
-                        alignment: Alignment.bottomCenter,
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(24),
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [transparent, black.withValues(alpha: 0.7)],
-                                stops: const [0.6, 1],
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: ProfileHeader(
-                              userName: userName!,
-                              userPhoneNumber: userPhoneNumber,
-                              userPhotoUrl: userPhotoUrl!,
-                              userId: userId,
-                            ),
-                          ),
-                        ],
-                      ),
+                    _buildProfileHeader(
+                      context: context,
+                      userName: userName,
+                      userPhotoUrl: userPhotoUrl,
+                      userId: userId,
+                      userPhoneNumber: userPhoneNumber,
                     ),
-                    Container(
-                      margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(color: black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 5)),
-                        ],
-                      ),
-                      child: Row(
-                        spacing: 16,
-                        children: [
-                          ProfileActivityStatusWidget(
-                            title: l10n?.accountActivity ?? '',
-                            value: l10n?.activeStatus ?? '',
-                            icon: Icons.notifications_active_outlined,
-                            color: customIndigoColor,
-                          ),
-                          ProfileActivityStatusWidget(
-                            title: l10n?.accountStatus ?? '',
-                            value: isUserBannedStatus ? l10n?.restrictedStatus ?? '' : l10n?.normalStatus ?? '',
-                            icon: isUserBannedStatus ? Icons.block : Icons.check_circle,
-                            color: isUserBannedStatus ? errorColor : successColor,
-                          ),
-                        ],
-                      ),
+                    _buildActivityStatusCard(
+                      context: context,
+                      l10n: l10n,
+                      isUserBannedStatus: isUserBannedStatus,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: ProfileDetails(
-                        createdAt: createdAt,
-                        isUserBannedStatus: isUserBannedStatus,
-                      ),
+                    _buildProfileDetails(
+                      context: context,
+                      createdAt: createdAt,
+                      isUserBannedStatus: isUserBannedStatus,
                     ),
-                    Expanded(
-                      child: Container(
-                        margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(color: black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 5)),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            CustomText(
-                              text: l10n?.contactInformation ?? '',
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: customGreyColor900,
-                            ),
-                            const SizedBox(height: 12),
-                            ProfileContactInfoWidget(
-                              icon: Icons.phone,
-                              title: l10n?.phoneNumber ?? '',
-                              value: userPhoneNumber,
-                            ),
-                            const Divider(height: 16),
-                            ProfileContactInfoWidget(
-                              icon: Icons.tag,
-                              title: l10n?.userId ?? '',
-                              value: userId,
-                            ),
-                          ],
-                        ),
-                      ),
+                    _buildContactInformationCard(
+                      context: context,
+                      l10n: l10n,
+                      userPhoneNumber: userPhoneNumber,
+                      userId: userId,
                     ),
-
-                    // Sign out button at the bottom
-                    const ProfileSignOutButton(),
-                    const SizedBox(height: 16),
+                    _buildSignOutButton(context: context),
                   ],
                 ),
               );
             },
           );
-        } else {
-          return const Scaffold(
-            body: CustomProgressIndicator(progressIndicatorColor: black),
-          );
-        }
-      },
+        },
+      ),
+    );
+  }
+
+  /// Build the sign out button
+  Widget _buildSignOutButton({required BuildContext context}) {
+    return const Column(
+      children: [
+        ProfileSignOutButton(),
+        SizedBox(height: 16),
+      ],
+    );
+  }
+
+  /// Build the profile header with cover image and user info
+  Widget _buildProfileHeader({
+    required BuildContext context,
+    required String userName,
+    required String userPhotoUrl,
+    required String userId,
+    required String userPhoneNumber,
+  }) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.22,
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(16, 52, 16, 12),
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage(Assets.images.flutter.path),
+          fit: BoxFit.cover,
+          colorFilter: ColorFilter.mode(black.withValues(alpha: 0.3), BlendMode.darken),
+        ),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(color: black.withValues(alpha: 0.2), blurRadius: 10, offset: const Offset(0, 5)),
+        ],
+      ),
+      child: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          // Gradient overlay for better text visibility
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [transparent, black.withValues(alpha: 0.7)],
+                stops: const [0.6, 1],
+              ),
+            ),
+          ),
+          // User Info overlay
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: ProfileHeader(
+              userName: userName,
+              userPhoneNumber: userPhoneNumber,
+              userPhotoUrl: userPhotoUrl,
+              userId: userId,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build the activity status card showing user activity and account status
+  Widget _buildActivityStatusCard({
+    required BuildContext context,
+    required AppLocalizations? l10n,
+    required bool isUserBannedStatus,
+  }) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(color: black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 5)),
+        ],
+      ),
+      child: Row(
+        spacing: 16,
+        children: [
+          ProfileActivityStatusWidget(
+            title: l10n?.accountActivity ?? '',
+            value: l10n?.activeStatus ?? '',
+            icon: Icons.notifications_active_outlined,
+            color: customIndigoColor,
+          ),
+          ProfileActivityStatusWidget(
+            title: l10n?.accountStatus ?? '',
+            value: isUserBannedStatus ? l10n?.restrictedStatus ?? '' : l10n?.normalStatus ?? '',
+            icon: isUserBannedStatus ? Icons.block : Icons.check_circle,
+            color: isUserBannedStatus ? errorColor : successColor,
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Build the profile details section
+  Widget _buildProfileDetails({
+    required BuildContext context,
+    required String createdAt,
+    required bool isUserBannedStatus,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: ProfileDetails(
+        createdAt: createdAt,
+        isUserBannedStatus: isUserBannedStatus,
+      ),
+    );
+  }
+
+  /// Build the contact information card
+  Widget _buildContactInformationCard({
+    required BuildContext context,
+    required AppLocalizations? l10n,
+    required String userPhoneNumber,
+    required String userId,
+  }) {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(color: black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 5)),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CustomText(
+              text: l10n?.contactInformation ?? '',
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: customGreyColor900,
+            ),
+            const SizedBox(height: 12),
+            ProfileContactInfoWidget(
+              icon: Icons.phone,
+              title: l10n?.phoneNumber ?? '',
+              value: userPhoneNumber,
+            ),
+            const Divider(height: 16),
+            ProfileContactInfoWidget(
+              icon: Icons.tag,
+              title: l10n?.userId ?? '',
+              value: userId,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
