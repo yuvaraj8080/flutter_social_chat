@@ -113,6 +113,11 @@ class _ChannelNameFormFieldState extends State<ChannelNameFormField> {
                       // Update state in chat management cubit
                       context.read<ChatManagementCubit>().channelNameChanged(channelName: value.trim());
                       // Validate the form after the build is complete
+                      final isValid = _validateGroupName(value.trim()) == null;
+                      setState(() {
+                        _isValid = isValid;
+                      });
+                      context.read<ChatManagementCubit>().validateChannelName(isChannelNameValid: isValid);
                       _formKey.currentState?.validate();
                     });
                   },
