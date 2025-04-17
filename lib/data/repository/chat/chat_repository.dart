@@ -6,12 +6,19 @@ import 'package:flutter_social_chat/data/extensions/chat/chat_user_extensions.da
 import 'package:flutter_social_chat/core/constants/enums/chat_failure_enum.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide Unit;
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 
 class ChatRepository implements IChatRepository {
   ChatRepository(this._authRepository, this._streamChatClient);
 
   final IAuthRepository _authRepository;
   final StreamChatClient _streamChatClient;
+
+  // Stream Chat API Secret - In production, this should be on your backend
+  // For development purposes only, we're keeping it in the client
+  final String _apiSecret =
+      'e33hrz4ztu5ynub6h7xadb9juc5nd7cr6svbpg4ank3ff7mfzusnhyywy2z33pqz'; // Replace with your actual Stream secret
 
   @override
   Stream<ChatUserModel> get chatAuthStateChanges {
@@ -50,6 +57,29 @@ class ChatRepository implements IChatRepository {
     }
   }
 
+  /// Generates a Stream Chat token for the given user ID
+  String _generateToken(String userId) {
+    // In production, token generation should happen on the server
+    // This is only for development purposes
+
+    // Header
+    final header = {'alg': 'HS256', 'typ': 'JWT'};
+    final encodedHeader = base64Url.encode(utf8.encode(json.encode(header)));
+
+    // Payload with the user ID
+    final payload = {'user_id': userId};
+    final encodedPayload = base64Url.encode(utf8.encode(json.encode(payload)));
+
+    // Create signature
+    final message = '$encodedHeader.$encodedPayload';
+    final hmac = Hmac(sha256, utf8.encode(_apiSecret));
+    final digest = hmac.convert(utf8.encode(message));
+    final signature = base64Url.encode(digest.bytes);
+
+    // Return the JWT token
+    return '$encodedHeader.$encodedPayload.$signature';
+  }
+
   @override
   Future<Either<ChatFailureEnum, Unit>> connectTheCurrentUser() async {
     try {
@@ -60,9 +90,11 @@ class ChatRepository implements IChatRepository {
         (user) => user,
       );
 
-      // devToken, get info from readme.md file
-      const String devToken =
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZWZlIn0.WfcPNsvL16TFOc0ced5eIrjzCukZBHIVyCz3DHBSWKI';
+      // Generate a token specific to this user
+      final userToken = _generateToken(signedInUser.id);
+
+      // Log token info for debugging
+      debugPrint('Connecting user: ${signedInUser.id}');
 
       await _streamChatClient.connectUser(
         User(
@@ -70,7 +102,7 @@ class ChatRepository implements IChatRepository {
           name: signedInUser.userName,
           image: signedInUser.photoUrl,
         ),
-        devToken,
+        userToken,
       );
       return right(unit);
     } catch (e) {

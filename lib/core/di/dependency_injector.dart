@@ -30,7 +30,7 @@ void injectionSetup() {
 
   // External services
   getIt.registerSingleton<Connectivity>(Connectivity());
-  getIt.registerSingleton<StreamChatClient>(StreamChatClient('3r6a7g8d4v8e', logLevel: Level.INFO));
+  getIt.registerSingleton<StreamChatClient>(StreamChatClient('c2neqfzpxu7m', logLevel: Level.INFO));
 
   // Firebase services
   getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
