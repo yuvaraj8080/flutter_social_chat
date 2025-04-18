@@ -62,7 +62,7 @@ class CreateChatViewCreatingGroupChatPageDetails extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: state.listOfSelectedUserIDs.length >= 2
                                 ? successColor.withValues(alpha: 0.1)
-                                : Colors.orange.withValues(alpha: 0.1),
+                                : customOrangeColor.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: CustomText(
@@ -70,7 +70,7 @@ class CreateChatViewCreatingGroupChatPageDetails extends StatelessWidget {
                                 ? appLocalizations?.enough ?? ''
                                 : appLocalizations?.min2Required ?? '',
                             fontSize: 12,
-                            color: state.listOfSelectedUserIDs.length >= 2 ? successColor : Colors.orange,
+                            color: state.listOfSelectedUserIDs.length >= 2 ? successColor : customOrangeColor,
                             fontWeight: FontWeight.w500,
                           ),
                         ),

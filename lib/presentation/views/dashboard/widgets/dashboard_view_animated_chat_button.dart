@@ -191,7 +191,7 @@ class _DashboardViewAnimatedChatButtonState extends State<DashboardViewAnimatedC
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: LinearGradient(
-                        colors: [color, Color.lerp(color, Colors.white, 0.15) ?? color],
+                        colors: [color, Color.lerp(color, white, 0.15) ?? color],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),

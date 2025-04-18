@@ -6,6 +6,7 @@ const Color black = Colors.black;
 const Color transparent = Colors.transparent;
 const Color errorColor = Colors.red;
 const Color successColor = Colors.green;
+const Color customOrangeColor = Colors.orange;
 
 /// Primary brand colors
 const Color customIndigoColor = Color.fromRGBO(65, 71, 220, 1);
