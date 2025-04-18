@@ -222,47 +222,82 @@ class _ProfileSignOutButtonState extends State<ProfileSignOutButton> {
     try {
       final client = getIt<StreamChatClient>();
 
-      // Only proceed if there's a current user connected
+      // Check if client exists and is connected
       if (client.state.currentUser != null) {
-        // Reset Chat Management cubit to clean up subscriptions
+        // Reset Chat Management cubit to clean up subscriptions first
         if (chatManagementCubit != null) {
           await chatManagementCubit.reset();
+          // Give time for subscriptions to be cleaned up
+          await Future.delayed(const Duration(milliseconds: 200));
         }
 
         // Disconnect in stages to prevent race conditions
         await _disconnectChannels(client);
         await _disconnectUser(client);
+        
+        // Verify disconnection was successful
+        if (client.state.currentUser != null) {
+          // Force disconnect as a fallback mechanism
+          await client.disconnectUser(flushChatPersistence: true);
+          await Future.delayed(const Duration(milliseconds: 300));
+        }
       }
     } catch (e) {
-      // Ignore Stream Chat disconnect errors - proceed with sign-out anyway
+      // Log the error but continue with sign-out process
+      debugPrint('Error disconnecting from Stream Chat: $e');
     }
   }
 
   /// Disconnects all active channels
   Future<void> _disconnectChannels(StreamChatClient client) async {
-    // Close all active channels
-    for (final entry in client.state.channels.entries) {
-      try {
-        entry.value.dispose();
-      } catch (e) {
-        // Ignore individual channel disposal errors
+    try {
+      // Create a copy of the channels to avoid concurrent modification
+      final channelsCopy = Map<String, Channel>.from(client.state.channels);
+      
+      // Close all active channels
+      for (final entry in channelsCopy.entries) {
+        try {
+          // Don't await inside loop to avoid waiting sequentially
+          entry.value.dispose();
+        } catch (e) {
+          // Ignore individual channel disposal errors
+        }
       }
-    }
 
-    // Allow time for channel disposal to complete
-    await Future.delayed(const Duration(milliseconds: 100));
+      // Allow time for channel disposal to complete
+      await Future.delayed(const Duration(milliseconds: 200));
+    } catch (e) {
+      debugPrint('Error disposing channels: $e');
+    }
   }
 
   /// Disconnects the user from Stream Chat
   Future<void> _disconnectUser(StreamChatClient client) async {
     try {
-      // Disconnect with persistence flush
-      await client.disconnectUser(flushChatPersistence: true);
-
-      // Allow time for disconnection to complete
-      await Future.delayed(const Duration(milliseconds: 100));
+      // Check if the client is still connected
+      if (client.state.currentUser != null) {
+        // Disconnect with persistence flush
+        await client.disconnectUser(flushChatPersistence: true);
+        
+        // Allow more time for disconnection to complete
+        await Future.delayed(const Duration(milliseconds: 300));
+        
+        // Verify disconnection was successful
+        if (client.state.currentUser != null) {
+          debugPrint('First disconnect attempt failed, trying again...');
+          // Try again with different approach
+          await Future.delayed(const Duration(milliseconds: 200));
+          await client.dispose();
+        }
+      }
     } catch (e) {
-      // Ignore disconnection errors
+      debugPrint('Error disconnecting user: $e');
+      // Try alternative disconnection method as fallback
+      try {
+        await client.dispose();
+      } catch (e2) {
+        debugPrint('Error on fallback disposal: $e2');
+      }
     }
   }
 
@@ -279,13 +314,21 @@ class _ProfileSignOutButtonState extends State<ProfileSignOutButton> {
     CustomLoadingIndicator.reset();
     _safelyShowLoadingIndicator(context);
 
-    // Perform sign-out steps in sequence
-    await _disconnectStreamChat();
-    await _resetCubits(cubits);
-    await _clearStorage();
+    try {
+      // Perform sign-out steps in sequence with proper error handling
+      await _disconnectStreamChat();
+      await _resetCubits(cubits);
+      await _clearStorage();
 
-    // Finally trigger auth sign-out
-    cubits.authCubit.signOut();
+      // Finally trigger auth sign-out
+      await cubits.authCubit.signOut();
+    } catch (e) {
+      debugPrint('Error during sign-out process: $e');
+      // Reset sign-out flag if there was an error
+      if (mounted) {
+        setState(() => _isSigningOut = false);
+      }
+    }
   }
 
   /// Gets references to all required cubits
