@@ -1,28 +1,26 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_social_chat/core/constants/enums/router_enum.dart';
 import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_cubit.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_progress_indicator.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
-import 'package:flutter_social_chat/presentation/views/chat/widgets/chat_page_body.dart';
+import 'package:flutter_social_chat/presentation/views/chat/widgets/chat_view_body.dart';
 import 'package:go_router/go_router.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-class ChatPage extends StatefulWidget {
-  const ChatPage({
-    super.key,
-    required this.channel,
-  });
-  
+class ChatView extends StatefulWidget {
+  const ChatView({super.key, required this.channel});
+
   final Channel channel;
 
   @override
-  State<ChatPage> createState() => _ChatPageState();
+  State<ChatView> createState() => _ChatViewState();
 }
 
-class _ChatPageState extends State<ChatPage> {
+class _ChatViewState extends State<ChatView> {
   @override
   void initState() {
     super.initState();
@@ -39,35 +37,31 @@ class _ChatPageState extends State<ChatPage> {
       channel: widget.channel,
       child: Scaffold(
         appBar: _buildAppBar(context),
-        body: const ChatPageBody(),
+        body: const ChatViewBody(),
       ),
     );
   }
-  
+
   PreferredSizeWidget _buildAppBar(BuildContext context) {
+    final localization = AppLocalizations.of(context);
     final currentUserId = context.read<AuthSessionCubit>().state.authUser.id;
     final channelMembers = widget.channel.state?.members ?? [];
     final isOneToOneChat = channelMembers.length == 2;
-    
+
     User? otherUser;
     if (isOneToOneChat) {
       try {
-        otherUser = channelMembers
-            .firstWhere((member) => member.userId != currentUserId)
-            .user;
+        otherUser = channelMembers.firstWhere((member) => member.userId != currentUserId).user;
       } catch (e) {
         // No other user found
       }
     }
-    
-    final displayName = isOneToOneChat && otherUser != null
-        ? otherUser.name
-        : widget.channel.name ?? 'Unnamed Group';
-    
-    final imageUrl = isOneToOneChat && otherUser != null
-        ? otherUser.image
-        : widget.channel.image;
-    
+
+    final displayName =
+        isOneToOneChat && otherUser != null ? otherUser.name : widget.channel.name ?? localization?.unnamedGroup;
+
+    final imageUrl = isOneToOneChat && otherUser != null ? otherUser.image : widget.channel.image;
+
     return AppBar(
       backgroundColor: white,
       elevation: 0,
@@ -86,18 +80,14 @@ class _ChatPageState extends State<ChatPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 CustomText(
-                  text: displayName,
+                  text: displayName ?? '',
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 if (isOneToOneChat && otherUser?.online == true)
-                  const CustomText(
-                    text: 'Online',
-                    fontSize: 12,
-                    color: successColor,
-                  ),
+                  CustomText(text: localization?.online ?? '', fontSize: 12, color: successColor),
               ],
             ),
           ),
@@ -119,20 +109,20 @@ class _ChatPageState extends State<ChatPage> {
       ],
     );
   }
-  
+
   Widget _buildAvatar(String? imageUrl, bool isOneToOneChat) {
     const double avatarSize = 36;
-    
+
     final Widget defaultAvatar = CircleAvatar(
       radius: avatarSize / 2,
-      backgroundColor: customIndigoColor.withValues(alpha: 26), // 0.1 * 255 ≈ 26
+      backgroundColor: customIndigoColor.withValues(alpha: 0.1),
       child: Icon(
         isOneToOneChat ? Icons.person : Icons.group,
         color: customIndigoColor,
         size: avatarSize / 2.5,
       ),
     );
-    
+
     if (imageUrl == null || imageUrl.isEmpty) {
       return defaultAvatar;
     }
@@ -144,7 +134,7 @@ class _ChatPageState extends State<ChatPage> {
         backgroundImage: imageProvider,
       ),
       placeholder: (context, url) => const CircleAvatar(
-        radius: 36 / 2,
+        radius: avatarSize / 2,
         backgroundColor: customGreyColor200,
         child: CustomProgressIndicator(
           size: 20,

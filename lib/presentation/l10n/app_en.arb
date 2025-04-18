@@ -245,5 +245,9 @@
 
     "retry": "Retry",
     
-    "connectingToChat": "Connecting to chat..."
+    "connectingToChat": "Connecting to chat...",
+
+    "unnamedGroup": "Unnamed Group",
+    
+    "sendMessageToStartConversation": "Send a message to start the conversation"
 }

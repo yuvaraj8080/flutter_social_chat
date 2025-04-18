@@ -7,7 +7,7 @@ import 'package:flutter_social_chat/core/init/router/custom_page_builder_widget.
 import 'package:flutter_social_chat/presentation/blocs/phone_number_sign_in/phone_number_sign_in_state.dart';
 import 'package:flutter_social_chat/presentation/views/bottom_tab/bottom_tab_view.dart';
 import 'package:flutter_social_chat/presentation/views/dashboard/dashboard_view.dart';
-import 'package:flutter_social_chat/presentation/views/chat/chat_page.dart';
+import 'package:flutter_social_chat/presentation/views/chat/chat_view.dart';
 import 'package:flutter_social_chat/presentation/views/create_chat/create_chat_view.dart';
 import 'package:flutter_social_chat/presentation/views/landing/landing_view.dart';
 import 'package:flutter_social_chat/presentation/views/onboarding/onboarding_view.dart';
@@ -93,11 +93,11 @@ class AppRouter {
           if (state.extra is Map<String, dynamic>) {
             final extraParameters = state.extra as Map<String, dynamic>;
             final channel = extraParameters['channel'] as Channel?;
-            return ChatPage(channel: channel!);
+            return ChatView(channel: channel!);
           } else {
             // For backward compatibility
             final channel = state.extra as Channel?;
-            return ChatPage(channel: channel!);
+            return ChatView(channel: channel!);
           }
         },
       );
