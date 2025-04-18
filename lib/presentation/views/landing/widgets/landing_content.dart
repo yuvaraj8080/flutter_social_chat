@@ -35,8 +35,6 @@ class LandingContent extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const SizedBox(height: 40),
-
-          // App logo animation
           Lottie.asset(
             Assets.animations.chatAnimation,
             width: size.width * 0.7,
@@ -45,7 +43,6 @@ class LandingContent extends StatelessWidget {
             frameRate: const FrameRate(30), // Limit frame rate to improve performance
           ),
           const SizedBox(height: 32),
-          // App name with custom styling
           CustomText(
             text: localizations?.appName ?? '',
             fontSize: 32,
@@ -54,18 +51,12 @@ class LandingContent extends StatelessWidget {
             letterSpacing: 1.2,
           ),
           const SizedBox(height: 16),
-          // App tagline
           CustomText(text: localizations?.appTagline ?? '', fontSize: 16, color: white),
-          const Spacer(),
-          // Loading status with progress indicator
-          LandingStatusContainer(
-            loadingMessage: loadingMessage,
-            loadingPhase: loadingPhase,
-          ),
-          const SizedBox(height: 32),
-          // Loading indicator at the bottom
+          const SizedBox(height: 60),
           LandingLoadingIndicator(isReadyToNavigate: isReadyToNavigate),
-          const SizedBox(height: 40),
+          const Spacer(),
+          LandingStatusContainer(loadingMessage: loadingMessage, loadingPhase: loadingPhase),
+          const SizedBox(height: 60),
         ],
       ),
     );

@@ -18,42 +18,44 @@ import 'dart:async';
 /// 3. Shows loading indicators for various initialization phases
 /// 4. Ensures a smooth user experience with minimum splash duration
 /// 5. Handles transitions to the appropriate next screen
-class LandingPage extends StatefulWidget {
-  const LandingPage({super.key});
+class LandingView extends StatefulWidget {
+  const LandingView({super.key});
 
   @override
-  State<LandingPage> createState() => _LandingPageState();
+  State<LandingView> createState() => _LandingViewState();
 }
 
-class _LandingPageState extends State<LandingPage> with SingleTickerProviderStateMixin {
-  /// Controls the fade-in animation for the splash content
-  late final AnimationController _animationController;
-  late final Animation<double> _fadeAnimation;
-  
-  /// Flag to prevent multiple navigation attempts
-  bool _hasCheckedInitialRoute = false;
-  
-  /// Flag indicating if auth state has been checked
-  bool _isAuthStateReady = false;
-  
-  /// Flag indicating if minimum splash duration has elapsed
-  bool _isReadyToNavigate = false;
-  
-  /// Current loading message to display (updated with dots animation)
-  late String _loadingMessage;
-  
-  /// Current loading phase (0-4) affecting the UI display
-  int _loadingPhase = 0;
-  
-  /// Timer for the loading dots animation
-  Timer? _loadingDotsTimer;
-
-  // Constants for timing
+class _LandingViewState extends State<LandingView> with SingleTickerProviderStateMixin {
+  // Animation constants
   static const Duration _animationDuration = Duration(milliseconds: 3000);
   static const Duration _minimumSplashDuration = Duration(milliseconds: 4000);
   static const Duration _loadingDotsDuration = Duration(milliseconds: 500);
   static const Duration _navigationDelay = Duration(milliseconds: 500);
+
+  // Loading phase constants
   static const int _maxLoadingPhase = 4;
+
+  /// Controls the fade-in animation for the splash content
+  late final AnimationController _animationController;
+  late final Animation<double> _fadeAnimation;
+
+  /// Flag to prevent multiple navigation attempts
+  bool _hasCheckedInitialRoute = false;
+
+  /// Flag indicating if auth state has been checked
+  bool _isAuthStateReady = false;
+
+  /// Flag indicating if minimum splash duration has elapsed
+  bool _isReadyToNavigate = false;
+
+  /// Current loading message to display (updated with dots animation)
+  late String _loadingMessage;
+
+  /// Current loading phase (0-4) affecting the UI display
+  int _loadingPhase = 0;
+
+  /// Timer for the loading dots animation
+  Timer? _loadingDotsTimer;
 
   @override
   void initState() {
@@ -66,19 +68,13 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
       _checkAuthAndInitialize();
     });
   }
-  
+
   /// Sets up the fade-in animation for splash content
   void _initializeAnimation() {
-    _animationController = AnimationController(
-      vsync: this,
-      duration: _animationDuration,
-    );
+    _animationController = AnimationController(vsync: this, duration: _animationDuration);
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeIn,
-      ),
+    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
     );
 
     _animationController.forward();
@@ -109,17 +105,17 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
     // Ensure minimum display time for the splash screen
     _ensureMinimumSplashDuration(authState);
   }
-  
+
   /// Updates the loading message and phase state
   void _updateLoadingState(String message, int phase) {
     if (!mounted) return;
-    
+
     setState(() {
       _loadingMessage = message;
       _loadingPhase = phase;
     });
   }
-  
+
   /// Ensures the splash screen is shown for a minimum duration
   void _ensureMinimumSplashDuration(AuthSessionState authState) {
     Future.delayed(_minimumSplashDuration, () {
@@ -172,11 +168,11 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
     _prepareForNavigation();
     _navigateToAppropriateRoute(authState.isLoggedIn, authState.authUser.isOnboardingCompleted);
   }
-  
+
   /// Prepares the UI for navigation
   void _prepareForNavigation() {
-    final localizations = AppLocalizations.of(context)!;
-    _updateLoadingState(localizations.takingToChats, _maxLoadingPhase);
+    final localizations = AppLocalizations.of(context);
+    _updateLoadingState(localizations?.takingToChats ?? '', _maxLoadingPhase);
     _loadingDotsTimer?.cancel();
   }
 
@@ -200,18 +196,18 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
       }
     });
   }
-  
+
   /// Handles navigation errors with fallback approach
   void _handleNavigationError(bool isUserLoggedIn, bool isOnboardingCompleted) {
     if (!mounted) return;
-    
+
     // Try once more on the next frame with a different approach
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      
+
       try {
         final route = _getRouteForUser(isUserLoggedIn, isOnboardingCompleted);
-        Navigator.of(context).pushNamedAndRemoveUntil(route, (route) => false);
+        context.go(route);
       } catch (e) {
         // Last resort - go to sign in view directly
         if (mounted) {
@@ -242,10 +238,7 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
       child: PopScopeScaffold(
         body: Stack(
           children: [
-            // Gradient background
             const LandingBackground(),
-
-            // Content with animation
             FadeTransition(
               opacity: _fadeAnimation,
               child: LandingContent(
@@ -259,14 +252,13 @@ class _LandingPageState extends State<LandingPage> with SingleTickerProviderStat
       ),
     );
   }
-  
+
   /// Handles authentication state changes from the BlocListener
   void _handleAuthStateChanged(BuildContext context, AuthSessionState state) {
-    final localizations = AppLocalizations.of(context)!;
-    
+    final localizations = AppLocalizations.of(context);
+
     _isAuthStateReady = true;
-    _updateLoadingState(localizations.accountVerified, 2);
+    _updateLoadingState(localizations?.accountVerified ?? '', 2);
     _checkAndNavigate(state);
   }
 }
-

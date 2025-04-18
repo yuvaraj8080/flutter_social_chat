@@ -16,23 +16,16 @@ class LandingLoadingIndicator extends StatelessWidget {
     final localizations = AppLocalizations.of(context);
 
     return AnimatedOpacity(
-      opacity: isReadyToNavigate ? 0.0 : 1,
+      opacity: isReadyToNavigate ? 0 : 1,
       duration: const Duration(milliseconds: 300),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: customIndigoColor,
-          borderRadius: BorderRadius.circular(20),
-        ),
+        decoration: BoxDecoration(color: customIndigoColor, borderRadius: BorderRadius.circular(20)),
         child: Row(
+          spacing: 12,
           mainAxisSize: MainAxisSize.min,
           children: [
-            const CustomProgressIndicator(
-              size: 20,
-              strokeWidth: 2.5,
-              progressIndicatorColor: white,
-            ),
-            const SizedBox(width: 12),
+            const CustomProgressIndicator(size: 20, strokeWidth: 2.5, progressIndicatorColor: white),
             CustomText(text: localizations?.justAMoment ?? '', fontSize: 14, color: white, fontWeight: FontWeight.w500),
           ],
         ),

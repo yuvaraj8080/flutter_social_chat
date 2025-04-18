@@ -16,11 +16,7 @@ class LandingBackground extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            customIndigoColor,
-            customIndigoColorSecondary,
-            customGreyColor300, // Grey for better contrast
-          ],
+          colors: [customIndigoColor, customIndigoColorSecondary, customGreyColor300],
           stops: [0.0, 0.5, 1.0],
         ),
       ),

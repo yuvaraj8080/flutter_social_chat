@@ -21,17 +21,12 @@ class LandingStatusContainer extends StatelessWidget {
         color: customIndigoColor.withValues(alpha: 0.8),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(
-            color: black.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
+          BoxShadow(color: black.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, 5)),
         ],
       ),
       child: Column(
         spacing: 16,
         children: [
-          // Progress bar
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
@@ -41,12 +36,7 @@ class LandingStatusContainer extends StatelessWidget {
               minHeight: 8,
             ),
           ),
-          CustomText(
-            text: loadingMessage,
-            fontSize: 16,
-            color: white,
-            fontWeight: FontWeight.w500,
-          ),
+          CustomText(text: loadingMessage, fontSize: 16, color: white, fontWeight: FontWeight.w500),
         ],
       ),
     );
