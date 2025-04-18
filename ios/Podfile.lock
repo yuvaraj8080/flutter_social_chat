@@ -1459,7 +1459,7 @@ PODS:
     - Flutter
     - FlutterMacOS
   - RecaptchaInterop (101.0.0)
-  - record_darwin (1.0.0):
+  - record_ios (1.0.0):
     - Flutter
   - SDWebImage (5.21.0):
     - SDWebImage/Core (= 5.21.0)
@@ -1500,7 +1500,7 @@ DEPENDENCIES:
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - PhoneNumberKit (~> 3.7.6)
   - photo_manager (from `.symlinks/plugins/photo_manager/ios`)
-  - record_darwin (from `.symlinks/plugins/record_darwin/ios`)
+  - record_ios (from `.symlinks/plugins/record_ios/ios`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
@@ -1573,8 +1573,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
   photo_manager:
     :path: ".symlinks/plugins/photo_manager/ios"
-  record_darwin:
-    :path: ".symlinks/plugins/record_darwin/ios"
+  record_ios:
+    :path: ".symlinks/plugins/record_ios/ios"
   share_plus:
     :path: ".symlinks/plugins/share_plus/ios"
   sqflite_darwin:
@@ -1630,7 +1630,7 @@ SPEC CHECKSUMS:
   PhoneNumberKit: ced55861269312a5e3bc2ef82a58d6255b1c976a
   photo_manager: d2fbcc0f2d82458700ee6256a15018210a81d413
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
-  record_darwin: fb1f375f1d9603714f55b8708a903bbb91ffdb0a
+  record_ios: fee1c924aa4879b882ebca2b4bce6011bcfc3d8b
   SDWebImage: f84b0feeb08d2d11e6a9b843cb06d75ebf5b8868
   share_plus: 50da8cb520a8f0f65671c6c6a99b3617ed10a58a
   sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
@@ -1638,7 +1638,7 @@ SPEC CHECKSUMS:
   url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
   video_player_avfoundation: 2cef49524dd1f16c5300b9cd6efd9611ce03639b
   volume_controller: 3657a1f65bedb98fa41ff7dc5793537919f31b12
-  wakelock_plus: 04623e3f525556020ebd4034310f20fe7fda8b49
+  wakelock_plus: e29112ab3ef0b318e58cfa5c32326458be66b556
 
 PODFILE CHECKSUM: 082f348efd10c5379e3064609d65d3fd5c8cb909
 
