@@ -15,17 +15,17 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 /// 3. Providing methods to sync state with the actual Stream Chat client
 /// 4. Persisting chat session data using HydratedBloc
 class ChatSessionCubit extends HydratedCubit<ChatSessionState> {
-  final IChatRepository _chatService;
+  final IChatRepository _chatRepository;
   StreamSubscription<ChatUserModel>? _chatUserSubscription;
   Timer? _connectionCheckTimer;
 
-  ChatSessionCubit(this._chatService) : super(ChatSessionState.empty()) {
+  ChatSessionCubit(this._chatRepository) : super(ChatSessionState.empty()) {
     _initializeSubscriptions();
   }
 
   /// Initializes all subscriptions and listeners
   void _initializeSubscriptions() {
-    _chatUserSubscription = _chatService.chatAuthStateChanges.listen(_listenChatUserAuthStateChangesStream);
+    _chatUserSubscription = _chatRepository.chatAuthStateChanges.listen(_listenChatUserAuthStateChangesStream);
 
     // Setup a periodic connection check to ensure UI state reflects reality
     _connectionCheckTimer = Timer.periodic(const Duration(seconds: 30), (_) {
