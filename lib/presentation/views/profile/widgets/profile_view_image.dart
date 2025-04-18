@@ -3,8 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_progress_indicator.dart';
 
-class ProfileImage extends StatelessWidget {
-  const ProfileImage({super.key, required this.userPhotoUrl});
+/// Displays the user's profile image with proper caching and loading states
+///
+/// Features:
+/// - Circular image with white border
+/// - Shows loading indicator while image loads
+/// - Fallback icon if image fails to load
+/// - Memory caching for better performance
+class ProfileViewImage extends StatelessWidget {
+  const ProfileViewImage({super.key, required this.userPhotoUrl});
+  
   final String userPhotoUrl;
 
   @override
@@ -27,6 +35,9 @@ class ProfileImage extends StatelessWidget {
         child: CachedNetworkImage(
           imageUrl: userPhotoUrl,
           fit: BoxFit.cover,
+          fadeInDuration: const Duration(milliseconds: 200),
+          memCacheHeight: (imageSize * MediaQuery.of(context).devicePixelRatio).toInt(),
+          memCacheWidth: (imageSize * MediaQuery.of(context).devicePixelRatio).toInt(),
           placeholder: (context, url) => Container(
             color: customGreyColor800,
             child: const CustomProgressIndicator(progressIndicatorColor: white, strokeWidth: 2),

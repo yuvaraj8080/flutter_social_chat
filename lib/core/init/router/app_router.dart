@@ -11,7 +11,7 @@ import 'package:flutter_social_chat/presentation/views/chat/chat_page.dart';
 import 'package:flutter_social_chat/presentation/views/create_new_chat/create_new_chat_page.dart';
 import 'package:flutter_social_chat/presentation/views/landing/landing_view.dart';
 import 'package:flutter_social_chat/presentation/views/onboarding/onboarding_view.dart';
-import 'package:flutter_social_chat/presentation/views/profile/profile_page.dart';
+import 'package:flutter_social_chat/presentation/views/profile/profile_view.dart';
 import 'package:flutter_social_chat/presentation/views/sign_in/sign_in_view.dart';
 import 'package:flutter_social_chat/presentation/views/sms_verification/sms_verification_view.dart';
 import 'package:go_router/go_router.dart';
@@ -81,7 +81,7 @@ class AppRouter {
             pageBuilder: (context, state) => customPageBuilderWidget(
               context,
               state,
-              const ProfilePage(),
+              const ProfileView(),
             ),
           ),
         ],

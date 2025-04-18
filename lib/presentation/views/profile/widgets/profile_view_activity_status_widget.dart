@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
 
-class ProfileActivityStatusWidget extends StatelessWidget {
-  const ProfileActivityStatusWidget({
+class ProfileViewActivityStatusWidget extends StatelessWidget {
+  const ProfileViewActivityStatusWidget({
     super.key,
     required this.title,
     required this.value,

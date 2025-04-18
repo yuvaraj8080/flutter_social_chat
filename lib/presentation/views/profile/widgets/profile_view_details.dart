@@ -3,8 +3,8 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
 
-class ProfileDetails extends StatelessWidget {
-  const ProfileDetails({
+class ProfileViewDetails extends StatelessWidget {
+  const ProfileViewDetails({
     super.key,
     required this.createdAt,
     required this.isUserBannedStatus,
@@ -18,7 +18,7 @@ class ProfileDetails extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 20),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: white,

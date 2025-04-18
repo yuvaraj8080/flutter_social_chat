@@ -215,5 +215,7 @@
 
     "reconnectingToChat": "Reconnecting to chat...",
 
+    "loadingProfile": "Loading profile...",
+
     "retry": "Retry"
 }

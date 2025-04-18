@@ -17,20 +17,20 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A button that handles the sign-out process including confirmation dialog,
 /// disconnection from Stream Chat, and navigation to the sign-in view.
-class ProfileSignOutButton extends StatefulWidget {
-  const ProfileSignOutButton({super.key});
+class ProfileViewSignOutButton extends StatefulWidget {
+  const ProfileViewSignOutButton({super.key});
 
   @override
-  State<ProfileSignOutButton> createState() => _ProfileSignOutButtonState();
+  State<ProfileViewSignOutButton> createState() => _ProfileViewSignOutButtonState();
 }
 
-class _ProfileSignOutButtonState extends State<ProfileSignOutButton> {
+class _ProfileViewSignOutButtonState extends State<ProfileViewSignOutButton> {
   /// Flag to prevent multiple simultaneous sign-out attempts
   bool _isSigningOut = false;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
+    final localization = AppLocalizations.of(context);
 
     return BlocListener<AuthSessionCubit, AuthSessionState>(
       listenWhen: (previous, current) =>
@@ -39,7 +39,7 @@ class _ProfileSignOutButtonState extends State<ProfileSignOutButton> {
           (previous.isLoggedIn && !current.isLoggedIn), // When actually logged out
       listener: _handleAuthStateChanges,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16),
+        margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
         width: double.infinity,
         child: ElevatedButton(
           onPressed: _isSigningOut ? null : () => _showSignOutConfirmationDialog(context),
@@ -51,21 +51,21 @@ class _ProfileSignOutButtonState extends State<ProfileSignOutButton> {
             elevation: 2,
             shadowColor: black.withValues(alpha: 0.2),
           ),
-          child: _buildButtonContent(l10n),
+          child: _buildButtonContent(localization),
         ),
       ),
     );
   }
 
   /// Builds the button content with icon and text
-  Widget _buildButtonContent(AppLocalizations? l10n) {
+  Widget _buildButtonContent(AppLocalizations? localization) {
     return Row(
       spacing: 8,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Icon(Icons.logout_rounded, color: white, size: 18),
         CustomText(
-          text: l10n?.signOut ?? '',
+          text: localization?.signOut ?? '',
           fontSize: 15,
           fontWeight: FontWeight.w600,
           color: white,
@@ -131,7 +131,7 @@ class _ProfileSignOutButtonState extends State<ProfileSignOutButton> {
 
   /// Shows a confirmation dialog before signing out
   void _showSignOutConfirmationDialog(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
+    final localization = AppLocalizations.of(context);
 
     showDialog(
       context: context,
@@ -141,15 +141,12 @@ class _ProfileSignOutButtonState extends State<ProfileSignOutButton> {
             borderRadius: BorderRadius.circular(16),
           ),
           title: CustomText(
-            text: l10n?.signOut ?? '',
+            text: localization?.signOut ?? '',
             fontSize: 16,
             fontWeight: FontWeight.bold,
             color: customGreyColor900,
           ),
-          content: CustomText(
-            text: l10n?.signOutConfirmation ?? '',
-            color: customGreyColor800,
-          ),
+          content: CustomText(text: localization?.signOutConfirmation ?? '', color: customGreyColor800),
           actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           actionsAlignment: MainAxisAlignment.center,
           actions: [
@@ -157,14 +154,8 @@ class _ProfileSignOutButtonState extends State<ProfileSignOutButton> {
               spacing: 12,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Cancel button
-                Expanded(
-                  child: _buildCancelButton(dialogContext, l10n),
-                ),
-                // Confirm button
-                Expanded(
-                  child: _buildConfirmButton(dialogContext, context, l10n),
-                ),
+                Expanded(child: _buildCancelButton(dialogContext, localization)),
+                Expanded(child: _buildConfirmButton(dialogContext, context, localization)),
               ],
             ),
           ],
@@ -174,7 +165,7 @@ class _ProfileSignOutButtonState extends State<ProfileSignOutButton> {
   }
 
   /// Builds the cancel button for the confirmation dialog
-  Widget _buildCancelButton(BuildContext dialogContext, AppLocalizations? l10n) {
+  Widget _buildCancelButton(BuildContext dialogContext, AppLocalizations? localization) {
     return TextButton(
       onPressed: () => Navigator.of(dialogContext).pop(),
       style: TextButton.styleFrom(
@@ -183,15 +174,12 @@ class _ProfileSignOutButtonState extends State<ProfileSignOutButton> {
           borderRadius: BorderRadius.circular(8),
         ),
       ),
-      child: CustomText(
-        text: l10n?.cancel ?? '',
-        color: customGreyColor700,
-      ),
+      child: CustomText(text: localization?.cancel ?? '', color: customGreyColor700),
     );
   }
 
   /// Builds the confirm button for the confirmation dialog
-  Widget _buildConfirmButton(BuildContext dialogContext, BuildContext parentContext, AppLocalizations? l10n) {
+  Widget _buildConfirmButton(BuildContext dialogContext, BuildContext parentContext, AppLocalizations? localization) {
     return ElevatedButton(
       onPressed: () {
         Navigator.of(dialogContext).pop();
@@ -203,7 +191,7 @@ class _ProfileSignOutButtonState extends State<ProfileSignOutButton> {
         padding: const EdgeInsets.symmetric(vertical: 12),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
-      child: CustomText(text: l10n?.signOut ?? '', color: white),
+      child: CustomText(text: localization?.signOut ?? '', color: white),
     );
   }
 
@@ -234,7 +222,7 @@ class _ProfileSignOutButtonState extends State<ProfileSignOutButton> {
         // Disconnect in stages to prevent race conditions
         await _disconnectChannels(client);
         await _disconnectUser(client);
-        
+
         // Verify disconnection was successful
         if (client.state.currentUser != null) {
           // Force disconnect as a fallback mechanism
@@ -253,7 +241,7 @@ class _ProfileSignOutButtonState extends State<ProfileSignOutButton> {
     try {
       // Create a copy of the channels to avoid concurrent modification
       final channelsCopy = Map<String, Channel>.from(client.state.channels);
-      
+
       // Close all active channels
       for (final entry in channelsCopy.entries) {
         try {
@@ -278,10 +266,10 @@ class _ProfileSignOutButtonState extends State<ProfileSignOutButton> {
       if (client.state.currentUser != null) {
         // Disconnect with persistence flush
         await client.disconnectUser(flushChatPersistence: true);
-        
+
         // Allow more time for disconnection to complete
         await Future.delayed(const Duration(milliseconds: 300));
-        
+
         // Verify disconnection was successful
         if (client.state.currentUser != null) {
           debugPrint('First disconnect attempt failed, trying again...');
