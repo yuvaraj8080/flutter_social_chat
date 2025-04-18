@@ -103,6 +103,13 @@ class _DashboardViewAnimatedChatButtonState extends State<DashboardViewAnimatedC
   Widget build(BuildContext context) {
     final appLocalizations = AppLocalizations.of(context);
 
+    // Constants for button sizes to ensure proper centering
+    const double mainButtonSize = 64;
+    const double optionButtonSize = 48;
+    
+    // Calculate the offset to properly center the option buttons
+    final double buttonOffset = (mainButtonSize - optionButtonSize) / 2;
+
     return SizedBox(
       width: 220,
       height: 250,
@@ -116,7 +123,7 @@ class _DashboardViewAnimatedChatButtonState extends State<DashboardViewAnimatedC
             icon: Icons.group_rounded,
             color: customIndigoColorSecondary,
             onTap: () => _navigateToCreateChat(true),
-            horizontalOffset: 48,
+            horizontalOffset: buttonOffset,
           ),
           _buildChatOption(
             animation: _slidePrivateChatAnimation,
@@ -124,7 +131,7 @@ class _DashboardViewAnimatedChatButtonState extends State<DashboardViewAnimatedC
             icon: Icons.person,
             color: customIndigoColor,
             onTap: () => _navigateToCreateChat(false),
-            horizontalOffset: 48,
+            horizontalOffset: buttonOffset,
           ),
           _buildMainButton(),
         ],
