@@ -27,12 +27,19 @@ class SmsVerificationView extends StatefulWidget {
 }
 
 class _SmsVerificationViewState extends State<SmsVerificationView> {
+  // Flag to prevent multiple navigations
   bool _hasNavigatedAway = false;
+
+  // Critical auth failure types that should trigger navigation back to sign-in
+  static const _criticalAuthFailures = {
+    AuthFailureEnum.serverError,
+    AuthFailureEnum.sessionExpired,
+  };
 
   @override
   Widget build(BuildContext context) {
-    final String phoneNumber = widget.state.phoneNumber;
-    final String appBarTitle = AppLocalizations.of(context)?.verification ?? '';
+    final localizations = AppLocalizations.of(context);
+    final String appBarTitle = localizations?.verification ?? '';
 
     return MultiBlocListener(
       listeners: [
@@ -69,7 +76,7 @@ class _SmsVerificationViewState extends State<SmsVerificationView> {
           title: appBarTitle,
           titleColor: white,
         ),
-        body: SmsVerificationViewBody(phoneNumber: phoneNumber),
+        body: const SmsVerificationViewBody(),
       ),
     );
   }
@@ -96,18 +103,15 @@ class _SmsVerificationViewState extends State<SmsVerificationView> {
   void _safelyNavigateTo(BuildContext context, String route) {
     if (!mounted) return;
 
-    Future.microtask(() {
-      if (mounted) {
-        try {
-          context.go(route);
-        } catch (e) {
-          // If navigation fails, try again in the next frame
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              context.go(route);
-            }
-          });
-        }
+    // Use a single navigation approach with a post frame callback
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      try {
+        context.go(route);
+      } catch (e) {
+        debugPrint('Navigation error: $e');
+        // Error already logged, no need for additional attempts
       }
     });
   }
@@ -131,7 +135,7 @@ class _SmsVerificationViewState extends State<SmsVerificationView> {
         (authFailure) {
           _showErrorToast(context, authFailure);
 
-          if (authFailure == AuthFailureEnum.serverError || authFailure == AuthFailureEnum.sessionExpired) {
+          if (_criticalAuthFailures.contains(authFailure)) {
             // For critical errors, go back to the sign-in screen
             _safelyNavigateBack(context);
           } else {
@@ -200,8 +204,8 @@ class _SmsVerificationViewState extends State<SmsVerificationView> {
 
     setState(() => _hasNavigatedAway = true);
 
-    // Use a microtask to defer the navigation to the next frame
-    Future.microtask(() {
+    // Use a more reliable navigation approach
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
 
       try {

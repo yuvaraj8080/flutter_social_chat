@@ -5,6 +5,7 @@ import 'package:flutter_social_chat/presentation/blocs/phone_number_sign_in/phon
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
+/// Widget that displays a custom PIN field for SMS code entry
 class SmsVerificationPinField extends StatelessWidget {
   const SmsVerificationPinField({super.key});
 

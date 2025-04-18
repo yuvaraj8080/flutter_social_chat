@@ -2,19 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_social_chat/presentation/blocs/phone_number_sign_in/phone_number_sign_in_cubit.dart';
-import 'package:flutter_social_chat/presentation/blocs/phone_number_sign_in/phone_number_sign_in_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
 
-class VerificationConfirmButton extends StatelessWidget {
-  const VerificationConfirmButton({super.key, required this.state});
+/// Button to confirm and submit the SMS verification code
+class SmsVerificationButton extends StatelessWidget {
+  const SmsVerificationButton({super.key, required this.isEnabled});
 
-  final PhoneNumberSignInState state;
-
+  final bool isEnabled;
   @override
   Widget build(BuildContext context) {
     final String verifyCodeText = AppLocalizations.of(context)?.verifyCode ?? '';
-    final bool isEnabled = state.smsCode.isNotEmpty && state.smsCode.length == 6;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 120),

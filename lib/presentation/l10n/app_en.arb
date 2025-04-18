@@ -86,6 +86,8 @@
 
     "resendCode": "RESEND CODE",
     
+    "codeResent": "Code resent successfully",
+    
     "username": "Username",
 
     "tellUsWhatsYourName": "Tell us what's your name?",

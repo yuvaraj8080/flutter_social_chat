@@ -6,22 +6,22 @@ import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/gen/assets.gen.dart';
 import 'package:flutter_social_chat/presentation/views/sms_verification/widgets/confirmation_info_text_with_icon.dart';
 import 'package:flutter_social_chat/presentation/views/sms_verification/widgets/confirmation_text_with_icon.dart';
-import 'package:flutter_social_chat/presentation/views/sms_verification/widgets/resend_code_button.dart';
+import 'package:flutter_social_chat/presentation/views/sms_verification/widgets/sms_verification_resend_code_button.dart';
 import 'package:flutter_social_chat/presentation/views/sms_verification/widgets/sms_verification_pin_field.dart';
-import 'package:flutter_social_chat/presentation/views/sms_verification/widgets/verification_confirm_button.dart';
+import 'package:flutter_social_chat/presentation/views/sms_verification/widgets/sms_verification_button.dart';
 import 'package:lottie/lottie.dart';
 
+/// Main content container for the SMS verification view
 class SmsVerificationViewBody extends StatelessWidget {
-  const SmsVerificationViewBody({super.key, required this.phoneNumber});
-
-  final String phoneNumber;
+  const SmsVerificationViewBody({super.key});
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<PhoneNumberSignInCubit, PhoneNumberSignInState>(
       buildWhen: (previous, current) => previous.smsCode != current.smsCode,
       builder: (context, state) {
-        final screenHeight = MediaQuery.of(context).size.height;
+        final screenHeight = MediaQuery.sizeOf(context).height;
+        final isVerificationButtonEnabled = state.smsCode.isNotEmpty && state.smsCode.length == 6;
 
         return Container(
           height: double.infinity,
@@ -35,12 +35,15 @@ class SmsVerificationViewBody extends StatelessWidget {
           ),
           child: Column(
             children: [
-              // Animation - Reduced height when keyboard is visible
               SizedBox(
                 height: screenHeight * 0.25,
                 child: Lottie.asset(
                   Assets.animations.smsAnimation,
                   fit: BoxFit.contain,
+                  frameRate: const FrameRate(30), // Limit frame rate for better performance
+                  options: LottieOptions(
+                    enableMergePaths: true, // Enable path merging for better performance
+                  ),
                 ),
               ),
               Padding(
@@ -49,13 +52,13 @@ class SmsVerificationViewBody extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const ConfirmationTextWithIcon(),
-                    ConfirmationInfoTextWithIcon(phoneNumber: phoneNumber),
+                    ConfirmationInfoTextWithIcon(phoneNumber: state.phoneNumber),
                     const SizedBox(height: 40),
                     const SmsVerificationPinField(),
                     const SizedBox(height: 40),
-                    const ResendCodeButton(),
+                    const SmsVerificationResendCodeButton(),
                     const SizedBox(height: 24),
-                    VerificationConfirmButton(state: state),
+                    SmsVerificationButton(isEnabled: isVerificationButtonEnabled),
                   ],
                 ),
               ),

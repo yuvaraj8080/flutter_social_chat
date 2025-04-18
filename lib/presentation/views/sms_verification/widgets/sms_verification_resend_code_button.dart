@@ -9,14 +9,16 @@ import 'package:flutter_social_chat/presentation/blocs/phone_number_sign_in/phon
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
 
-class ResendCodeButton extends StatefulWidget {
-  const ResendCodeButton({super.key});
+/// Button that allows users to request a new SMS code
+class SmsVerificationResendCodeButton extends StatefulWidget {
+  const SmsVerificationResendCodeButton({super.key});
 
   @override
-  State<ResendCodeButton> createState() => _ResendCodeButtonState();
+  State<SmsVerificationResendCodeButton> createState() => _SmsVerificationResendCodeButtonState();
 }
 
-class _ResendCodeButtonState extends State<ResendCodeButton> {
+class _SmsVerificationResendCodeButtonState extends State<SmsVerificationResendCodeButton> {
+  // Button state tracking
   bool _isResending = false;
   Timer? _safetyTimer;
 
@@ -31,21 +33,20 @@ class _ResendCodeButtonState extends State<ResendCodeButton> {
     final String resendCodeText = AppLocalizations.of(context)?.resendCode ?? '';
 
     return BlocConsumer<PhoneNumberSignInCubit, PhoneNumberSignInState>(
-      listenWhen: (previous, current) => 
+      listenWhen: (previous, current) =>
           previous.isInProgress != current.isInProgress ||
-          (previous.failureMessageOption != current.failureMessageOption && 
-           current.failureMessageOption.isSome()),
+          (previous.failureMessageOption != current.failureMessageOption && current.failureMessageOption.isSome()),
       listener: (context, state) {
         // When the state changes from in-progress to not in-progress during a resend operation
         if (_isResending) {
           if (!state.isInProgress) {
             setState(() => _isResending = false);
             _safetyTimer?.cancel();
-            
+
             state.failureMessageOption.fold(
               () {
-                // Success case
-                BotToast.showText(text: 'Code resent');
+                // Success case - show toast with localized message
+                BotToast.showText(text: AppLocalizations.of(context)?.codeResent ?? '');
               },
               (_) {
                 // Error is already handled by the parent view
@@ -57,7 +58,7 @@ class _ResendCodeButtonState extends State<ResendCodeButton> {
       buildWhen: (previous, current) => previous.isInProgress != current.isInProgress,
       builder: (context, state) {
         final bool isDisabled = state.isInProgress || _isResending;
-        
+
         return Align(
           alignment: Alignment.centerLeft,
           child: InkWell(
@@ -71,10 +72,7 @@ class _ResendCodeButtonState extends State<ResendCodeButton> {
                   const Icon(Icons.refresh_rounded, size: 18, color: white),
                   const SizedBox(width: 8),
                   CustomText(
-                    text: resendCodeText,
-                    color: white.withOpacity(isDisabled ? 0.5 : 1.0),
-                    fontSize: 14,
-                  ),
+                      text: resendCodeText, color: white.withValues(alpha: isDisabled ? 0.5 : 1.0), fontSize: 14),
                 ],
               ),
             ),
@@ -87,13 +85,13 @@ class _ResendCodeButtonState extends State<ResendCodeButton> {
   void _resendCode(BuildContext context) {
     // Already resending, don't trigger again
     if (_isResending) return;
-    
+
     // Cancel any existing safety timer
     _safetyTimer?.cancel();
-    
+
     // Track that we're in a resend operation
     setState(() => _isResending = true);
-    
+
     // Use a safety timer as a backup - if after 8 seconds we're still resending,
     // reset our state
     _safetyTimer = Timer(const Duration(seconds: 8), () {
@@ -102,7 +100,7 @@ class _ResendCodeButtonState extends State<ResendCodeButton> {
         debugPrint('ResendCodeButton safety timer fired');
       }
     });
-    
+
     // Initiate the resend through the cubit
     context.read<PhoneNumberSignInCubit>().resendCode();
   }

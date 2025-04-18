@@ -23,14 +23,7 @@ class ConfirmationTextWithIcon extends StatelessWidget {
             ),
             child: const Icon(Icons.verified_outlined, size: 28, color: white),
           ),
-          Expanded(
-            child: CustomText(
-              text: confirmationText,
-              color: white,
-              fontWeight: FontWeight.w700,
-              fontSize: 26,
-            ),
-          ),
+          Expanded(child: CustomText(text: confirmationText, color: white, fontWeight: FontWeight.w700, fontSize: 26)),
         ],
       ),
     );
