@@ -36,14 +36,6 @@
 
     "yourInspirationalGroupName": "My inspirational group name is...",
 
-    "channelNameCanNotBeAnEmpty": "Channel name can not be an empty!",
-
-    "channelNameCanNotBeLongerThanTenCharacters": "Channel name can not be longer than twenty characters!",
-
-    "channelNameCanNotBeShorterThanThreeCharacters": "Channel name can not be shorter than three characters!",
-
-    "userNameRequired": "Please enter a valid username!",
-
     "userNameCanNotBeAnEmpty": "Username can not be an empty!",
 
     "userNameCanNotBeLongerThanTwentyCharacters": "Username can not be longer than twenty characters!",
@@ -61,12 +53,6 @@
     "animatedText4": "Complete your profile to unlock all features and connect with people",
 
     "createdAtText": "Created at",
-
-    "role": "Role",
-
-    "banStatus": "Ban Status",
-
-    "profilePage": "Profile Page",
 
     "signIn": "Sign In",
 
@@ -91,8 +77,6 @@
     "codeResent": "Code resent successfully",
     
     "username": "Username",
-
-    "tellUsWhatsYourName": "Tell us what's your name?",
 
     "serverError": "Server Error!",
 
