@@ -4,8 +4,8 @@ import 'package:flutter_social_chat/presentation/blocs/phone_number_sign_in/phon
 import 'package:flutter_social_chat/presentation/blocs/phone_number_sign_in/phone_number_sign_in_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/gen/assets.gen.dart';
-import 'package:flutter_social_chat/presentation/views/sms_verification/widgets/confirmation_info_text_with_icon.dart';
-import 'package:flutter_social_chat/presentation/views/sms_verification/widgets/confirmation_text_with_icon.dart';
+import 'package:flutter_social_chat/presentation/views/sms_verification/widgets/sms_verification_confirmation_info_text_with_icon.dart';
+import 'package:flutter_social_chat/presentation/views/sms_verification/widgets/sms_verification_confirmation_text_with_icon.dart';
 import 'package:flutter_social_chat/presentation/views/sms_verification/widgets/sms_verification_resend_code_button.dart';
 import 'package:flutter_social_chat/presentation/views/sms_verification/widgets/sms_verification_pin_field.dart';
 import 'package:flutter_social_chat/presentation/views/sms_verification/widgets/sms_verification_button.dart';
@@ -51,8 +51,8 @@ class SmsVerificationViewBody extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const ConfirmationTextWithIcon(),
-                    ConfirmationInfoTextWithIcon(phoneNumber: state.phoneNumber),
+                    const SmsVerificationConfirmationTextWithIcon(),
+                    SmsVerificationConfirmationInfoTextWithIcon(phoneNumber: state.phoneNumber),
                     const SizedBox(height: 40),
                     const SmsVerificationPinField(),
                     const SizedBox(height: 40),
