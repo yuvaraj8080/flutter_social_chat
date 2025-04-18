@@ -4,6 +4,7 @@ import 'package:flutter_social_chat/domain/models/chat/chat_user_model.dart';
 import 'package:flutter_social_chat/core/interfaces/i_chat_repository.dart';
 import 'package:flutter_social_chat/data/extensions/chat/chat_user_extensions.dart';
 import 'package:flutter_social_chat/core/constants/enums/chat_failure_enum.dart';
+import 'package:flutter_social_chat/core/config/env_config.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart' hide Unit;
 import 'dart:convert';
@@ -15,10 +16,8 @@ class ChatRepository implements IChatRepository {
   final IAuthRepository _authRepository;
   final StreamChatClient _streamChatClient;
 
-  // Stream Chat API Secret - In production, this should be on your backend
-  // For development purposes only, we're keeping it in the client
-  final String _apiSecret =
-      'e33hrz4ztu5ynub6h7xadb9juc5nd7cr6svbpg4ank3ff7mfzusnhyywy2z33pqz'; // Replace with your actual Stream secret
+  // Stream Chat API Secret is retrieved from environment configuration
+  // No hardcoded secrets
 
   @override
   Stream<ChatUserModel> get chatAuthStateChanges {
@@ -61,6 +60,9 @@ class ChatRepository implements IChatRepository {
   String _generateToken(String userId) {
     // In production, token generation should happen on the server
     // This is only for development purposes
+    
+    // Get API secret from environment config
+    final apiSecret = EnvConfig.instance.streamChatApiSecret;
 
     // Header
     final header = {'alg': 'HS256', 'typ': 'JWT'};
@@ -72,7 +74,7 @@ class ChatRepository implements IChatRepository {
 
     // Create signature
     final message = '$encodedHeader.$encodedPayload';
-    final hmac = Hmac(sha256, utf8.encode(_apiSecret));
+    final hmac = Hmac(sha256, utf8.encode(apiSecret));
     final digest = hmac.convert(utf8.encode(message));
     final signature = base64Url.encode(digest.bytes);
 

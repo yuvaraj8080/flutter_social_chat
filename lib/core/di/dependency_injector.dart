@@ -13,6 +13,7 @@ import 'package:flutter_social_chat/core/interfaces/i_auth_repository.dart';
 import 'package:flutter_social_chat/core/interfaces/i_chat_repository.dart';
 import 'package:flutter_social_chat/core/interfaces/i_connectivity_repository.dart';
 import 'package:flutter_social_chat/core/init/router/app_router.dart';
+import 'package:flutter_social_chat/core/config/env_config.dart';
 import 'package:get_it/get_it.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -24,7 +25,12 @@ void injectionSetup() {
 
   // External services
   getIt.registerSingleton<Connectivity>(Connectivity());
-  getIt.registerSingleton<StreamChatClient>(StreamChatClient('c2neqfzpxu7m', logLevel: Level.INFO));
+  getIt.registerSingleton<StreamChatClient>(
+    StreamChatClient(
+      EnvConfig.instance.streamChatApiKey,
+      logLevel: Level.INFO,
+    ),
+  );
 
   // Firebase services
   getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);

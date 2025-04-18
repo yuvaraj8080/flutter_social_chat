@@ -12,7 +12,7 @@ extension AuthUserMapperExtensions on User {
       phoneNumber: phoneNumber ?? '',
       photoUrl: photoURL,
       userName: displayName,
-      isOnboardingCompleted: false, // Default to false, should be updated from Firestore
+      isOnboardingCompleted: false,
     );
   }
 }

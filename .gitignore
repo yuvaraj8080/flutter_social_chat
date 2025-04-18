@@ -174,3 +174,8 @@ firebase.json
 !android/settings.gradle
 !README.md
 !pubspec.yaml
+
+# Environment files
+.env
+*.env
+!.env.example
