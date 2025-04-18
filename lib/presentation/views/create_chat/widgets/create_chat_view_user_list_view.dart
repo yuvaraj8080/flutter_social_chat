@@ -7,8 +7,8 @@ import 'package:flutter_social_chat/presentation/design_system/widgets/custom_te
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class UserListView extends StatelessWidget {
-  const UserListView({
+class CreateChatViewUserListView extends StatelessWidget {
+  const CreateChatViewUserListView({
     super.key,
     required this.userListController,
     this.isCreateNewChatPageForCreatingGroup,

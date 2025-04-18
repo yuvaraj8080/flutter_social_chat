@@ -6,8 +6,8 @@ import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class CreateNewChatButton extends StatefulWidget {
-  const CreateNewChatButton({
+class CreateChatViewNewChatButton extends StatefulWidget {
+  const CreateChatViewNewChatButton({
     super.key,
     required this.isCreateNewChatPageForCreatingGroup,
   });
@@ -15,10 +15,10 @@ class CreateNewChatButton extends StatefulWidget {
   final bool isCreateNewChatPageForCreatingGroup;
 
   @override
-  State<CreateNewChatButton> createState() => _CreateNewChatButtonState();
+  State<CreateChatViewNewChatButton> createState() => _CreateChatViewNewChatButtonState();
 }
 
-class _CreateNewChatButtonState extends State<CreateNewChatButton> with SingleTickerProviderStateMixin {
+class _CreateChatViewNewChatButtonState extends State<CreateChatViewNewChatButton> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
   bool _isPressed = false;

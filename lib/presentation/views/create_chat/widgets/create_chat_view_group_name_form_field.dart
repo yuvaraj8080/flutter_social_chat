@@ -7,14 +7,14 @@ import 'package:flutter_social_chat/presentation/blocs/chat_management/chat_mana
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
 
-class ChannelNameFormField extends StatefulWidget {
-  const ChannelNameFormField({super.key});
+class CreateChatViewGroupNameFormField extends StatefulWidget {
+  const CreateChatViewGroupNameFormField({super.key});
 
   @override
-  State<ChannelNameFormField> createState() => _ChannelNameFormFieldState();
+  State<CreateChatViewGroupNameFormField> createState() => _CreateChatViewGroupNameFormFieldState();
 }
 
-class _ChannelNameFormFieldState extends State<ChannelNameFormField> {
+class _CreateChatViewGroupNameFormFieldState extends State<CreateChatViewGroupNameFormField> {
   final _formKey = GlobalKey<FormState>();
   final _textController = TextEditingController();
   bool _isValid = false;
@@ -145,12 +145,14 @@ class _ChannelNameFormFieldState extends State<ChannelNameFormField> {
                         : null,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: customGreyColor300, width: 1),
+                      borderSide: const BorderSide(
+                        color: customGreyColor300,
+                      ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(
-                          color: _isValid ? customIndigoColor.withValues(alpha: 0.5) : customGreyColor300, width: 1),
+                      borderSide:
+                          BorderSide(color: _isValid ? customIndigoColor.withValues(alpha: 0.5) : customGreyColor300),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -158,7 +160,7 @@ class _ChannelNameFormFieldState extends State<ChannelNameFormField> {
                     ),
                     errorBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: errorColor.withValues(alpha: 0.7), width: 1),
+                      borderSide: BorderSide(color: errorColor.withValues(alpha: 0.7)),
                     ),
                     focusedErrorBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),

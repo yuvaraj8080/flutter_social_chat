@@ -8,7 +8,7 @@ import 'package:flutter_social_chat/presentation/blocs/phone_number_sign_in/phon
 import 'package:flutter_social_chat/presentation/views/bottom_tab/bottom_tab_view.dart';
 import 'package:flutter_social_chat/presentation/views/dashboard/dashboard_view.dart';
 import 'package:flutter_social_chat/presentation/views/chat/chat_page.dart';
-import 'package:flutter_social_chat/presentation/views/create_new_chat/create_new_chat_page.dart';
+import 'package:flutter_social_chat/presentation/views/create_chat/create_chat_view.dart';
 import 'package:flutter_social_chat/presentation/views/landing/landing_view.dart';
 import 'package:flutter_social_chat/presentation/views/onboarding/onboarding_view.dart';
 import 'package:flutter_social_chat/presentation/views/profile/profile_view.dart';
@@ -159,7 +159,7 @@ class AppRouter {
               .single
               .value as bool;
 
-          return CreateNewChatPage(
+          return CreateChatView(
             userListController: userListController ??
                 StreamUserListController(
                   client: StreamChat.of(context).client,

@@ -4,12 +4,12 @@ import 'package:flutter_social_chat/presentation/blocs/chat_management/chat_mana
 import 'package:flutter_social_chat/presentation/blocs/chat_management/chat_management_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
-import 'package:flutter_social_chat/presentation/views/create_new_chat/widgets/channel_name_form_field.dart';
-import 'package:flutter_social_chat/presentation/views/create_new_chat/widgets/create_new_chat_button.dart';
+import 'package:flutter_social_chat/presentation/views/create_chat/widgets/create_chat_view_group_name_form_field.dart';
+import 'package:flutter_social_chat/presentation/views/create_chat/widgets/create_chat_view_new_chat_button.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class CreatingGroupChatPageDetails extends StatelessWidget {
-  const CreatingGroupChatPageDetails({
+class CreateChatViewCreatingGroupChatPageDetails extends StatelessWidget {
+  const CreateChatViewCreatingGroupChatPageDetails({
     super.key,
     this.isCreateNewChatPageForCreatingGroup,
   });
@@ -78,8 +78,8 @@ class CreatingGroupChatPageDetails extends StatelessWidget {
                     ),
                   ),
                 ),
-              const ChannelNameFormField(),
-              CreateNewChatButton(
+              const CreateChatViewGroupNameFormField(),
+              CreateChatViewNewChatButton(
                 isCreateNewChatPageForCreatingGroup: isCreateNewChatPageForCreatingGroup!,
               ),
             ],
