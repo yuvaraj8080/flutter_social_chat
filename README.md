@@ -149,6 +149,8 @@ STREAM_CHAT_API_KEY=your_stream_chat_api_key
 STREAM_CHAT_API_SECRET=your_stream_chat_api_secret
 ```
 
+- For detailed environment setup instructions, see [ENV_SETUP.md](ENV_SETUP.md)
+
 5. **Run the app**
 
 ```bash
