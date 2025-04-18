@@ -17,6 +17,7 @@ class PopScopeScaffold extends StatelessWidget {
     this.resizeToAvoidBottomInset = true,
     this.onPopInvokedWithResult,
     this.enableKeyboardDismiss = true,
+    this.primary = true,
   }) : super(key: key);
 
   /// The bottom navigation bar of the scaffold.
@@ -43,6 +44,10 @@ class PopScopeScaffold extends StatelessWidget {
   /// Whether to enable automatic keyboard dismissal.
   final bool enableKeyboardDismiss;
 
+  /// Whether this scaffold is the primary scaffold in the app.
+  /// Set to false when using as a nested scaffold.
+  final bool primary;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -54,6 +59,7 @@ class PopScopeScaffold extends StatelessWidget {
       canPop: false,
       onPopInvokedWithResult: onPopInvokedWithResult ?? (didPop, result) {},
       child: Scaffold(
+        primary: primary,
         bottomNavigationBar: bottomNavigationBar,
         body: wrappedBody,
         appBar: appBar,

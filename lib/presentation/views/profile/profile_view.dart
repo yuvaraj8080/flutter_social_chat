@@ -8,7 +8,7 @@ import 'package:flutter_social_chat/presentation/blocs/chat_session/chat_session
 import 'package:flutter_social_chat/presentation/blocs/chat_session/chat_session_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/views/profile/widgets/profile_view_contact_card.dart';
-import 'package:flutter_social_chat/presentation/views/profile/widgets/profile_cover_card.dart';
+import 'package:flutter_social_chat/presentation/views/profile/widgets/profile_view_cover_card.dart';
 import 'package:flutter_social_chat/presentation/views/profile/widgets/profile_view_details.dart';
 import 'package:flutter_social_chat/presentation/views/profile/widgets/profile_view_loading_view.dart';
 import 'package:flutter_social_chat/presentation/views/profile/widgets/profile_view_sign_out_button.dart';

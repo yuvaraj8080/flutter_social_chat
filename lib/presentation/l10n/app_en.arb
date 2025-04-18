@@ -1,6 +1,8 @@
 {
     "chats": "Chats",
 
+    "dashboard": "Dashboard",
+
     "profile": "Profile",
 
     "giveRelatedPermission": "Please give related permission to use this feature.",
@@ -217,5 +219,7 @@
 
     "loadingProfile": "Loading profile...",
 
-    "retry": "Retry"
+    "retry": "Retry",
+    
+    "connectingToChat": "Connecting to chat..."
 }
