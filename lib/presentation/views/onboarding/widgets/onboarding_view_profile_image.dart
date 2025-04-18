@@ -8,8 +8,8 @@ import 'package:flutter_social_chat/presentation/design_system/widgets/custom_te
 /// Component that displays the user's profile image
 ///
 /// Uses a default image from a remote URL during onboarding
-class OnboardingProfileImage extends StatelessWidget {
-  const OnboardingProfileImage({super.key});
+class OnboardingViewProfileImage extends StatelessWidget {
+  const OnboardingViewProfileImage({super.key});
 
   // Default remote image URL
   static const String defaultImageUrl = 'https://pbs.twimg.com/profile_images/1870429866643869696/K1jmpXsk_400x400.jpg';

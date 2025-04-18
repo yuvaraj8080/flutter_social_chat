@@ -9,8 +9,8 @@ import 'package:flutter_social_chat/presentation/design_system/widgets/animated_
 ///
 /// This button is enabled only when the username is valid.
 /// When pressed, it triggers the profile creation process through the ProfileManagerCubit.
-class OnboardingSubmitButton extends StatelessWidget {
-  const OnboardingSubmitButton({super.key});
+class OnboardingViewSubmitButton extends StatelessWidget {
+  const OnboardingViewSubmitButton({super.key});
 
   @override
   Widget build(BuildContext context) {

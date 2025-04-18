@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
-import 'package:flutter_social_chat/presentation/views/onboarding/widgets/onboarding_animated_tips.dart';
-import 'package:flutter_social_chat/presentation/views/onboarding/widgets/onboarding_animation.dart';
-import 'package:flutter_social_chat/presentation/views/onboarding/widgets/onboarding_profile_image.dart';
-import 'package:flutter_social_chat/presentation/views/onboarding/widgets/onboarding_submit_button.dart';
-import 'package:flutter_social_chat/presentation/views/onboarding/widgets/onboarding_username_form_field.dart';
+import 'package:flutter_social_chat/presentation/views/onboarding/widgets/onboarding_view_animated_tips.dart';
+import 'package:flutter_social_chat/presentation/views/onboarding/widgets/onboarding_view_animation.dart';
+import 'package:flutter_social_chat/presentation/views/onboarding/widgets/onboarding_view_profile_image.dart';
+import 'package:flutter_social_chat/presentation/views/onboarding/widgets/onboarding_view_submit_button.dart';
+import 'package:flutter_social_chat/presentation/views/onboarding/widgets/onboarding_view_username_form_field.dart';
 
 /// Main content container for the onboarding page
 ///
@@ -16,8 +16,8 @@ import 'package:flutter_social_chat/presentation/views/onboarding/widgets/onboar
 /// - Username input field
 /// - Animated tips at the bottom
 /// - Submit button
-class OnboardingPageBody extends StatelessWidget {
-  const OnboardingPageBody({super.key});
+class OnboardingViewBody extends StatelessWidget {
+  const OnboardingViewBody({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,7 @@ class OnboardingPageBody extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const OnboardingAnimation(),
+          const OnboardingViewAnimation(),
           Expanded(
             child: _buildMainContentContainer(appLocalizations),
           ),
@@ -65,9 +65,9 @@ class OnboardingPageBody extends StatelessWidget {
           const SizedBox(height: 32),
           _buildProfileSection(appLocalizations),
           const Spacer(),
-          const OnboardingAnimatedTips(),
+          const OnboardingViewAnimatedTips(),
           const SizedBox(height: 24),
-          const OnboardingSubmitButton(),
+          const OnboardingViewSubmitButton(),
           const SizedBox(height: 36),
         ],
       ),
@@ -104,7 +104,7 @@ class OnboardingPageBody extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const OnboardingProfileImage(),
+        const OnboardingViewProfileImage(),
         const SizedBox(width: 20),
         Expanded(
           child: Column(
@@ -118,7 +118,7 @@ class OnboardingPageBody extends StatelessWidget {
                 color: customIndigoColor,
               ),
               const SizedBox(height: 16),
-              const OnboardingUsernameFormField(),
+              const OnboardingViewUsernameFormField(),
             ],
           ),
         ),

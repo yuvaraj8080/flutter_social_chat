@@ -4,14 +4,14 @@ import 'package:flutter_social_chat/presentation/gen/assets.gen.dart';
 import 'package:lottie/lottie.dart';
 
 /// Animated illustration shown at the top of the onboarding page
-class OnboardingAnimation extends StatefulWidget {
-  const OnboardingAnimation({super.key});
+class OnboardingViewAnimation extends StatefulWidget {
+  const OnboardingViewAnimation({super.key});
 
   @override
-  State<OnboardingAnimation> createState() => _OnboardingAnimationState();
+  State<OnboardingViewAnimation> createState() => _OnboardingViewAnimationState();
 }
 
-class _OnboardingAnimationState extends State<OnboardingAnimation> with SingleTickerProviderStateMixin {
+class _OnboardingViewAnimationState extends State<OnboardingViewAnimation> with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
   @override

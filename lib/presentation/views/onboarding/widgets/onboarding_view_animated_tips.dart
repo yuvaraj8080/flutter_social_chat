@@ -8,14 +8,14 @@ import 'package:flutter_social_chat/presentation/design_system/widgets/custom_te
 ///
 /// Displays a series of helpful tips with a fade animation between them.
 /// Tips are localized and automatically cycle every few seconds.
-class OnboardingAnimatedTips extends StatefulWidget {
-  const OnboardingAnimatedTips({super.key});
+class OnboardingViewAnimatedTips extends StatefulWidget {
+  const OnboardingViewAnimatedTips({super.key});
 
   @override
-  State<OnboardingAnimatedTips> createState() => _OnboardingAnimatedTipsState();
+  State<OnboardingViewAnimatedTips> createState() => _OnboardingViewAnimatedTipsState();
 }
 
-class _OnboardingAnimatedTipsState extends State<OnboardingAnimatedTips> with SingleTickerProviderStateMixin {
+class _OnboardingViewAnimatedTipsState extends State<OnboardingViewAnimatedTips> with SingleTickerProviderStateMixin {
   // State tracking
   int _currentTipIndex = 0;
   bool _isAnimating = false;

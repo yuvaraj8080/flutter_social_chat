@@ -13,8 +13,8 @@ import 'package:flutter_social_chat/presentation/design_system/widgets/custom_te
 /// Validates that the username:
 /// - Is between 3 and 20 characters
 /// - Only contains letters, numbers, underscores, and hyphens
-class OnboardingUsernameFormField extends StatelessWidget {
-  const OnboardingUsernameFormField({super.key});
+class OnboardingViewUsernameFormField extends StatelessWidget {
+  const OnboardingViewUsernameFormField({super.key});
 
   // Username validation regex - only allows letters, numbers, underscores and hyphens
   static final RegExp _usernameRegExp = RegExp(r'^[a-zA-Z0-9_\-]+$');

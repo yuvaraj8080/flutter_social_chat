@@ -7,7 +7,7 @@ import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session
 import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_loading_indicator.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/popscope_scaffold.dart';
-import 'package:flutter_social_chat/presentation/views/onboarding/widgets/onboarding_page_body.dart';
+import 'package:flutter_social_chat/presentation/views/onboarding/widgets/onboarding_view_body.dart';
 import 'package:go_router/go_router.dart';
 
 /// User onboarding page shown after successful authentication
@@ -20,8 +20,8 @@ import 'package:go_router/go_router.dart';
 /// The page listens to two BLoC states:
 /// - AuthSessionCubit: To detect when onboarding is completed and navigate accordingly
 /// - ProfileManagerCubit: To manage loading states during profile creation
-class OnboardingPage extends StatelessWidget {
-  const OnboardingPage({super.key});
+class OnboardingView extends StatelessWidget {
+  const OnboardingView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +41,7 @@ class OnboardingPage extends StatelessWidget {
         ),
       ],
       child: const PopScopeScaffold(
-        body: OnboardingPageBody(),
+        body: OnboardingViewBody(),
       ),
     );
   }
