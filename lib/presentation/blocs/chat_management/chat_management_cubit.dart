@@ -323,35 +323,29 @@ class ChatManagementCubit extends Cubit<ChatManagementState> {
     required int lengthOfTheChannelMembers,
     required User oneToOneChatMember,
   }) {
+    // If search text is empty, always show all channels
+    if (searchedText.isEmpty) {
+      return true;
+    }
+    
     // Clean up search text for case-insensitive comparison
     final editedSearchedText = searchedText.toLowerCase().trim();
     
-    // Default result if nothing is found
-    int result = -1;
-
+    // Safety check for index bounds
+    if (index < 0 || index >= listOfChannels.length) {
+      return false;
+    }
+    
+    // Get the channel to search in
+    final channel = listOfChannels[index];
+    
     if (lengthOfTheChannelMembers == 2) {
       // For one-to-one chats, search by member name
-      final filteredChannels = listOfChannels
-          .where(
-            (channel) => oneToOneChatMember.name.toLowerCase().trim().contains(editedSearchedText),
-          )
-          .toList();
-
-      // Check if the channel at index is in the filtered list
-      result = filteredChannels.indexOf(listOfChannels[index]);
+      return oneToOneChatMember.name.toLowerCase().trim().contains(editedSearchedText);
     } else {
       // For group chats, search by channel name
-      final filteredChannels = listOfChannels
-          .where(
-            (channel) => (channel.name ?? '').toLowerCase().trim().contains(editedSearchedText),
-          )
-          .toList();
-
-      // Check if the channel at index is in the filtered list
-      result = filteredChannels.indexOf(listOfChannels[index]);
+      final channelName = channel.name ?? '';
+      return channelName.toLowerCase().trim().contains(editedSearchedText);
     }
-
-    // Return true if the channel was found in the search results
-    return result != -1;
   }
 }
