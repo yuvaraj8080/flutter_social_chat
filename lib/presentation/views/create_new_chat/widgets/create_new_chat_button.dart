@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat_management/chat_management_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat_management/chat_management_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
+import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class CreateNewChatButton extends StatefulWidget {
   const CreateNewChatButton({
@@ -24,19 +26,10 @@ class _CreateNewChatButtonState extends State<CreateNewChatButton> with SingleTi
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 150),
-    );
-    
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 0.95,
-    ).animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.easeInOut,
-      ),
+    _animationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 150));
+
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
   }
 
@@ -48,30 +41,37 @@ class _CreateNewChatButtonState extends State<CreateNewChatButton> with SingleTi
 
   @override
   Widget build(BuildContext context) {
+    final appLocalizations = AppLocalizations.of(context);
+
     return BlocBuilder<ChatManagementCubit, ChatManagementState>(
-      buildWhen: (previous, current) => 
-        previous.listOfSelectedUserIDs != current.listOfSelectedUserIDs ||
-        previous.isChannelNameValid != current.isChannelNameValid ||
-        previous.isInProgress != current.isInProgress,
+      buildWhen: (previous, current) =>
+          previous.listOfSelectedUserIDs != current.listOfSelectedUserIDs ||
+          previous.isChannelNameValid != current.isChannelNameValid ||
+          previous.isInProgress != current.isInProgress,
       builder: (context, state) {
         // For group chat: require valid name AND at least 2 selected users
         // For private chat: require only 1 selected user
         final bool isUserSelected = state.listOfSelectedUserIDs.isNotEmpty;
-        final bool hasEnoughUsers = widget.isCreateNewChatPageForCreatingGroup 
-            ? state.listOfSelectedUserIDs.length >= 2
-            : isUserSelected;
-        
-        final bool shouldEnableButton = hasEnoughUsers && 
+        final bool hasEnoughUsers =
+            widget.isCreateNewChatPageForCreatingGroup ? state.listOfSelectedUserIDs.length >= 2 : isUserSelected;
+
+        final bool shouldEnableButton = hasEnoughUsers &&
             (widget.isCreateNewChatPageForCreatingGroup ? state.isChannelNameValid : true) &&
             !state.isInProgress;
-        
+
         // Get appropriate button text based on state
         final String buttonText = state.isInProgress
-            ? (widget.isCreateNewChatPageForCreatingGroup ? 'Creating Group...' : 'Starting Chat...')
+            ? (widget.isCreateNewChatPageForCreatingGroup
+                ? appLocalizations?.creatingGroup ?? ''
+                : appLocalizations?.startingChat ?? '')
             : widget.isCreateNewChatPageForCreatingGroup
-                ? (shouldEnableButton ? 'Create Group Chat' : 'Select Users & Name Group')
-                : (shouldEnableButton ? 'Start Chat' : 'Select a User to Chat With');
-            
+                ? (shouldEnableButton
+                    ? (appLocalizations?.startGroupChat ?? '')
+                    : (appLocalizations?.chatButtonDisabled ?? ''))
+                : (shouldEnableButton
+                    ? (appLocalizations?.startPrivateChat ?? '')
+                    : (appLocalizations?.selectUserToChat ?? ''));
+
         return Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
           child: AnimatedBuilder(
@@ -85,37 +85,43 @@ class _CreateNewChatButtonState extends State<CreateNewChatButton> with SingleTi
             child: Material(
               elevation: shouldEnableButton ? 4 : 0,
               borderRadius: BorderRadius.circular(12),
-              color: Colors.transparent,
+              color: transparent,
               child: Tooltip(
                 message: shouldEnableButton || state.isInProgress
-                    ? '' 
+                    ? ''
                     : widget.isCreateNewChatPageForCreatingGroup
-                        ? 'Select at least 2 users and provide a valid group name'
-                        : 'Select a user to start chatting',
+                        ? appLocalizations?.selectUsersAndNameGroup ?? ''
+                        : (appLocalizations?.selectUserToChat ?? ''),
                 preferBelow: true,
                 verticalOffset: 20,
                 child: GestureDetector(
-                  onTapDown: shouldEnableButton ? (_) {
-                    setState(() {
-                      _isPressed = true;
-                    });
-                    _animationController.forward();
-                  } : null,
-                  onTapUp: shouldEnableButton ? (_) {
-                    setState(() {
-                      _isPressed = false;
-                    });
-                    _animationController.reverse();
-                    context.read<ChatManagementCubit>().createNewChannel(
-                      isCreateNewChatPageForCreatingGroup: widget.isCreateNewChatPageForCreatingGroup,
-                    );
-                  } : null,
-                  onTapCancel: shouldEnableButton ? () {
-                    setState(() {
-                      _isPressed = false;
-                    });
-                    _animationController.reverse();
-                  } : null,
+                  onTapDown: shouldEnableButton
+                      ? (_) {
+                          setState(() {
+                            _isPressed = true;
+                          });
+                          _animationController.forward();
+                        }
+                      : null,
+                  onTapUp: shouldEnableButton
+                      ? (_) {
+                          setState(() {
+                            _isPressed = false;
+                          });
+                          _animationController.reverse();
+                          context.read<ChatManagementCubit>().createNewChannel(
+                                isCreateNewChatPageForCreatingGroup: widget.isCreateNewChatPageForCreatingGroup,
+                              );
+                        }
+                      : null,
+                  onTapCancel: shouldEnableButton
+                      ? () {
+                          setState(() {
+                            _isPressed = false;
+                          });
+                          _animationController.reverse();
+                        }
+                      : null,
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     width: double.infinity,
@@ -125,18 +131,18 @@ class _CreateNewChatButtonState extends State<CreateNewChatButton> with SingleTi
                       gradient: LinearGradient(
                         colors: state.isInProgress
                             ? [
-                                customIndigoColor.withOpacity(0.7),
-                                customIndigoColor.withOpacity(0.6),
+                                customIndigoColor.withValues(alpha: 0.7),
+                                customIndigoColor.withValues(alpha: 0.6),
                               ]
                             : shouldEnableButton
-                                ? (_isPressed 
+                                ? (_isPressed
                                     ? [
-                                        customIndigoColor.withOpacity(0.8),
+                                        customIndigoColor.withValues(alpha: 0.8),
                                         customIndigoColor,
                                       ]
                                     : [
                                         customIndigoColor,
-                                        customIndigoColor.withOpacity(0.8),
+                                        customIndigoColor.withValues(alpha: 0.8),
                                       ])
                                 : [
                                     customGreyColor400,
@@ -146,7 +152,7 @@ class _CreateNewChatButtonState extends State<CreateNewChatButton> with SingleTi
                       boxShadow: shouldEnableButton && !state.isInProgress
                           ? [
                               BoxShadow(
-                                color: customIndigoColor.withOpacity(0.3),
+                                color: customIndigoColor.withValues(alpha: 0.3),
                                 blurRadius: 8,
                                 offset: const Offset(0, 4),
                               ),
@@ -158,7 +164,7 @@ class _CreateNewChatButtonState extends State<CreateNewChatButton> with SingleTi
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           if (state.isInProgress)
-                            SizedBox(
+                            const SizedBox(
                               width: 20,
                               height: 20,
                               child: CircularProgressIndicator(
@@ -175,14 +181,12 @@ class _CreateNewChatButtonState extends State<CreateNewChatButton> with SingleTi
                               size: 24,
                             ),
                           const SizedBox(width: 12),
-                          Text(
-                            buttonText,
-                            style: const TextStyle(
-                              color: white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.5,
-                            ),
+                          CustomText(
+                            text: buttonText,
+                            color: white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.5,
                           ),
                         ],
                       ),

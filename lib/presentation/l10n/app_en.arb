@@ -38,7 +38,7 @@
 
     "channelNameCanNotBeAnEmpty": "Channel name can not be an empty!",
 
-    "channelNameCanNotBeLongerThanTenCharacters": "Channel name can not be longer than ten characters!",
+    "channelNameCanNotBeLongerThanTenCharacters": "Channel name can not be longer than twenty characters!",
 
     "channelNameCanNotBeShorterThanThreeCharacters": "Channel name can not be shorter than three characters!",
 
@@ -200,6 +200,30 @@
     "selectUserToChat": "Select a user to chat with",
     
     "deselectUser": "Tap to deselect",
+
+    "usersSelected": "users selected",
+
+    "noUsersFound": "No users found",
+    
+    "failedToLoadUsers": "Failed to load users",
+    
+    "enough": "Enough",
+    
+    "min2Required": "Min. 2 required",
+    
+    "creatingGroup": "Creating Group",
+    
+    "startingChat": "Starting Chat...",
+    
+    "selectUsersAndNameGroup": "Select at least 2 users and provide a valid group name",
+    
+    "groupNameCannotBeEmpty": "Group name cannot be empty",
+    
+    "atLeast3CharactersRequired": "At least 3 characters required",
+    
+    "maximum20CharactersAllowed": "Maximum 20 characters allowed",
+    
+    "enterInspiringGroupName": "Enter an inspiring group name",
 
     "online": "Online",
 

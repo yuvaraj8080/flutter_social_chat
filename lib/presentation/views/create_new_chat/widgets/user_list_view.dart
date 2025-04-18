@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat_management/chat_management_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat_management/chat_management_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
+import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -26,18 +27,17 @@ class UserListView extends StatelessWidget {
             color: customIndigoColor,
             onRefresh: () => userListController.refresh(),
             child: StreamUserListView(
-              shrinkWrap: false,
               controller: userListController,
-              emptyBuilder: (_) => _buildEmptyView(),
+              emptyBuilder: (_) => _buildEmptyView(context),
               loadingBuilder: (_) => const Center(
                 child: CircularProgressIndicator(color: customIndigoColor),
               ),
-              errorBuilder: (_, error) => _buildErrorView(),
+              errorBuilder: (_, error) => _buildErrorView(context),
               itemBuilder: (context, users, index, _) {
                 // Build custom item instead of using the default widget
                 final user = users[index];
                 final isSelected = state.listOfSelectedUserIDs.contains(user.id);
-                
+
                 return _buildUserListItem(
                   context: context,
                   user: user,
@@ -52,40 +52,40 @@ class UserListView extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyView() {
+  Widget _buildEmptyView(BuildContext context) {
+    final appLocalizations = AppLocalizations.of(context);
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.people_outline, size: 48, color: customIndigoColor.withOpacity(0.5)),
+          Icon(Icons.people_outline, size: 48, color: customIndigoColor.withValues(alpha: 0.5)),
           const SizedBox(height: 16),
-          Text(
-            'No users found',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: customIndigoColor.withOpacity(0.7),
-            ),
+          CustomText(
+            text: appLocalizations?.noUsersFound ?? '',
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: customIndigoColor.withValues(alpha: 0.7),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildErrorView() {
+  Widget _buildErrorView(BuildContext context) {
+    final appLocalizations = AppLocalizations.of(context);
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline, size: 48, color: Colors.red[300]),
+          Icon(Icons.error_outline, size: 48, color: errorColor.withValues(alpha: 0.7)),
           const SizedBox(height: 16),
-          Text(
-            'Failed to load users',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: Colors.red[400],
-            ),
+          CustomText(
+            text: appLocalizations?.failedToLoadUsers ?? '',
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: errorColor,
           ),
         ],
       ),
@@ -98,36 +98,30 @@ class UserListView extends StatelessWidget {
     required bool isSelected,
     required bool isGroup,
   }) {
+    final appLocalizations = AppLocalizations.of(context);
+
     return Material(
-      color: Colors.transparent,
+      color: transparent,
       child: Tooltip(
-        message: isSelected 
-            ? AppLocalizations.of(context)?.deselectUser ?? 'Tap to deselect'
-            : AppLocalizations.of(context)?.selectUserToChat ?? 'Select a user to chat with',
+        message: isSelected ? appLocalizations?.deselectUser ?? '' : appLocalizations?.selectUserToChat ?? '',
         preferBelow: true,
         child: InkWell(
           onTap: () {
             context.read<ChatManagementCubit>().selectUserWhenCreatingAGroup(
-              user: user,
-              isCreateNewChatPageForCreatingGroup: isGroup,
-            );
+                  user: user,
+                  isCreateNewChatPageForCreatingGroup: isGroup,
+                );
           },
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeInOut,
             decoration: BoxDecoration(
-              color: isSelected ? customIndigoColor.withOpacity(0.05) : Colors.transparent,
-              border: Border(
-                bottom: BorderSide(
-                  color: customGreyColor200,
-                  width: 0.5,
-                ),
-              ),
+              color: isSelected ? customIndigoColor.withValues(alpha: 0.05) : transparent,
+              border: const Border(bottom: BorderSide(color: customGreyColor200, width: 0.5)),
             ),
             padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
             child: Row(
               children: [
-                // Avatar with selection indicator
                 Stack(
                   clipBehavior: Clip.none,
                   children: [
@@ -151,39 +145,30 @@ class UserListView extends StatelessWidget {
                             shape: BoxShape.circle,
                             border: Border.all(color: white, width: 2),
                           ),
-                          child: const Icon(
-                            Icons.check,
-                            color: white,
-                            size: 14,
-                          ),
+                          child: const Icon(Icons.check, color: white, size: 14),
                         ),
                       ),
                   ],
                 ),
                 const SizedBox(width: 16),
-                // User details
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        user.name,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                          color: isSelected ? customIndigoColor : black,
-                        ),
+                      CustomText(
+                        text: user.name,
+                        fontSize: 16,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                        color: isSelected ? customIndigoColor : black,
                       ),
                       if (user.extraData.containsKey('status') && user.extraData['status'] != null)
                         Padding(
                           padding: const EdgeInsets.only(top: 4),
-                          child: Text(
-                            user.extraData['status'] as String,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: customGreyColor600,
-                              fontWeight: FontWeight.w400,
-                            ),
+                          child: CustomText(
+                            text: user.extraData['status'] as String,
+                            fontSize: 14,
+                            color: customGreyColor600,
+                            fontWeight: FontWeight.w400,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
@@ -191,7 +176,6 @@ class UserListView extends StatelessWidget {
                     ],
                   ),
                 ),
-                // Selection indicator for right side
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   curve: Curves.easeInOut,
@@ -199,19 +183,13 @@ class UserListView extends StatelessWidget {
                   height: 24,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: isSelected ? customIndigoColor : Colors.transparent,
+                    color: isSelected ? customIndigoColor : transparent,
                     border: Border.all(
                       color: isSelected ? customIndigoColor : customGreyColor400,
                       width: 1.5,
                     ),
                   ),
-                  child: isSelected
-                      ? const Icon(
-                          Icons.check,
-                          color: white,
-                          size: 16,
-                        )
-                      : null,
+                  child: isSelected ? const Icon(Icons.check, color: white, size: 16) : null,
                 ),
               ],
             ),

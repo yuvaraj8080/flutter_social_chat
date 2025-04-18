@@ -5,6 +5,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat_management/chat_management_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat_management/chat_management_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
+import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
 
 class ChannelNameFormField extends StatefulWidget {
   const ChannelNameFormField({super.key});
@@ -36,12 +37,14 @@ class _ChannelNameFormFieldState extends State<ChannelNameFormField> {
 
   // Validate group name with comprehensive rules
   String? _validateGroupName(String? value) {
+    final appLocalizations = AppLocalizations.of(context);
+
     if (value == null || value.trim().isEmpty) {
-      return 'Group name cannot be empty';
+      return appLocalizations?.groupNameCannotBeEmpty ?? '';
     } else if (value.trim().length < 3) {
-      return 'At least 3 characters required';
+      return appLocalizations?.atLeast3CharactersRequired ?? '';
     } else if (value.trim().length > 20) {
-      return 'Maximum 20 characters allowed';
+      return appLocalizations?.maximum20CharactersAllowed ?? '';
     }
 
     return null;
@@ -49,6 +52,8 @@ class _ChannelNameFormFieldState extends State<ChannelNameFormField> {
 
   @override
   Widget build(BuildContext context) {
+    final appLocalizations = AppLocalizations.of(context);
+
     return BlocBuilder<ChatManagementCubit, ChatManagementState>(
       builder: (context, state) {
         return Form(
@@ -60,35 +65,24 @@ class _ChannelNameFormFieldState extends State<ChannelNameFormField> {
               // Form field label
               Row(
                 children: [
-                  const Icon(
-                    CupertinoIcons.group_solid,
-                    size: 18,
+                  const Icon(CupertinoIcons.group_solid, size: 18, color: customIndigoColor),
+                  const SizedBox(width: 8),
+                  CustomText(
+                    text: appLocalizations?.groupName ?? '',
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                     color: customIndigoColor,
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    AppLocalizations.of(context)?.groupName ?? 'Group Name',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: customIndigoColor,
-                    ),
-                  ),
                   const Spacer(),
-                  // Character counter (only shows when field has content)
                   if (_textController.text.isNotEmpty)
-                    Text(
-                      '${_textController.text.length}/20',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: _isValid ? Colors.green : customGreyColor600,
-                      ),
+                    CustomText(
+                      text: '${_textController.text.length}/20',
+                      fontSize: 12,
+                      color: _isValid ? successColor : customGreyColor600,
                     ),
                 ],
               ),
               const SizedBox(height: 8),
-
-              // Text field with enhanced UX
               Focus(
                 onFocusChange: (hasFocus) {
                   // Use microtask to avoid calling setState during build
@@ -103,12 +97,9 @@ class _ChannelNameFormFieldState extends State<ChannelNameFormField> {
                   validator: _validateGroupName,
                   keyboardType: TextInputType.text,
                   textCapitalization: TextCapitalization.sentences,
-                  autocorrect: true,
                   maxLength: 20,
-                  // Remove default counter
                   buildCounter: (context, {required currentLength, required isFocused, maxLength}) => null,
                   onChanged: (value) {
-                    // Use microtask to avoid calling setState during build
                     Future.microtask(() {
                       // Update state in chat management cubit
                       context.read<ChatManagementCubit>().channelNameChanged(channelName: value.trim());
@@ -123,11 +114,8 @@ class _ChannelNameFormFieldState extends State<ChannelNameFormField> {
                   },
                   decoration: InputDecoration(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                    hintText: 'Enter an inspiring group name',
-                    hintStyle: TextStyle(
-                      color: customGreyColor400,
-                      fontSize: 14,
-                    ),
+                    hintText: appLocalizations?.enterInspiringGroupName ?? '',
+                    hintStyle: const TextStyle(color: customGreyColor400, fontSize: 14),
                     prefixIcon: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
                       padding: const EdgeInsets.all(8),
@@ -140,7 +128,7 @@ class _ChannelNameFormFieldState extends State<ChannelNameFormField> {
                     suffixIcon: _textController.text.isNotEmpty
                         ? IconButton(
                             icon: _isValid
-                                ? const Icon(Icons.check_circle, color: Colors.green, size: 20)
+                                ? const Icon(Icons.check_circle, color: successColor, size: 20)
                                 : const Icon(Icons.clear, size: 18),
                             onPressed: () {
                               // Use microtask to avoid calling setState during build
@@ -162,7 +150,7 @@ class _ChannelNameFormFieldState extends State<ChannelNameFormField> {
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide(
-                          color: _isValid ? customIndigoColor.withOpacity(0.5) : customGreyColor300, width: 1),
+                          color: _isValid ? customIndigoColor.withValues(alpha: 0.5) : customGreyColor300, width: 1),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -170,11 +158,11 @@ class _ChannelNameFormFieldState extends State<ChannelNameFormField> {
                     ),
                     errorBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.red[300]!, width: 1),
+                      borderSide: BorderSide(color: errorColor.withValues(alpha: 0.7), width: 1),
                     ),
                     focusedErrorBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.red[400]!, width: 2),
+                      borderSide: const BorderSide(color: errorColor, width: 2),
                     ),
                     fillColor: white,
                     filled: true,
@@ -188,19 +176,13 @@ class _ChannelNameFormFieldState extends State<ChannelNameFormField> {
                   padding: const EdgeInsets.only(top: 8, left: 4),
                   child: Row(
                     children: [
-                      const Icon(
-                        Icons.check_circle_outline,
-                        color: Colors.green,
-                        size: 16,
-                      ),
+                      const Icon(Icons.check_circle_outline, color: successColor, size: 16),
                       const SizedBox(width: 4),
-                      Text(
-                        'Ready to create group!',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Colors.green,
-                          fontWeight: FontWeight.w500,
-                        ),
+                      CustomText(
+                        text: appLocalizations?.readyToCreateGroup ?? '',
+                        fontSize: 14,
+                        color: successColor,
+                        fontWeight: FontWeight.w500,
                       ),
                     ],
                   ),
