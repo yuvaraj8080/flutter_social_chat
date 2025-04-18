@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_social_chat/core/constants/enums/router_enum.dart';
 import 'package:flutter_social_chat/core/di/dependency_injector.dart';
 import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_cubit.dart';
@@ -62,8 +61,6 @@ class ProfileView extends StatelessWidget {
       builder: (context, authState) {
         return BlocBuilder<ChatSessionCubit, ChatSessionState>(
           builder: (context, chatState) {
-            final localization = AppLocalizations.of(context);
-
             // Check if Stream Chat is ready
             if (!_isStreamChatReady(context, chatState)) {
               return const ProfileViewLoadingView();
@@ -84,7 +81,6 @@ class ProfileView extends StatelessWidget {
                     userPhoneNumber: userInfo.phoneNumber,
                   ),
                   ProfileViewStatusCard(
-                    localization: localization,
                     isUserBannedStatus: userInfo.isUserBanned,
                   ),
                   ProfileViewDetails(
@@ -92,7 +88,6 @@ class ProfileView extends StatelessWidget {
                     isUserBannedStatus: userInfo.isUserBanned,
                   ),
                   ProfileViewContactCard(
-                    localization: localization,
                     userPhoneNumber: userInfo.phoneNumber,
                     userId: userInfo.userId,
                   ),
