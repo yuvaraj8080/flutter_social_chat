@@ -31,7 +31,7 @@ class AuthSessionCubit extends HydratedCubit<AuthSessionState> {
   final IAuthRepository _authRepository;
   final IChatRepository _chatRepository;
   StreamSubscription<AuthUserModel>? _authUserSubscription;
-  
+
   /// Flag to prevent multiple simultaneous connection attempts
   bool _isConnecting = false;
 
@@ -55,39 +55,39 @@ class AuthSessionCubit extends HydratedCubit<AuthSessionState> {
   Future<void> signOut() async {
     // Prevent multiple simultaneous sign-out attempts
     if (state.isInProgress) return;
-    
+
     emit(state.copyWith(isInProgress: true));
 
     try {
       // Sign out from auth service
       await _authRepository.signOut();
-      
+
       // Clean up auth state subscription
       await _cleanupSubscriptions();
-      
+
       // Reset state to empty but preserve authentication check flag
       _resetToSignedOutState();
 
       // Clear persisted data
       await _clearPersistedData();
-      
+
       // Reattach the auth state listener
       _subscribeToAuthChanges();
     } catch (e) {
       // Even on error, reset to signed out state to prevent being stuck
       _resetToSignedOutState(hasError: true);
-      
+
       // Reattach the auth state listener
       _subscribeToAuthChanges();
     }
   }
-  
+
   /// Cleans up auth state subscription
   Future<void> _cleanupSubscriptions() async {
     await _authUserSubscription?.cancel();
     _authUserSubscription = null;
   }
-  
+
   /// Resets state to empty signed-out state
   void _resetToSignedOutState({bool hasError = false}) {
     emit(
@@ -98,7 +98,7 @@ class AuthSessionCubit extends HydratedCubit<AuthSessionState> {
       ),
     );
   }
-  
+
   /// Clears persisted authentication data
   Future<void> _clearPersistedData() async {
     try {
@@ -121,14 +121,14 @@ class AuthSessionCubit extends HydratedCubit<AuthSessionState> {
     // If user is signed in, connect to chat service
     await _connectToChatService(authUser);
   }
-  
+
   /// Connects to Stream Chat service using the authenticated user
   Future<void> _connectToChatService(AuthUserModel authUser) async {
     // Prevent multiple simultaneous connection attempts
     if (_isConnecting) return;
-    
+
     _isConnecting = true;
-    
+
     try {
       final result = await _chatRepository.connectTheCurrentUser();
 
@@ -151,15 +151,15 @@ class AuthSessionCubit extends HydratedCubit<AuthSessionState> {
       _isConnecting = false;
     }
   }
-  
+
   /// Attempts to reconnect to the chat service one more time before failing
   Future<void> _retryConnectToChatService(AuthUserModel authUser) async {
     try {
       // Add a small delay before retry
       await Future.delayed(const Duration(seconds: 1));
-      
+
       final result = await _chatRepository.connectTheCurrentUser();
-      
+
       result.fold(
         (failure) {
           emit(
@@ -189,17 +189,17 @@ class AuthSessionCubit extends HydratedCubit<AuthSessionState> {
       );
     }
   }
-  
+
   /// Reconnects to chat service if the connection is lost
   /// This should be called when the app detects a missing chat connection
   Future<void> reconnectToChatService() async {
     if (!state.isLoggedIn) return;
-    
+
     // Prevent multiple simultaneous reconnection attempts
     if (_isConnecting) return;
-    
+
     _isConnecting = true;
-    
+
     try {
       // First check if already connected but state doesn't reflect it
       if (await _isStreamChatAlreadyConnected()) {
@@ -207,12 +207,12 @@ class AuthSessionCubit extends HydratedCubit<AuthSessionState> {
         _isConnecting = false;
         return;
       }
-      
+
       // If not connected, start reconnection process
       emit(state.copyWith(isInProgress: true));
-      
+
       final result = await _chatRepository.connectTheCurrentUser();
-      
+
       result.fold(
         (failure) {
           // Check if failure is because connection is already in progress
@@ -233,7 +233,7 @@ class AuthSessionCubit extends HydratedCubit<AuthSessionState> {
       _isConnecting = false;
     }
   }
-  
+
   /// Checks if Stream Chat is already connected
   Future<bool> _isStreamChatAlreadyConnected() async {
     try {
@@ -243,7 +243,7 @@ class AuthSessionCubit extends HydratedCubit<AuthSessionState> {
       return false;
     }
   }
-  
+
   /// Determines if an error is due to a connection already in progress
   bool _isAlreadyConnectingError(Object failure) {
     return failure.toString().contains('User already getting connected');

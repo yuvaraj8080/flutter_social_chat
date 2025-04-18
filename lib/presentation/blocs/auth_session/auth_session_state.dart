@@ -8,13 +8,13 @@ import 'package:flutter_social_chat/domain/models/auth/auth_user_model.dart';
 class AuthSessionState extends Equatable {
   /// The currently authenticated user (or empty if not authenticated)
   final AuthUserModel authUser;
-  
+
   /// Whether the user's authentication state has been verified with the auth service
   final bool isUserCheckedFromAuthService;
-  
+
   /// Whether an authentication operation is currently in progress
   final bool isInProgress;
-  
+
   /// Whether the last operation resulted in an error
   final bool hasError;
 
