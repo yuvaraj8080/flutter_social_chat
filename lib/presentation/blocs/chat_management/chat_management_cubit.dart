@@ -39,7 +39,7 @@ class ChatManagementCubit extends Cubit<ChatManagementState> {
 
   /// Subscribes to channel changes from the chat service
   void _subscribeToChannels() {
-    _currentUserChannelsSubscription = 
+    _currentUserChannelsSubscription =
         _chatService.channelsThatTheUserIsIncluded.listen(_listenCurrentUserChannelsChangeStream);
   }
 
@@ -59,7 +59,7 @@ class ChatManagementCubit extends Cubit<ChatManagementState> {
   /// Used during sign-out or when needing to clear all state
   Future<void> reset() async {
     await _cancelSubscriptions();
-    
+
     emit(
       state.copyWith(
         isInProgress: false,
@@ -90,7 +90,7 @@ class ChatManagementCubit extends Cubit<ChatManagementState> {
   }
 
   /// Creates a new chat channel based on selected users
-  /// 
+  ///
   /// If [isCreateNewChatPageForCreatingGroup] is true, creates a group chat with multiple users
   /// Otherwise creates a one-to-one chat with a single selected user
   Future<void> createNewChannel({
@@ -121,12 +121,12 @@ class ChatManagementCubit extends Cubit<ChatManagementState> {
     // Validate according to chat type
     final bool hasEnoughMembers = listOfMemberIDs.length >= 2;
     final bool isValidName = isCreateNewChatPageForCreatingGroup ? state.isChannelNameValid : true;
-    
+
     if (!hasEnoughMembers || !isValidName) {
       emit(state.copyWith(error: ChatFailureEnum.channelCreateFailure));
       return;
     }
-    
+
     // Start operation and show loading
     emit(state.copyWith(isInProgress: true, isChannelCreated: false, error: null));
 
@@ -174,23 +174,27 @@ class ChatManagementCubit extends Cubit<ChatManagementState> {
       // Handle result
       result.fold(
         (failure) => emit(state.copyWith(isInProgress: false, isChannelCreated: false, error: failure)),
-        (_) => emit(state.copyWith(
-          isInProgress: false, 
-          isChannelCreated: true,
-          // Reset user selection and channel name after successful creation
-          listOfSelectedUsers: {},
-          listOfSelectedUserIDs: {},
-          channelName: '',
-          isChannelNameValid: false,
-        )),
+        (_) => emit(
+          state.copyWith(
+            isInProgress: false,
+            isChannelCreated: true,
+            // Reset user selection and channel name after successful creation
+            listOfSelectedUsers: {},
+            listOfSelectedUserIDs: {},
+            channelName: '',
+            isChannelNameValid: false,
+          ),
+        ),
       );
     } catch (e) {
       // Handle unexpected errors
-      emit(state.copyWith(
-        isInProgress: false,
-        isChannelCreated: false,
-        error: ChatFailureEnum.channelCreateFailure,
-      ));
+      emit(
+        state.copyWith(
+          isInProgress: false,
+          isChannelCreated: false,
+          error: ChatFailureEnum.channelCreateFailure,
+        ),
+      );
     }
   }
 
@@ -199,7 +203,7 @@ class ChatManagementCubit extends Cubit<ChatManagementState> {
   //
 
   /// Selects or deselects a user when creating a chat
-  /// 
+  ///
   /// Behavior differs based on [isCreateNewChatPageForCreatingGroup]:
   /// - For one-to-one chats, only one user can be selected, and can be toggled
   /// - For group chats, multiple users can be selected or deselected
@@ -283,11 +287,9 @@ class ChatManagementCubit extends Cubit<ChatManagementState> {
     // Get the channel ID for the selected user
     final channelId = state.currentUserChannels[state.userIndex].id;
     if (channelId == null) {
-      emit(state.copyWith(
-        isInProgress: false, 
-        isCapturedPhotoSent: false, 
-        error: ChatFailureEnum.channelCreateFailure
-      ));
+      emit(
+        state.copyWith(isInProgress: false, isCapturedPhotoSent: false, error: ChatFailureEnum.channelCreateFailure),
+      );
       return;
     }
 
@@ -313,7 +315,7 @@ class ChatManagementCubit extends Cubit<ChatManagementState> {
   //
 
   /// Searches for a channel in the existing channels list
-  /// 
+  ///
   /// Returns true if the channel at [index] matches the [searchedText]
   /// based on channel name or member name for one-to-one chats.
   bool searchInsideExistingChannels({
@@ -327,18 +329,18 @@ class ChatManagementCubit extends Cubit<ChatManagementState> {
     if (searchedText.isEmpty) {
       return true;
     }
-    
+
     // Clean up search text for case-insensitive comparison
     final editedSearchedText = searchedText.toLowerCase().trim();
-    
+
     // Safety check for index bounds
     if (index < 0 || index >= listOfChannels.length) {
       return false;
     }
-    
+
     // Get the channel to search in
     final channel = listOfChannels[index];
-    
+
     if (lengthOfTheChannelMembers == 2) {
       // For one-to-one chats, search by member name
       return oneToOneChatMember.name.toLowerCase().trim().contains(editedSearchedText);
