@@ -40,26 +40,56 @@ Read more about our first integration (2023) in this article: [Building a Social
 
 ## 📱 App Showcase
 
-### Screenshots
+### App Flow Demo
 
-<table>
-  <tr>
-    <td><img src="assets/images/screenshot1.png" width="200"/></td>
-    <td><img src="assets/images/screenshot2.png" width="200"/></td>
-    <td><img src="assets/images/screenshot3.png" width="200"/></td>
-  </tr>
-  <tr>
-    <td><img src="assets/images/screenshot4.png" width="200"/></td>
-    <td><img src="assets/images/screenshot5.png" width="200"/></td>
-    <td><img src="assets/images/screenshot6.png" width="200"/></td>
-  </tr>
-</table>
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/097b6421-d9fc-4e26-be65-0cfa16039ee0" alt="App Flow Demo" width="500"/>
+</p>
 
 ### Demo Video
 
-[![Flutter Social Chat Demo](https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
+[![Flutter Social Chat Demo](https://img.youtube.com/vi/3X-tVb1xim4/0.jpg)](https://www.youtube.com/watch?v=3X-tVb1xim4)
 
-*Click the image above to watch the full app demo (1:30 mins)*
+*Click the image above to watch the full app demo*
+
+### Screenshots
+
+#### Authentication Flow
+<table>
+  <tr>
+    <td><b>Landing Page</b><br><img src="https://github.com/user-attachments/assets/263c86d4-0d1e-4bf6-9a97-762f0baf8eb5" width="200"/></td>
+    <td><b>Sign In</b><br><img src="https://github.com/user-attachments/assets/dfbbae03-a31d-414b-839d-adec763febc0" width="200"/></td>
+    <td><b>SMS Verification</b><br><img src="https://github.com/user-attachments/assets/f9abe4f2-e41b-463a-ba0d-f2d6917f70f4" width="200"/></td>
+    <td><b>Onboarding</b><br><img src="https://github.com/user-attachments/assets/b392e820-00fe-4e49-93cf-2fd3534fd883" width="200"/></td>
+  </tr>
+</table>
+
+#### Main App Features
+<table>
+  <tr>
+    <td><b>Dashboard</b><br><img src="https://github.com/user-attachments/assets/c2e6c74c-4a94-4502-936d-295ef333f746" width="200"/></td>
+    <td><b>Search Users</b><br><img src="https://github.com/user-attachments/assets/a4f3a5db-c060-4fcd-ae10-ef28c3ff2f35" width="200"/></td>
+    <td><b>Chat Options</b><br><img src="https://github.com/user-attachments/assets/b52a1363-dbf7-4500-8409-52e403031340" width="200"/></td>
+  </tr>
+</table>
+
+#### Chat Creation
+<table>
+  <tr>
+    <td><b>Create Private Chat</b><br><img src="https://github.com/user-attachments/assets/6a7d8590-4784-4105-ab8f-f0b31c250b4c" width="200"/></td>
+    <td><b>Create Group Chat</b><br><img src="https://github.com/user-attachments/assets/9fc1f1c5-d613-4e98-a06e-e127171a5dbe" width="200"/></td>
+  </tr>
+</table>
+
+#### Chat Experience
+<table>
+  <tr>
+    <td><b>Chat View</b><br><img src="https://github.com/user-attachments/assets/480a9760-07be-4f78-9ded-904e0f7ce7ac" width="200"/></td>
+    <td><b>Message Details</b><br><img src="https://github.com/user-attachments/assets/1dd38298-cf30-410a-a0c1-170a61d730d9" width="200"/></td>
+    <td><b>Message Reactions</b><br><img src="https://github.com/user-attachments/assets/6005b3d5-2faa-495e-b11d-f0f8af38cf20" width="200"/></td>
+    <td><b>Profile View</b><br><img src="https://github.com/user-attachments/assets/56061aff-c75f-4c16-bc01-71c0e6b6820a" width="200"/></td>
+  </tr>
+</table>
 
 ## 🏗️ Architecture
 
