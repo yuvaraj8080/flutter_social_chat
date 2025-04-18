@@ -64,17 +64,19 @@ class AppWidget extends StatelessWidget {
   /// Manages connectivity state changes and shows appropriate notifications
   void _handleConnectivityChanges(BuildContext context, ConnectivityState state) {
     if (!state.isUserConnectedToTheInternet) {
-      _showConnectivityToast(true);
+      _showConnectivityToast(context, true);
     } else if (state.isUserConnectedToTheInternet) {
       BotToast.cleanAll();
     }
   }
 
   /// Shows a connectivity error toast message
-  void _showConnectivityToast(bool hasConnectionFailed) {
+  void _showConnectivityToast(BuildContext context, bool hasConnectionFailed) {
     if (hasConnectionFailed) {
+      final localizations = AppLocalizations.of(context);
+
       BotToast.showText(
-        text: 'Connection Failed!',
+        text: localizations?.connectionFailed ?? '',
         duration: const Duration(seconds: 30),
         clickClose: true,
       );

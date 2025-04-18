@@ -18,6 +18,7 @@ import 'package:go_router/go_router.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:fpdart/fpdart.dart';
 
+/// Manages application routing configuration and navigation
 class AppRouter {
   AppRouter();
 
@@ -90,15 +91,16 @@ class AppRouter {
   GoRoute get _chatRoute => GoRoute(
         path: RouterEnum.chatView.routeName,
         builder: (context, state) {
-          if (state.extra is Map<String, dynamic>) {
-            final extraParameters = state.extra as Map<String, dynamic>;
-            final channel = extraParameters['channel'] as Channel?;
-            return ChatView(channel: channel!);
-          } else {
-            // For backward compatibility
-            final channel = state.extra as Channel?;
-            return ChatView(channel: channel!);
+          final extraParameters = state.extra is Map<String, dynamic>
+              ? state.extra as Map<String, dynamic>
+              : {'channel': state.extra as Channel?};
+
+          final channel = extraParameters['channel'] as Channel?;
+          if (channel == null) {
+            throw Exception('Missing required channel parameter for ChatView');
           }
+
+          return ChatView(channel: channel);
         },
       );
 
@@ -139,38 +141,16 @@ class AppRouter {
         builder: (context, state) {
           final extraParameters = state.extra as Map<String, dynamic>?;
           if (extraParameters == null) {
-            throw Exception('Missing required parameters for CreateNewChatPage');
+            throw Exception('Missing required parameters for CreateChatView');
           }
 
-          // Allow a null controller - CreateNewChatPage will create one if needed
-          StreamUserListController? userListController;
-          try {
-            userListController = extraParameters.entries
-                .where((entries) => entries.key == 'userListController')
-                .single
-                .value as StreamUserListController?;
-          } catch (e) {
-            // If there's an error accessing the controller, we'll let the page create its own
-            debugPrint('Error accessing userListController: $e');
-          }
-
-          final isCreateNewChatPageForCreatingGroup = extraParameters.entries
-              .where((entries) => entries.key == 'isCreateNewChatPageForCreatingGroup')
-              .single
-              .value as bool;
+          // Get user list controller or create a default one if not provided
+          final userListController = extraParameters['userListController'] as StreamUserListController?;
+          final isCreateNewChatPageForCreatingGroup =
+              extraParameters['isCreateNewChatPageForCreatingGroup'] as bool? ?? false;
 
           return CreateChatView(
-            userListController: userListController ??
-                StreamUserListController(
-                  client: StreamChat.of(context).client,
-                  limit: 25,
-                  filter: Filter.and([
-                    Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
-                  ]),
-                  sort: [
-                    const SortOption('name', direction: 1),
-                  ],
-                ),
+            userListController: userListController ?? _createDefaultUserListController(context),
             isCreateNewChatPageForCreatingGroup: isCreateNewChatPageForCreatingGroup,
           );
         },
@@ -184,4 +164,20 @@ class AppRouter {
           const OnboardingView(),
         ),
       );
+
+  StreamUserListController _createDefaultUserListController(BuildContext context) {
+    final client = StreamChat.of(context).client;
+    final currentUser = client.state.currentUser;
+
+    if (currentUser == null) {
+      throw Exception('Cannot create user list controller: No authenticated user found');
+    }
+
+    return StreamUserListController(
+      client: client,
+      limit: 25,
+      filter: Filter.and([Filter.notEqual('id', currentUser.id)]),
+      sort: [const SortOption('name', direction: 1)],
+    );
+  }
 }

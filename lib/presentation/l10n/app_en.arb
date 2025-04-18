@@ -233,5 +233,7 @@
 
     "unnamedGroup": "Unnamed Group",
     
-    "sendMessageToStartConversation": "Send a message to start the conversation"
+    "sendMessageToStartConversation": "Send a message to start the conversation",
+
+    "connectionFailed": "Connection Failed!"
 }
