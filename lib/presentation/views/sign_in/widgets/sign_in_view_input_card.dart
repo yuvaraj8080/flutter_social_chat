@@ -6,14 +6,15 @@ import 'package:flutter_social_chat/presentation/blocs/phone_number_sign_in/phon
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/animated_gradient_button.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
-import 'package:flutter_social_chat/presentation/views/sign_in/widgets/phone_number_sign_in_section.dart';
+import 'package:flutter_social_chat/presentation/views/sign_in/widgets/sign_in_view_input_field.dart';
 
-class PhoneNumberInputCard extends StatelessWidget {
-  const PhoneNumberInputCard({super.key});
+/// Card component that contains the phone number input form
+class SignInViewInputCard extends StatelessWidget {
+  const SignInViewInputCard({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final Size size = MediaQuery.of(context).size;
+    final Size size = MediaQuery.sizeOf(context);
     final localizations = AppLocalizations.of(context);
 
     final String signInWithPhoneNumber = localizations?.signInWithPhoneNumber ?? '';
@@ -40,15 +41,19 @@ class PhoneNumberInputCard extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 28, left: 28),
                   child: CustomText(
                     text: signInWithPhoneNumber,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700, color: black),
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: black,
                   ),
                 ),
-                PhoneNumberInputField(state: state),
+                SignInViewInputField(state: state),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
                   child: CustomText(
                     text: smsInformationMessage,
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400, color: secondaryTextColor),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                    color: secondaryTextColor,
                   ),
                 ),
                 AnimatedGradientButton(

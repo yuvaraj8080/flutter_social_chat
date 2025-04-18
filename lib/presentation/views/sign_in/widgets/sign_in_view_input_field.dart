@@ -8,16 +8,18 @@ import 'package:flutter_social_chat/presentation/design_system/styles/input_styl
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 
-class PhoneNumberInputField extends StatefulWidget {
-  const PhoneNumberInputField({super.key, required this.state});
+/// Widget for handling phone number input with validation
+class SignInViewInputField extends StatefulWidget {
+  const SignInViewInputField({super.key, required this.state});
 
   final PhoneNumberSignInState state;
 
   @override
-  State<PhoneNumberInputField> createState() => _PhoneNumberInputFieldState();
+  State<SignInViewInputField> createState() => _SignInViewInputFieldState();
 }
 
-class _PhoneNumberInputFieldState extends State<PhoneNumberInputField> {
+class _SignInViewInputFieldState extends State<SignInViewInputField> {
+  // Constants
   final PhoneNumber initialPhone = PhoneNumber(isoCode: 'TR');
   final TextEditingController _phoneController = TextEditingController();
   bool _hasAttemptedValidation = false;

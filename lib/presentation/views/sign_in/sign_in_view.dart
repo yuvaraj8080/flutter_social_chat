@@ -17,7 +17,7 @@ import 'package:flutter_social_chat/presentation/views/sign_in/widgets/sign_in_v
 import 'package:go_router/go_router.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// A view that handles phone number sign-in functionality, 
+/// A view that handles phone number sign-in functionality,
 /// including initialization, error handling, and navigation to SMS verification.
 class SignInView extends StatefulWidget {
   const SignInView({super.key});
@@ -32,10 +32,10 @@ class _SignInViewState extends State<SignInView> {
     super.initState();
     // Reset loading indicator and SignIn cubit on entry
     CustomLoadingIndicator.reset();
-    
+
     // Reset Stream Chat client if needed
     _resetStreamChatIfNeeded();
-    
+
     // Reset the PhoneNumberSignInCubit state
     _initializeSignInState();
   }
@@ -44,10 +44,10 @@ class _SignInViewState extends State<SignInView> {
   void _initializeSignInState() {
     Future.microtask(() {
       if (!mounted) return;
-        
+
       // Reset phone number sign-in state
       context.read<PhoneNumberSignInCubit>().reset();
-      
+
       // Extra safety: Ensure we're fully signed out by checking auth session
       final authSessionCubit = context.read<AuthSessionCubit>();
       if (authSessionCubit.state.isInProgress) {
@@ -56,7 +56,7 @@ class _SignInViewState extends State<SignInView> {
       }
     });
   }
-  
+
   /// Properly disconnects Stream Chat if a user session is still active
   void _resetStreamChatIfNeeded() {
     try {
@@ -68,7 +68,7 @@ class _SignInViewState extends State<SignInView> {
       // Ignore Stream Chat reset errors
     }
   }
-  
+
   /// Performs a clean disconnect of the Stream Chat client
   void _cleanupStreamChat(StreamChatClient client) {
     // First, close any open channels to prevent resource leaks
@@ -79,13 +79,11 @@ class _SignInViewState extends State<SignInView> {
         // Ignore individual channel disposal errors
       }
     }
-    
+
     // Add a delay to ensure channel disposal has completed
     Future.delayed(const Duration(milliseconds: 100), () {
       // Then disconnect the user with persistence flush
-      client.disconnectUser(flushChatPersistence: true).catchError((e) {
-        // Ignore disconnection errors
-      });
+      client.disconnectUser(flushChatPersistence: true);
     });
   }
 
@@ -112,7 +110,7 @@ class _SignInViewState extends State<SignInView> {
   /// Handles state changes in the PhoneNumberSignInCubit
   void _handleStateChanges(BuildContext context, PhoneNumberSignInState state) {
     if (!mounted) return;
-    
+
     // Handle loading state
     _handleLoadingState(state);
 
@@ -122,7 +120,7 @@ class _SignInViewState extends State<SignInView> {
     // Handle verification ID state
     _handleVerificationIdState(state);
   }
-  
+
   /// Manages loading indicator based on state progress
   void _handleLoadingState(PhoneNumberSignInState state) {
     if (state.isInProgress) {
@@ -131,7 +129,7 @@ class _SignInViewState extends State<SignInView> {
       _safelyHideLoadingIndicator();
     }
   }
-  
+
   /// Handles error states and displays appropriate messages
   void _handleErrorState(PhoneNumberSignInState state) {
     state.failureMessageOption.fold(
@@ -139,7 +137,7 @@ class _SignInViewState extends State<SignInView> {
       (authFailure) {
         // Ensure loading indicator is hidden when there's an error
         _safelyHideLoadingIndicator();
-        
+
         _showErrorToast(authFailure);
         // Reset only error state without clearing phone number
         if (mounted) {
@@ -148,14 +146,14 @@ class _SignInViewState extends State<SignInView> {
       },
     );
   }
-  
+
   /// Handles verification ID and navigation to SMS verification
   void _handleVerificationIdState(PhoneNumberSignInState state) {
     state.verificationIdOption.fold(
       () {},
       (verificationId) {
         if (!mounted) return;
-        
+
         final isValidVerificationId = verificationId.isNotEmpty;
         final canNavigate = isValidVerificationId && !state.hasNavigatedToVerification;
 
@@ -169,18 +167,18 @@ class _SignInViewState extends State<SignInView> {
   /// Safely shows the loading indicator
   void _safelyShowLoadingIndicator() {
     if (!mounted) return;
-    
+
     try {
       CustomLoadingIndicator.of(context).show();
     } catch (e) {
       // Ignore loading indicator errors
     }
   }
-  
+
   /// Safely hides the loading indicator
   void _safelyHideLoadingIndicator() {
     if (!mounted) return;
-    
+
     try {
       CustomLoadingIndicator.of(context).hide();
     } catch (e) {
@@ -191,7 +189,7 @@ class _SignInViewState extends State<SignInView> {
   /// Shows an error toast with the appropriate message
   void _showErrorToast(AuthFailureEnum authFailure) {
     if (!mounted) return;
-    
+
     final errorMessage = _getErrorMessageForFailure(authFailure);
     BotToast.showText(text: errorMessage);
   }
@@ -199,7 +197,7 @@ class _SignInViewState extends State<SignInView> {
   /// Gets the localized error message for a specific auth failure
   String _getErrorMessageForFailure(AuthFailureEnum authFailure) {
     if (!mounted) return '';
-    
+
     final localizations = AppLocalizations.of(context);
 
     return switch (authFailure) {
@@ -222,25 +220,21 @@ class _SignInViewState extends State<SignInView> {
     // Update navigation flag to prevent duplicate navigation
     if (mounted) {
       context.read<PhoneNumberSignInCubit>().updateNavigationFlag(hasNavigated: true);
-    }
-
-    // Create encoded state for navigation
-    final updatedState = state.copyWith(hasNavigatedToVerification: true);
-    final encodedState = NavigationStateCodec.encodeMap(updatedState.toJson());
-
-    // Navigate to SMS verification
-    if (mounted) {
-      Future.microtask(() {
+      
+      // Get the updated state from the BLoC after setting the navigation flag
+      final currentState = context.read<PhoneNumberSignInCubit>().state;
+      final encodedState = NavigationStateCodec.encodeMap(currentState.toJson());
+      
+      // Navigate to SMS verification using a safer approach with error handling
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
+        
         try {
           context.push(RouterEnum.smsVerificationView.routeName, extra: encodedState);
         } catch (e) {
-          // If navigation fails, try again on next frame
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              context.push(RouterEnum.smsVerificationView.routeName, extra: encodedState);
-            }
-          });
+          debugPrint('Navigation error: $e');
+          // Handle navigation error if needed, but don't attempt again
+          // as it might cause the same error in a loop
         }
       });
     }
