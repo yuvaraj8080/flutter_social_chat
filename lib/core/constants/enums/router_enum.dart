@@ -1,11 +1,11 @@
 enum RouterEnum {
   initialLocation('/'),
-  channelsView('/channels_view'),
+  dashboardView('/dashboard_view'),
   profileView('/profile_view'),
   chatView('/chat_view'),
   signInView('/sign_in_view'),
   smsVerificationView('/sms_verification_view'),
-  createNewChatView('/create_new_chat_view'),
+  createChatView('/create_chat_view'),
   onboardingView('/onboarding_view');
 
   final String routeName;

@@ -66,7 +66,7 @@ class _CreateChatViewState extends State<CreateChatView> {
 
   void _navigateBack() {
     context.read<ChatManagementCubit>().reset();
-    context.go(RouterEnum.channelsView.routeName);
+    context.go(RouterEnum.dashboardView.routeName);
   }
 
   @override
@@ -75,7 +75,7 @@ class _CreateChatViewState extends State<CreateChatView> {
       listener: (context, state) {
         if (state.isChannelCreated) {
           context.read<ChatManagementCubit>().reset();
-          context.go(RouterEnum.channelsView.routeName);
+          context.go(RouterEnum.dashboardView.routeName);
         }
       },
       child: PopScopeScaffold(

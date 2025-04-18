@@ -41,7 +41,7 @@ class DashboardViewSearchedChat extends StatelessWidget {
     final channelMembers = channel.state?.members ?? [];
     final lengthOfTheChannelMembers = channelMembers.length;
     final currentUserId = context.read<AuthSessionCubit>().state.authUser.id;
-
+    final appLocalizations = AppLocalizations.of(context);
     // Find the other user in a one-to-one chat
     Member? otherMember;
 
@@ -77,7 +77,8 @@ class DashboardViewSearchedChat extends StatelessWidget {
 
     // Determine name and image based on chat type
     final isOneToOneChat = lengthOfTheChannelMembers == 2;
-    final String displayName = isOneToOneChat ? oneToOneChatMember.name : channel.name ?? 'Unnamed Group';
+    final String displayName =
+        isOneToOneChat ? oneToOneChatMember.name : channel.name ?? appLocalizations?.unnamedGroup ?? '';
     final String? imageUrl = isOneToOneChat ? oneToOneChatMember.image : channel.image;
 
     // Get unread count and online status

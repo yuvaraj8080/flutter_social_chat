@@ -68,7 +68,7 @@ class _ChatViewState extends State<ChatView> {
       titleSpacing: 0,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back_ios_new, color: customGreyColor800),
-        onPressed: () => context.go(RouterEnum.channelsView.routeName),
+        onPressed: () => context.go(RouterEnum.dashboardView.routeName),
       ),
       title: Row(
         children: [

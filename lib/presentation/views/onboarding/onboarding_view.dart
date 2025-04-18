@@ -49,7 +49,7 @@ class OnboardingView extends StatelessWidget {
   /// Handles navigation when onboarding is completed
   void _handleOnboardingCompleted(BuildContext context, AuthSessionState state) {
     CustomLoadingIndicator.of(context).hide();
-    context.go(RouterEnum.channelsView.routeName);
+    context.go(RouterEnum.dashboardView.routeName);
   }
   
   /// Manages loading indicator based on profile creation state

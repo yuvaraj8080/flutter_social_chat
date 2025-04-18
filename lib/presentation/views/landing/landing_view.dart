@@ -222,7 +222,7 @@ class _LandingViewState extends State<LandingView> with SingleTickerProviderStat
     if (isUserLoggedIn && !isOnboardingCompleted) {
       return RouterEnum.onboardingView.routeName;
     } else if (isUserLoggedIn && isOnboardingCompleted) {
-      return RouterEnum.channelsView.routeName;
+      return RouterEnum.dashboardView.routeName;
     } else {
       return RouterEnum.signInView.routeName;
     }

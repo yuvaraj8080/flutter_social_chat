@@ -93,7 +93,7 @@ class _SmsVerificationViewState extends State<SmsVerificationView> {
 
     // Determine destination route based on onboarding status
     final route =
-        state.authUser.isOnboardingCompleted ? RouterEnum.channelsView.routeName : RouterEnum.onboardingView.routeName;
+        state.authUser.isOnboardingCompleted ? RouterEnum.dashboardView.routeName : RouterEnum.onboardingView.routeName;
 
     // Navigate to appropriate route
     _safelyNavigateTo(context, route);

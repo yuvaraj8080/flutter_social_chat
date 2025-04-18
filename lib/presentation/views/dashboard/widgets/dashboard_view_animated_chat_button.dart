@@ -91,7 +91,7 @@ class _DashboardViewAnimatedChatButtonState extends State<DashboardViewAnimatedC
     final controller = _createUserListController();
 
     context.go(
-      RouterEnum.createNewChatView.routeName,
+      RouterEnum.createChatView.routeName,
       extra: {
         'userListController': controller,
         'isCreateNewChatPageForCreatingGroup': isGroup,

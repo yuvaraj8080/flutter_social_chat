@@ -72,7 +72,10 @@ class _SmsVerificationResendCodeButtonState extends State<SmsVerificationResendC
                   const Icon(Icons.refresh_rounded, size: 18, color: white),
                   const SizedBox(width: 8),
                   CustomText(
-                      text: resendCodeText, color: white.withValues(alpha: isDisabled ? 0.5 : 1.0), fontSize: 14),
+                    text: resendCodeText,
+                    color: white.withValues(alpha: isDisabled ? 0.5 : 1.0),
+                    fontSize: 14,
+                  ),
                 ],
               ),
             ),

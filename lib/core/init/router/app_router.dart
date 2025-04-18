@@ -68,7 +68,7 @@ class AppRouter {
         },
         routes: [
           GoRoute(
-            path: RouterEnum.channelsView.routeName,
+            path: RouterEnum.dashboardView.routeName,
             pageBuilder: (context, state) {
               return customPageBuilderWidget(
                 context,
@@ -137,7 +137,7 @@ class AppRouter {
       );
 
   GoRoute get _createNewChatRoute => GoRoute(
-        path: RouterEnum.createNewChatView.routeName,
+        path: RouterEnum.createChatView.routeName,
         builder: (context, state) {
           final extraParameters = state.extra as Map<String, dynamic>?;
           if (extraParameters == null) {

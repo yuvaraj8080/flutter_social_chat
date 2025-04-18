@@ -115,7 +115,7 @@ Widget _buildNavItem({
 int _calculateSelectedIndex(BuildContext context) {
   final String location = GoRouterState.of(context).uri.toString();
 
-  if (location == RouterEnum.channelsView.routeName) {
+  if (location == RouterEnum.dashboardView.routeName) {
     return 0;
   }
   if (location == RouterEnum.profileView.routeName) {
@@ -128,7 +128,7 @@ int _calculateSelectedIndex(BuildContext context) {
 void _onItemTapped(int index, BuildContext context) {
   switch (index) {
     case 0:
-      GoRouter.of(context).go(RouterEnum.channelsView.routeName);
+      GoRouter.of(context).go(RouterEnum.dashboardView.routeName);
       break;
     case 1:
       GoRouter.of(context).go(RouterEnum.profileView.routeName);
