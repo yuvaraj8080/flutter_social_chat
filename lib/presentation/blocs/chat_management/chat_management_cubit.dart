@@ -15,14 +15,14 @@ class ChatManagementCubit extends Cubit<ChatManagementState> {
   /// Default image URL for new group chats
   final String randomGroupProfilePhoto = 'https://picsum.photos/200/300';
 
-  final IChatRepository _chatService;
+  final IChatRepository _chatRepository;
   final FirebaseFirestore _firebaseFirestore;
   final AuthSessionCubit _authCubit;
 
   /// Subscription to channel changes for the current user
   StreamSubscription<List<Channel>>? _currentUserChannelsSubscription;
 
-  ChatManagementCubit(this._chatService, this._firebaseFirestore, this._authCubit)
+  ChatManagementCubit(this._chatRepository, this._firebaseFirestore, this._authCubit)
       : super(ChatManagementState.empty()) {
     _subscribeToChannels();
   }
@@ -40,7 +40,7 @@ class ChatManagementCubit extends Cubit<ChatManagementState> {
   /// Subscribes to channel changes from the chat service
   void _subscribeToChannels() {
     _currentUserChannelsSubscription =
-        _chatService.channelsThatTheUserIsIncluded.listen(_listenCurrentUserChannelsChangeStream);
+        _chatRepository.channelsThatTheUserIsIncluded.listen(_listenCurrentUserChannelsChangeStream);
   }
 
   /// Cancels all active subscriptions
@@ -165,7 +165,7 @@ class ChatManagementCubit extends Cubit<ChatManagementState> {
       }
 
       // Create the channel
-      final result = await _chatService.createNewChannel(
+      final result = await _chatRepository.createNewChannel(
         listOfMemberIDs: listOfMemberIDs.toList(),
         channelName: channelName,
         channelImageUrl: channelImageUrl,
@@ -297,7 +297,7 @@ class ChatManagementCubit extends Cubit<ChatManagementState> {
     await Future.delayed(const Duration(seconds: 1));
 
     // Send the photo through the chat service
-    final result = await _chatService.sendPhotoAsMessageToTheSelectedUser(
+    final result = await _chatRepository.sendPhotoAsMessageToTheSelectedUser(
       channelId: channelId,
       pathOfTheTakenPhoto: pathOfTheTakenPhoto,
       sizeOfTheTakenPhoto: sizeOfTheTakenPhoto,
