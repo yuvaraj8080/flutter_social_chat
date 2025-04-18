@@ -5,7 +5,7 @@ import 'package:flutter_social_chat/core/constants/enums/router_enum.dart';
 import 'package:flutter_social_chat/core/init/router/navigation_state_codec.dart';
 import 'package:flutter_social_chat/core/init/router/custom_page_builder_widget.dart';
 import 'package:flutter_social_chat/presentation/blocs/phone_number_sign_in/phone_number_sign_in_state.dart';
-import 'package:flutter_social_chat/presentation/views/bottom_tab/bottom_tab.dart';
+import 'package:flutter_social_chat/presentation/views/bottom_tab/bottom_tab_view.dart';
 import 'package:flutter_social_chat/presentation/views/channels/channels_page.dart';
 import 'package:flutter_social_chat/presentation/views/chat/chat_page.dart';
 import 'package:flutter_social_chat/presentation/views/create_new_chat/create_new_chat_page.dart';
@@ -62,7 +62,7 @@ class AppRouter {
           return customPageBuilderWidget(
             context,
             state,
-            BottomTabPage(child: child),
+            BottomTabView(child: child),
           );
         },
         routes: [

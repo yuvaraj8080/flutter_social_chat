@@ -17,30 +17,30 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 ///
 /// This widget manages:
 /// 1. The global navigation bar at the bottom of the app
-/// 2. Authentication state monitoring and redirection
-/// 3. Stream Chat connection verification
+/// 2. Authentication state monitoring and redirection to sign-in if needed
+/// 3. Stream Chat connection verification and auto-reconnection
 /// 4. Loading state display while services initialize
 ///
 /// It acts as a container for the main content pages which are displayed
 /// via the [child] parameter, typically set by the router.
-class BottomTabPage extends StatefulWidget {
-  const BottomTabPage({super.key, this.child});
+class BottomTabView extends StatefulWidget {
+  const BottomTabView({super.key, this.child});
 
   /// The content page to display within the tab structure
   final Widget? child;
 
   @override
-  State<BottomTabPage> createState() => _BottomTabPageState();
+  State<BottomTabView> createState() => _BottomTabViewState();
 }
 
-class _BottomTabPageState extends State<BottomTabPage> {
+class _BottomTabViewState extends State<BottomTabView> {
   /// Flag to prevent multiple simultaneous reconnection attempts
   bool _isAttemptingReconnection = false;
-  
+
   @override
   void initState() {
     super.initState();
-    
+
     // Check for chat service initialization after the first frame
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
@@ -48,30 +48,30 @@ class _BottomTabPageState extends State<BottomTabPage> {
       }
     });
   }
-  
+
   /// Verifies Stream Chat service is properly connected
   ///
   /// If user is authenticated but chat is not connected,
   /// this initiates a reconnection attempt.
   void _checkChatServiceConnection() {
     if (!mounted) return;
-    
+
     final authCubit = context.read<AuthSessionCubit>();
     final chatCubit = context.read<ChatSessionCubit>();
-    
+
     if (authCubit.state.isLoggedIn && !chatCubit.state.isChatUserConnected) {
       _attemptReconnection();
     }
   }
-  
+
   /// Attempts to reconnect to Stream Chat service
-  /// 
+  ///
   /// Uses a flag to prevent multiple simultaneous attempts
   void _attemptReconnection() {
     if (_isAttemptingReconnection || !mounted) return;
-    
+
     _isAttemptingReconnection = true;
-    
+
     try {
       context.read<AuthSessionCubit>().reconnectToChatService();
     } catch (e) {
@@ -80,11 +80,11 @@ class _BottomTabPageState extends State<BottomTabPage> {
       _isAttemptingReconnection = false;
     }
   }
-  
+
   /// Safely navigates to the sign-in view when user is logged out
   void _navigateToSignIn() {
     if (!mounted) return;
-    
+
     // Use post-frame callback to avoid navigation during build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
@@ -96,9 +96,9 @@ class _BottomTabPageState extends State<BottomTabPage> {
       }
     });
   }
-  
+
   /// Manually checks if Stream Chat is connected by examining client state
-  /// 
+  ///
   /// This helps detect situations where the client is connected but the
   /// ChatSessionCubit hasn't been updated to reflect this.
   bool _isStreamChatActuallyConnected() {
@@ -109,11 +109,11 @@ class _BottomTabPageState extends State<BottomTabPage> {
       return false;
     }
   }
-  
+
   /// Forces a sync between Stream Chat client state and ChatSessionCubit
   void _syncChatClientState() {
     if (!mounted) return;
-    
+
     try {
       context.read<ChatSessionCubit>().syncWithClientState();
     } catch (e) {
@@ -132,7 +132,7 @@ class _BottomTabPageState extends State<BottomTabPage> {
         ),
         // Listen for chat session state changes
         BlocListener<ChatSessionCubit, ChatSessionState>(
-          listenWhen: (previous, current) => 
+          listenWhen: (previous, current) =>
               previous.isUserCheckedFromChatService != current.isUserCheckedFromChatService ||
               previous.isChatUserConnected != current.isChatUserConnected,
           listener: _handleChatStateChanges,
@@ -141,27 +141,27 @@ class _BottomTabPageState extends State<BottomTabPage> {
       child: _buildMainContent(),
     );
   }
-  
+
   /// Handles authentication state changes
   void _handleAuthStateChanges(BuildContext context, AuthSessionState authState) {
     if (!authState.isLoggedIn) {
       _navigateToSignIn();
     }
   }
-  
+
   /// Handles chat session state changes
   void _handleChatStateChanges(BuildContext context, ChatSessionState state) {
     if (!mounted) return;
-    
+
     if (state.isUserCheckedFromChatService && !state.isChatUserConnected) {
       final authState = context.read<AuthSessionCubit>().state;
-      
+
       if (authState.isLoggedIn) {
         _attemptReconnection();
       }
     }
   }
-  
+
   /// Builds the main content of the app based on auth and chat states
   Widget _buildMainContent() {
     return BlocBuilder<ChatSessionCubit, ChatSessionState>(
@@ -170,21 +170,20 @@ class _BottomTabPageState extends State<BottomTabPage> {
           previous.isChatUserConnected != current.isChatUserConnected,
       builder: (context, chatState) {
         return BlocBuilder<AuthSessionCubit, AuthSessionState>(
-          buildWhen: (previous, current) => 
-              previous.isInProgress != current.isInProgress ||
-              previous.isLoggedIn != current.isLoggedIn,
+          buildWhen: (previous, current) =>
+              previous.isInProgress != current.isInProgress || previous.isLoggedIn != current.isLoggedIn,
           builder: (context, authState) {
             // Determine if we should show loading state
             if (_shouldShowLoading(authState, chatState)) {
               return _buildLoadingScreen();
             }
-            
+
             // Redirect to sign in if not logged in
             if (!authState.isLoggedIn) {
               _navigateToSignIn();
               return const SizedBox.shrink();
             }
-            
+
             // Main app UI when fully authenticated and connected
             return _buildMainAppUI();
           },
@@ -192,30 +191,30 @@ class _BottomTabPageState extends State<BottomTabPage> {
       },
     );
   }
-  
+
   /// Determines if the loading screen should be displayed
   bool _shouldShowLoading(AuthSessionState authState, ChatSessionState chatState) {
     // Show loading when auth operations are in progress or chat isn't ready yet
-    final isInLoadingState = authState.isInProgress || 
-        (authState.isLoggedIn && !chatState.isUserCheckedFromChatService);
-    
+    final isInLoadingState =
+        authState.isInProgress || (authState.isLoggedIn && !chatState.isUserCheckedFromChatService);
+
     // Check if we're stuck in loading but actually connected
     if (isInLoadingState && authState.isLoggedIn) {
       final isActuallyConnected = _isStreamChatActuallyConnected();
-      
+
       // If UI thinks we're loading but client is actually connected,
       // let's force a state refresh by syncing
       if (isActuallyConnected && !chatState.isUserCheckedFromChatService) {
         _syncChatClientState();
         return false; // Skip loading screen, we're actually connected
       }
-      
+
       return !isActuallyConnected; // Only show loading if truly not connected
     }
-    
+
     return isInLoadingState;
   }
-  
+
   /// Builds the loading screen
   Widget _buildLoadingScreen() {
     return const PopScopeScaffold(
@@ -224,7 +223,7 @@ class _BottomTabPageState extends State<BottomTabPage> {
       ),
     );
   }
-  
+
   /// Builds the main app UI with bottom navigation
   Widget _buildMainAppUI() {
     return PopScopeScaffold(
