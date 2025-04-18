@@ -4,6 +4,10 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
 
+/// Animated tips container that cycles through helpful onboarding tips
+///
+/// Displays a series of helpful tips with a fade animation between them.
+/// Tips are localized and automatically cycle every few seconds.
 class OnboardingAnimatedTips extends StatefulWidget {
   const OnboardingAnimatedTips({super.key});
 
@@ -11,12 +15,14 @@ class OnboardingAnimatedTips extends StatefulWidget {
   State<OnboardingAnimatedTips> createState() => _OnboardingAnimatedTipsState();
 }
 
-class _OnboardingAnimatedTipsState extends State<OnboardingAnimatedTips> {
+class _OnboardingAnimatedTipsState extends State<OnboardingAnimatedTips> with SingleTickerProviderStateMixin {
+  // State tracking
   int _currentTipIndex = 0;
   bool _isAnimating = false;
   Timer? _timer;
-  List<String> _tips = [];
+  late List<String> _tips;
 
+  // Animation and UI constants
   static const Duration _animationDuration = Duration(milliseconds: 300);
   static const Duration _tipChangeDuration = Duration(seconds: 3);
 
@@ -33,6 +39,7 @@ class _OnboardingAnimatedTipsState extends State<OnboardingAnimatedTips> {
     _tips = _getTips();
   }
 
+  /// Returns the list of localized tips to display
   List<String> _getTips() {
     final AppLocalizations? appLocalizations = AppLocalizations.of(context);
 
@@ -44,10 +51,12 @@ class _OnboardingAnimatedTipsState extends State<OnboardingAnimatedTips> {
     ];
   }
 
+  /// Starts the timer to cycle through tips automatically
   void _startTipsAnimation() {
     _timer = Timer.periodic(_tipChangeDuration, (_) => _animateToNextTip());
   }
 
+  /// Animates to the next tip with a fade transition
   void _animateToNextTip() {
     if (_tips.isEmpty) return;
 
@@ -71,8 +80,6 @@ class _OnboardingAnimatedTipsState extends State<OnboardingAnimatedTips> {
 
   @override
   Widget build(BuildContext context) {
-    final appLocalizations = AppLocalizations.of(context);
-
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.symmetric(horizontal: 12),
@@ -88,7 +95,7 @@ class _OnboardingAnimatedTipsState extends State<OnboardingAnimatedTips> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildTipsHeader(appLocalizations),
+          _buildTipsHeader(context),
           const SizedBox(height: 12),
           _buildAnimatedTip(),
         ],
@@ -96,11 +103,13 @@ class _OnboardingAnimatedTipsState extends State<OnboardingAnimatedTips> {
     );
   }
 
-  Widget _buildTipsHeader(AppLocalizations? appLocalizations) {
+  Widget _buildTipsHeader(BuildContext context) {
+    final appLocalizations = AppLocalizations.of(context);
+
     return Row(
+      spacing: 8,
       children: [
         const Icon(Icons.tips_and_updates_outlined, color: customIndigoColor, size: 24),
-        const SizedBox(width: 8),
         CustomText(
           text: appLocalizations?.tips ?? '',
           fontWeight: FontWeight.bold,
@@ -111,10 +120,15 @@ class _OnboardingAnimatedTipsState extends State<OnboardingAnimatedTips> {
     );
   }
 
+  /// Builds the animated tip text with fade transition
   Widget _buildAnimatedTip() {
+    // If tips list is empty, don't show anything
+    if (_tips.isEmpty) return const SizedBox.shrink();
+
     return AnimatedOpacity(
       opacity: _isAnimating ? 0.0 : 1.0,
       duration: _animationDuration,
+      curve: Curves.easeInOut,
       child: SizedBox(
         height: 85,
         child: CustomText(
@@ -122,6 +136,7 @@ class _OnboardingAnimatedTipsState extends State<OnboardingAnimatedTips> {
           color: customGreyColor500,
           fontSize: 16,
           maxLines: 4,
+          overflow: TextOverflow.ellipsis,
         ),
       ),
     );

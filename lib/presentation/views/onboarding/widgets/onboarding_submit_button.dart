@@ -5,6 +5,10 @@ import 'package:flutter_social_chat/presentation/blocs/profile_management/profil
 import 'package:flutter_social_chat/presentation/blocs/profile_management/profile_manager_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/animated_gradient_button.dart';
 
+/// Button used to submit the onboarding form and create the user profile
+///
+/// This button is enabled only when the username is valid.
+/// When pressed, it triggers the profile creation process through the ProfileManagerCubit.
 class OnboardingSubmitButton extends StatelessWidget {
   const OnboardingSubmitButton({super.key});
 
@@ -26,8 +30,12 @@ class OnboardingSubmitButton extends StatelessWidget {
     );
   }
 
-  /// Handle submit button press
-  /// ProfileManagerCubit now handles both profile creation and updating AuthSessionCubit
+  /// Handles the submit button press by triggering profile creation
+  ///
+  /// The ProfileManagerCubit handles:
+  /// 1. Creating the user profile in the database
+  /// 2. Updating the AuthSessionCubit to reflect the completed onboarding
+  /// 3. Reconnecting to chat services with the new profile data
   void _handleSubmit(BuildContext context) {
     context.read<ProfileManagerCubit>().createUserProfile();
   }

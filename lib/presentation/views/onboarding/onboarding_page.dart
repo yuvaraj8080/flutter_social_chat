@@ -10,6 +10,16 @@ import 'package:flutter_social_chat/presentation/design_system/widgets/popscope_
 import 'package:flutter_social_chat/presentation/views/onboarding/widgets/onboarding_page_body.dart';
 import 'package:go_router/go_router.dart';
 
+/// User onboarding page shown after successful authentication
+///
+/// This page allows users to complete their profile setup by:
+/// 1. Entering a valid username
+/// 2. Viewing their default profile image (which can be changed later)
+/// 3. Submitting their profile information
+///
+/// The page listens to two BLoC states:
+/// - AuthSessionCubit: To detect when onboarding is completed and navigate accordingly
+/// - ProfileManagerCubit: To manage loading states during profile creation
 class OnboardingPage extends StatelessWidget {
   const OnboardingPage({super.key});
 
@@ -21,22 +31,33 @@ class OnboardingPage extends StatelessWidget {
         BlocListener<AuthSessionCubit, AuthSessionState>(
           listenWhen: (previous, current) =>
               !previous.authUser.isOnboardingCompleted && current.authUser.isOnboardingCompleted,
-          listener: (context, state) {
-            CustomLoadingIndicator.of(context).hide();
-            context.go(RouterEnum.channelsView.routeName);
-          },
+          listener: _handleOnboardingCompleted,
         ),
+        
         // Listen for loading state changes in ProfileManagerCubit
         BlocListener<ProfileManagerCubit, ProfileManagerState>(
           listenWhen: (previous, current) => previous.isInProgress != current.isInProgress,
-          listener: (context, state) {
-            state.isInProgress ? CustomLoadingIndicator.of(context).show() : CustomLoadingIndicator.of(context).hide();
-          },
+          listener: _handleLoadingStateChanges,
         ),
       ],
       child: const PopScopeScaffold(
         body: OnboardingPageBody(),
       ),
     );
+  }
+  
+  /// Handles navigation when onboarding is completed
+  void _handleOnboardingCompleted(BuildContext context, AuthSessionState state) {
+    CustomLoadingIndicator.of(context).hide();
+    context.go(RouterEnum.channelsView.routeName);
+  }
+  
+  /// Manages loading indicator based on profile creation state
+  void _handleLoadingStateChanges(BuildContext context, ProfileManagerState state) {
+    if (state.isInProgress) {
+      CustomLoadingIndicator.of(context).show();
+    } else {
+      CustomLoadingIndicator.of(context).hide();
+    }
   }
 }

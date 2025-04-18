@@ -5,22 +5,24 @@ import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_progress_indicator.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
 
+/// Component that displays the user's profile image
+///
+/// Uses a default image from a remote URL during onboarding
 class OnboardingProfileImage extends StatelessWidget {
   const OnboardingProfileImage({super.key});
 
   // Default remote image URL
-  static const String defaultImageUrl =
-      'https://pbs.twimg.com/profile_images/1443929192668803076/ynrh00eg_400x400.jpg';
+  static const String defaultImageUrl = 'https://pbs.twimg.com/profile_images/1870429866643869696/K1jmpXsk_400x400.jpg';
 
   @override
   Widget build(BuildContext context) {
     final appLocalizations = AppLocalizations.of(context);
 
     return Column(
+      spacing: 12,
       mainAxisSize: MainAxisSize.min,
       children: [
         _buildProfileAvatar(),
-        const SizedBox(height: 12),
         CustomText(
           text: appLocalizations?.profilePhotoAdded ?? '',
           fontSize: 14,
@@ -41,11 +43,7 @@ class OnboardingProfileImage extends StatelessWidget {
           color: customGreyColor400,
           shape: BoxShape.circle,
           boxShadow: [
-            BoxShadow(
-              color: black.withValues(alpha: 0.1),
-              offset: const Offset(0, 4),
-              blurRadius: 10,
-            ),
+            BoxShadow(color: black.withValues(alpha: 0.1), offset: const Offset(0, 4), blurRadius: 10),
           ],
           image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
         ),
@@ -57,11 +55,7 @@ class OnboardingProfileImage extends StatelessWidget {
           color: customGreyColor400,
           shape: BoxShape.circle,
           boxShadow: [
-            BoxShadow(
-              color: black.withValues(alpha: 0.1),
-              offset: const Offset(0, 4),
-              blurRadius: 10,
-            ),
+            BoxShadow(color: black.withValues(alpha: 0.1), offset: const Offset(0, 4), blurRadius: 10),
           ],
         ),
         child: const CustomProgressIndicator(),
@@ -73,11 +67,7 @@ class OnboardingProfileImage extends StatelessWidget {
           color: customGreyColor400,
           shape: BoxShape.circle,
           boxShadow: [
-            BoxShadow(
-              color: black.withValues(alpha: 0.1),
-              offset: const Offset(0, 4),
-              blurRadius: 10,
-            ),
+            BoxShadow(color: black.withValues(alpha: 0.1), offset: const Offset(0, 4), blurRadius: 10),
           ],
         ),
         child: const Icon(Icons.person_rounded, size: 60, color: white),

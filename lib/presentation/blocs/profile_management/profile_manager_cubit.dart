@@ -32,7 +32,7 @@ class ProfileManagerCubit extends Cubit<ProfileManagerState> {
 
   // Default remote image URL
   static const String defaultProfileImageUrl =
-      'https://pbs.twimg.com/profile_images/1443929192668803076/ynrh00eg_400x400.jpg';
+      'https://pbs.twimg.com/profile_images/1870429866643869696/K1jmpXsk_400x400.jpg';
 
   /// Validates the username and updates the state
   ///

@@ -8,9 +8,15 @@ import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 import 'package:flutter_social_chat/presentation/design_system/styles/input_styles.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/custom_text.dart';
 
+/// Form field for username input with validation
+///
+/// Validates that the username:
+/// - Is between 3 and 20 characters
+/// - Only contains letters, numbers, underscores, and hyphens
 class OnboardingUsernameFormField extends StatelessWidget {
   const OnboardingUsernameFormField({super.key});
 
+  // Username validation regex - only allows letters, numbers, underscores and hyphens
   static final RegExp _usernameRegExp = RegExp(r'^[a-zA-Z0-9_\-]+$');
 
   @override
@@ -78,11 +84,13 @@ class OnboardingUsernameFormField extends StatelessWidget {
     );
   }
 
+  /// Updates the username validity in the ProfileManagerCubit
   void _validateUsername(BuildContext context, String? userName) {
     final bool isValid = _isUsernameValid(userName);
     context.read<ProfileManagerCubit>().updateUsernameValidity(isValid: isValid);
   }
 
+  /// Checks if the username meets all validation criteria
   bool _isUsernameValid(String? userName) {
     if (userName == null || userName.isEmpty) {
       return false;
@@ -94,6 +102,7 @@ class OnboardingUsernameFormField extends StatelessWidget {
     return isValidLength && hasValidCharacters;
   }
 
+  /// Returns a specific validation error message based on the validation failure
   String? _getValidationMessage(BuildContext context, String? userName) {
     final appLocalizations = AppLocalizations.of(context);
 

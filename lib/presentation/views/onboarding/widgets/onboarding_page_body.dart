@@ -8,6 +8,14 @@ import 'package:flutter_social_chat/presentation/views/onboarding/widgets/onboar
 import 'package:flutter_social_chat/presentation/views/onboarding/widgets/onboarding_submit_button.dart';
 import 'package:flutter_social_chat/presentation/views/onboarding/widgets/onboarding_username_form_field.dart';
 
+/// Main content container for the onboarding page
+///
+/// Displays:
+/// - Animated illustration at the top
+/// - Profile image selection
+/// - Username input field
+/// - Animated tips at the bottom
+/// - Submit button
 class OnboardingPageBody extends StatelessWidget {
   const OnboardingPageBody({super.key});
 
@@ -39,21 +47,15 @@ class OnboardingPageBody extends StatelessWidget {
     );
   }
 
+  /// Builds the main rounded container with all form elements
   Widget _buildMainContentContainer(AppLocalizations? appLocalizations) {
     return Container(
       padding: const EdgeInsets.only(top: 40, left: 24, right: 24),
       decoration: BoxDecoration(
         color: white,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(28),
-          topRight: Radius.circular(28),
-        ),
+        borderRadius: const BorderRadius.only(topLeft: Radius.circular(28), topRight: Radius.circular(28)),
         boxShadow: [
-          BoxShadow(
-            color: customIndigoColor.withValues(alpha: 0.08),
-            blurRadius: 15,
-            offset: const Offset(0, -5),
-          ),
+          BoxShadow(color: customIndigoColor.withValues(alpha: 0.08), blurRadius: 15, offset: const Offset(0, -5)),
         ],
       ),
       child: Column(
@@ -72,6 +74,7 @@ class OnboardingPageBody extends StatelessWidget {
     );
   }
 
+  /// Builds the welcome header with title and subtitle
   Widget _buildHeader(AppLocalizations? appLocalizations) {
     return Column(
       children: [
@@ -96,6 +99,7 @@ class OnboardingPageBody extends StatelessWidget {
     );
   }
 
+  /// Builds the profile image and username input section
   Widget _buildProfileSection(AppLocalizations? appLocalizations) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
