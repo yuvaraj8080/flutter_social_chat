@@ -31,8 +31,10 @@ class DashboardViewHeader extends StatelessWidget {
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    decoration:
-                        BoxDecoration(color: getCustomIndigoWithOpacity(0.2), borderRadius: BorderRadius.circular(12)),
+                    decoration: BoxDecoration(
+                      color: customIndigoColor.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     child: Row(
                       spacing: 8,
                       children: [

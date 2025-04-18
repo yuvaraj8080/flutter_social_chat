@@ -52,7 +52,7 @@ class AnimatedGradientButton extends StatelessWidget {
           final endColor = Color.lerp(buttonGradientInactiveEnd, buttonGradientActiveEnd, value)!;
 
           // Get shadow color with animated opacity
-          final shadowColor = getCustomIndigoWithOpacity(0.3 * value);
+          final shadowColor = customIndigoColor.withValues(alpha: 0.3 * value);
 
           // Interpolate for circle background
           final circleColor = Color.lerp(whiteWithOpacity10, whiteWithOpacity30, value)!;

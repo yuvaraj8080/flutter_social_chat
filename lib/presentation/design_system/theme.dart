@@ -10,7 +10,7 @@ import 'package:flutter_social_chat/presentation/design_system/colors.dart';
 class AppTheme {
   // Private constructor to prevent instantiation
   AppTheme._();
-  
+
   /// Base text style using Roboto font
   static final _baseTextStyle = GoogleFonts.getFont('Roboto');
 
@@ -37,11 +37,7 @@ class AppTheme {
       iconTheme: const IconThemeData(color: black, size: 24),
 
       // Divider theme
-      dividerTheme: const DividerThemeData(
-        color: customGreyColor400, 
-        thickness: 1, 
-        space: 1
-      ),
+      dividerTheme: const DividerThemeData(color: customGreyColor400, thickness: 1, space: 1),
 
       // Text selection theme
       textSelectionTheme: const TextSelectionThemeData(
@@ -131,10 +127,10 @@ class AppTheme {
         overlayColor: WidgetStateProperty.resolveWith<Color?>(
           (Set<WidgetState> states) {
             if (states.contains(WidgetState.hovered)) {
-              return customIndigoColor.withOpacity(0.04);
+              return customIndigoColor.withValues(alpha: 0.04);
             }
             if (states.contains(WidgetState.focused) || states.contains(WidgetState.pressed)) {
-              return customIndigoColor.withOpacity(0.12);
+              return customIndigoColor.withValues(alpha: 0.12);
             }
             return null;
           },

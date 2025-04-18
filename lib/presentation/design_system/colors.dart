@@ -33,12 +33,6 @@ const Color customGreyColor200 = Color.fromRGBO(238, 238, 238, 1);
 const Color secondaryTextColor = Color.fromRGBO(100, 100, 100, 1);
 const Color disabledTextColor = customGreyColor500;
 
-/// Helper functions for color manipulation
-/// Get indigo color with custom opacity
-Color getCustomIndigoWithOpacity(double opacity) {
-  return customIndigoColor.withValues(alpha: opacity);
-}
-
 /// Button gradient colors
 const Color buttonGradientActiveStart = customIndigoColor;
 const Color buttonGradientActiveEnd = customIndigoColorSecondary;

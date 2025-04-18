@@ -25,7 +25,7 @@ class DashboardViewMessagesCard extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: getCustomIndigoWithOpacity(0.1), shape: BoxShape.circle),
+            decoration: BoxDecoration(color: customIndigoColor.withValues(alpha: 0.1), shape: BoxShape.circle),
             child: const Icon(Icons.forum_rounded, color: customIndigoColor, size: 20),
           ),
           const SizedBox(width: 12),
