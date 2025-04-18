@@ -42,9 +42,7 @@ Read more about our first integration (2023) in this article: [Building a Social
 
 ### App Flow Demo
 
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/097b6421-d9fc-4e26-be65-0cfa16039ee0" alt="App Flow Demo" width="500"/>
-</p>
+<img src="https://github.com/user-attachments/assets/097b6421-d9fc-4e26-be65-0cfa16039ee0" alt="App Flow Demo" width="500"/>
 
 ### Demo Video
 
