@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -39,27 +41,135 @@ class _ChannelsPageState extends State<ChannelsPage> with AutomaticKeepAliveClie
   /// Flag to indicate if there are no results for the current search
   bool _hasNoResults = false;
 
+  /// Flag to prevent multiple reconnection attempts
+  bool _isAttemptingReconnection = false;
+
+  /// Timer for connection timeout
+  Timer? _connectionTimeoutTimer;
+
+  /// Maximum wait time for chat connection before showing UI anyway
+  static const int _maxConnectionWaitTimeMs = 3000;
+
+  /// Flag to track if we've shown content despite connection issues
+  bool _hasShownContentDespiteConnectionIssues = false;
+
   @override
   bool get wantKeepAlive => true;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _initControllers());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _ensureChatConnection();
+      // Set a timeout to show content even if chat isn't connected yet
+      _startConnectionTimeout();
+    });
   }
 
   @override
   void dispose() {
     _channelListController?.dispose();
     _searchController.dispose();
+    _cancelConnectionTimeout();
     super.dispose();
+  }
+
+  /// Starts a timeout to show content even if chat connection is taking too long
+  void _startConnectionTimeout() {
+    _cancelConnectionTimeout();
+
+    _connectionTimeoutTimer = Timer(const Duration(milliseconds: _maxConnectionWaitTimeMs), () {
+      if (mounted && _channelListController == null) {
+        debugPrint('Connection timeout reached, showing content without channels');
+        setState(() {
+          _hasShownContentDespiteConnectionIssues = true;
+        });
+
+        // Continue trying to connect in background
+        _scheduleReconnectionAttempt(silent: true);
+      }
+    });
+  }
+
+  /// Cancels the connection timeout timer
+  void _cancelConnectionTimeout() {
+    _connectionTimeoutTimer?.cancel();
+    _connectionTimeoutTimer = null;
+  }
+
+  /// Ensures chat connection is active before initializing controllers
+  void _ensureChatConnection() {
+    if (!mounted) return;
+
+    try {
+      final chatSessionState = context.read<ChatSessionCubit>().state;
+      final authSessionState = context.read<AuthSessionCubit>().state;
+
+      // Only proceed if we actually have a logged in user
+      if (!authSessionState.isLoggedIn) return;
+
+      // Check if user is connected to chat
+      if (chatSessionState.isChatUserConnected) {
+        _initControllers();
+      } else {
+        // If not connected, trigger reconnection if not already in progress
+        if (!_isAttemptingReconnection) {
+          _isAttemptingReconnection = true;
+
+          // Attempt to reconnect with a small timeout
+          context.read<AuthSessionCubit>().reconnectToChatService().timeout(
+            const Duration(milliseconds: 2000),
+            onTimeout: () {
+              debugPrint('Chat reconnection timed out');
+              return;
+            },
+          ).then((_) {
+            _isAttemptingReconnection = false;
+
+            // After reconnection attempt, check if we're mounted and try to init controllers
+            if (mounted) {
+              _initControllers();
+            }
+          }).catchError((error) {
+            _isAttemptingReconnection = false;
+
+            // If the error is "Connection already available" - that's actually good!
+            // It means the user is already connected, so try to init controllers
+            if (error.toString().contains('Connection already available')) {
+              if (mounted) {
+                debugPrint('User already connected to chat, initializing controllers');
+                _initControllers();
+                return;
+              }
+            }
+
+            // For other errors, show UI anyway
+            if (mounted && !_hasShownContentDespiteConnectionIssues) {
+              setState(() {
+                _hasShownContentDespiteConnectionIssues = true;
+              });
+            }
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error ensuring chat connection: $e');
+      // Show content despite connection error
+      if (mounted && !_hasShownContentDespiteConnectionIssues) {
+        setState(() {
+          _hasShownContentDespiteConnectionIssues = true;
+        });
+      }
+    }
   }
 
   /// Initialize Stream controllers
   void _initControllers() {
     if (!mounted) return;
+
     try {
       final client = StreamChat.of(context).client;
+
       final currentUser = client.state.currentUser;
 
       if (currentUser != null) {
@@ -71,11 +181,63 @@ class _ChannelsPageState extends State<ChannelsPage> with AutomaticKeepAliveClie
           limit: 20,
         );
 
+        // Cancel timeout since we're now connected
+        _cancelConnectionTimeout();
+
         if (mounted) setState(() {});
+      } else {
+        debugPrint('StreamChat current user is null, retrying connection...');
+        // If currentUser is null but we're supposed to be logged in, try reconnecting
+        _scheduleReconnectionAttempt();
       }
     } catch (e) {
       debugPrint('Error initializing controllers: $e');
+      // If we encounter an error, schedule a reconnection attempt
+      _scheduleReconnectionAttempt();
     }
+  }
+
+  /// Schedules a reconnection attempt after a short delay
+  void _scheduleReconnectionAttempt({bool silent = false}) {
+    if (!mounted || _isAttemptingReconnection) return;
+
+    _isAttemptingReconnection = true;
+
+    // Use a shorter delay for reconnection attempts
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        context.read<AuthSessionCubit>().reconnectToChatService().timeout(
+          const Duration(milliseconds: 1500),
+          onTimeout: () {
+            debugPrint('Reconnection attempt timed out');
+            return;
+          },
+        ).then((_) {
+          _isAttemptingReconnection = false;
+          if (mounted) _initControllers();
+        }).catchError((error) {
+          _isAttemptingReconnection = false;
+
+          // Check if this is actually a "already connected" error
+          if (error.toString().contains('Connection already available')) {
+            if (mounted) {
+              debugPrint('User already connected to chat, initializing controllers');
+              _initControllers();
+              return;
+            }
+          }
+
+          // In silent mode, we've already shown content so just keep trying in background
+          if (!silent && mounted && !_hasShownContentDespiteConnectionIssues) {
+            setState(() {
+              _hasShownContentDespiteConnectionIssues = true;
+            });
+          }
+        });
+      } else {
+        _isAttemptingReconnection = false;
+      }
+    });
   }
 
   /// Handle search text changes
@@ -94,31 +256,45 @@ class _ChannelsPageState extends State<ChannelsPage> with AutomaticKeepAliveClie
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return BlocListener<ChatSessionCubit, ChatSessionState>(
-      listenWhen: (previous, current) => !previous.isChatUserConnected && current.isChatUserConnected,
-      listener: (context, state) {
-        if (state.isChatUserConnected && _channelListController == null) {
-          _initControllers();
-        }
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<ChatSessionCubit, ChatSessionState>(
+          listenWhen: (previous, current) => !previous.isChatUserConnected && current.isChatUserConnected,
+          listener: (context, state) {
+            if (state.isChatUserConnected && _channelListController == null) {
+              _initControllers();
+            }
+          },
+        ),
+        BlocListener<AuthSessionCubit, AuthSessionState>(
+          listenWhen: (previous, current) => previous.isInProgress != current.isInProgress && !current.isInProgress,
+          listener: (context, state) {
+            if (!state.isInProgress && _channelListController == null) {
+              _ensureChatConnection();
+            }
+          },
+        ),
+      ],
       child: Scaffold(
-        floatingActionButton: _channelListController != null ? const AnimatedChatButton() : null,
+        floatingActionButton: const AnimatedChatButton(),
         body: BlocBuilder<AuthSessionCubit, AuthSessionState>(
           buildWhen: (previous, current) => previous.isInProgress != current.isInProgress,
           builder: (context, state) =>
-              state.isInProgress || _channelListController == null ? _buildLoading() : _buildContent(),
+              state.isInProgress || (_channelListController == null && !_hasShownContentDespiteConnectionIssues)
+                  ? _buildLoading()
+                  : _buildContent(),
         ),
       ),
     );
   }
 
   Widget _buildLoading() {
-    return  Center(
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-         const CustomProgressIndicator(size: 56, progressIndicatorColor: customIndigoColor),
-         const SizedBox(height: 24),
+          const CustomProgressIndicator(size: 56, progressIndicatorColor: customIndigoColor),
+          const SizedBox(height: 24),
           CustomText(
             text: AppLocalizations.of(context)?.loadingChats ?? 'Loading chats...',
             fontSize: 16,
@@ -134,8 +310,47 @@ class _ChannelsPageState extends State<ChannelsPage> with AutomaticKeepAliveClie
       children: [
         _buildHeader(),
         _buildSearchField(),
-        _searchText.isNotEmpty && _hasNoResults ? _buildNoSearchResults() : _buildChannelsList(),
+        _searchText.isNotEmpty && _hasNoResults
+            ? _buildNoSearchResults()
+            : _channelListController == null
+                ? _buildEmptyChannelsState()
+                : _buildChannelsList(),
       ],
+    );
+  }
+
+  /// Build empty state when channels couldn't be loaded yet
+  Widget _buildEmptyChannelsState() {
+    return Expanded(
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.forum_outlined,
+              size: 64,
+              color: customGreyColor500,
+            ),
+            const SizedBox(height: 16),
+            const CustomText(
+              text: 'Connecting to chat...',
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => _ensureChatConnection(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: customIndigoColor,
+                foregroundColor: white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              ),
+              child: Text(AppLocalizations.of(context)?.retry ?? 'Retry'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
