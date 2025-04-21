@@ -8,36 +8,55 @@ import 'package:flutter_social_chat/core/interfaces/i_auth_repository.dart';
 import 'package:fpdart/fpdart.dart';
 
 class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
+  /// Repository for authentication operations
   final IAuthRepository _authRepository;
+  
+  /// Subscription to track phone number sign-in process
   StreamSubscription<Either<AuthFailureEnum, (String, int?)>>? _phoneNumberSignInSubscription;
 
+  /// Duration after which the verification code expires
   final Duration verificationCodeTimeout = const Duration(seconds: 60);
 
+  /// Creates a new instance of [PhoneNumberSignInCubit]
   PhoneNumberSignInCubit(this._authRepository) : super(PhoneNumberSignInState.empty());
 
+  /// Updates the phone number in the state
+  /// 
+  /// [phoneNumber] - The new phone number to set
   void phoneNumberChanged({required String phoneNumber}) {
     if (state.phoneNumber == phoneNumber) return;
     emit(state.copyWith(phoneNumber: phoneNumber, isPhoneNumberInputValidated: false));
   }
 
+  /// Updates the validation status for the phone number input
+  /// 
+  /// [isPhoneNumberInputValidated] - Whether the phone number is valid
   void updateNextButtonStatus({required bool isPhoneNumberInputValidated}) {
     if (state.isPhoneNumberInputValidated == isPhoneNumberInputValidated) return;
     emit(state.copyWith(isPhoneNumberInputValidated: isPhoneNumberInputValidated));
   }
 
+  /// Updates the SMS verification code in the state
+  /// 
+  /// [smsCode] - The verification code entered by the user
   void smsCodeChanged({required String smsCode}) {
     if (state.smsCode == smsCode) return;
     emit(state.copyWith(smsCode: smsCode));
   }
 
+  /// Updates the navigation flag indicating if the user has navigated to verification screen
+  /// 
+  /// [hasNavigated] - Whether navigation has occurred
   void updateNavigationFlag({required bool hasNavigated}) {
     emit(state.copyWith(hasNavigatedToVerification: hasNavigated));
   }
 
+  /// Resets only the error state while keeping other state values
   void resetErrorOnly() {
     emit(state.copyWith(failureMessageOption: none(), isInProgress: false));
   }
 
+  /// Resets the state to prepare for a new authentication attempt
   void reset() {
     emit(
       state.copyWith(
@@ -50,6 +69,7 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
     );
   }
 
+  /// Resends the verification code to the user's phone number
   void resendCode() {
     if (state.isInProgress || state.phoneNumber.isEmpty) return;
 
@@ -74,6 +94,7 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
     });
   }
 
+  /// Verifies the SMS code entered by the user
   void verifySmsCode() {
     if (state.isInProgress) return;
 
@@ -106,6 +127,7 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
     );
   }
 
+  /// Initiates the phone number sign-in process
   void signInWithPhoneNumber() {
     if (state.isInProgress) return;
 
@@ -123,6 +145,11 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
     );
   }
 
+  /// Initiates the phone authentication process with the authentication repository
+  /// 
+  /// [phoneNumber] - The phone number to authenticate
+  /// [resendToken] - Optional token used when resending codes
+  /// [isResend] - Whether this is a resend operation
   void _initiatePhoneAuth({
     required String phoneNumber,
     int? resendToken,
@@ -174,6 +201,10 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
     }
   }
 
+  /// Handles errors that occur during authentication process
+  /// 
+  /// [source] - The method where the error occurred
+  /// [error] - The error that occurred
   void _handleError(String source, dynamic error) {
     debugPrint('Error in $source: $error');
     if (!isClosed) {
@@ -187,6 +218,7 @@ class PhoneNumberSignInCubit extends Cubit<PhoneNumberSignInState> {
     return super.close();
   }
 
+  /// Cancels the current phone number sign-in subscription
   Future<void> _cancelSubscription() async {
     await _phoneNumberSignInSubscription?.cancel();
     _phoneNumberSignInSubscription = null;
