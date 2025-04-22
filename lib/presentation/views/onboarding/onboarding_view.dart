@@ -47,7 +47,7 @@ class OnboardingView extends StatelessWidget {
   }
   
   /// Handles navigation when onboarding is completed
-  void _handleOnboardingCompleted(BuildContext context, AuthSessionState state) {
+  void _handleOnboardingCompleted(BuildContext context, _) {
     CustomLoadingIndicator.of(context).hide();
     context.go(RouterEnum.dashboardView.routeName);
   }
