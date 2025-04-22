@@ -9,7 +9,6 @@ import 'package:flutter_social_chat/presentation/blocs/chat_session/chat_session
 import 'package:flutter_social_chat/presentation/blocs/chat_session/chat_session_state.dart';
 import 'package:flutter_social_chat/presentation/design_system/widgets/popscope_scaffold.dart';
 import 'package:flutter_social_chat/presentation/views/dashboard/widgets/dashboard_view_animated_chat_button.dart';
-import 'package:flutter_social_chat/presentation/views/dashboard/widgets/dashboard_view_chat_not_found_widget.dart';
 import 'package:flutter_social_chat/presentation/views/dashboard/widgets/dashboard_view_empty_state_widget.dart';
 import 'package:flutter_social_chat/presentation/views/dashboard/widgets/dashboard_view_header.dart';
 import 'package:flutter_social_chat/presentation/views/dashboard/widgets/dashboard_view_list_view.dart';
@@ -292,9 +291,7 @@ class _DashboardViewState extends State<DashboardView> with AutomaticKeepAliveCl
       children: [
         const DashboardViewHeader(),
         DashboardViewSearchField(controller: _searchController, onSearchChanged: _handleSearchTextChanged),
-        _searchText.isNotEmpty && _hasNoResults
-            ? const DashboardViewChatNotFoundWidget()
-            : _channelListController == null
+         _channelListController == null
                 ? DashboardViewEmptyStateWidget(onRetry: _ensureChatConnection)
                 : DashboardViewListView(
                     controller: _channelListController!,

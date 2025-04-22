@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_social_chat/presentation/views/dashboard/widgets/dashboard_view_error_widget.dart';
 import 'package:flutter_social_chat/presentation/views/dashboard/widgets/dashboard_view_loading_widget.dart';
 import 'package:flutter_social_chat/presentation/views/dashboard/widgets/dashboard_view_list_item_builder.dart';
-import 'package:flutter_social_chat/presentation/views/dashboard/widgets/dashboard_view_chat_not_found_widget.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// A widget for displaying a list of channels with search functionality
@@ -39,7 +38,6 @@ class _DashboardViewListViewState extends State<DashboardViewListView> {
         padding: const EdgeInsets.only(top: 8),
         controller: widget.controller,
         onChannelTap: widget.onChannelTap,
-        emptyBuilder: (_) => const DashboardViewChatNotFoundWidget(),
         errorBuilder: (_, __) => DashboardViewErrorWidget(onRetry: () => widget.controller.refresh()),
         loadingBuilder: (_) => const DashboardViewLoadingWidget(),
         itemBuilder: (context, channels, index, defaultWidget) {
