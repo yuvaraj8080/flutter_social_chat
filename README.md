@@ -16,7 +16,12 @@ Flutter Social Chat is proudly sponsored by [Stream](https://getstream.io/chat/f
 
 This marks **another** exciting collaboration with Stream after our initial release. The powerful Stream Chat SDK enables us to implement robust, scalable, and feature-rich chat functionality with minimal effort.
 
-Read more about our first integration (2023) in this article: [Building a Social Chat App with Flutter and Stream](https://gstrm.io/sahinefe)
+📖 **Official Blog Coverage**
+
+- [Building a Flutter Social Chat App: MVVM Architecture & Stream Chat (2025)](https://getstream.io/blog/flutter-social-chat/)
+- [Building a Social Chat App with Flutter and Stream (2023)](https://gstrm.io/sahinefe)
+
+The latest blog post dives into our architectural decisions, feature set, and how the Stream Chat SDK powers real-time communication in this modern Flutter app.
 
 ## 🚀 Technical Highlights
 
