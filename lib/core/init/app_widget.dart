@@ -1,17 +1,18 @@
 import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart'; // Ensure this is imported
 import 'package:flutter_social_chat/presentation/blocs/profile_management/profile_manager_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat_management/chat_management_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/chat_session/chat_session_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/connectivity/connectivity_cubit.dart';
 import 'package:flutter_social_chat/presentation/blocs/connectivity/connectivity_state.dart';
+import 'package:flutter_social_chat/presentation/blocs/phone_number_sign_in/phone_number_sign_in_cubit.dart';
+import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_cubit.dart';
 import 'package:flutter_social_chat/presentation/design_system/theme.dart';
 import 'package:flutter_social_chat/core/di/dependency_injector.dart';
 import 'package:flutter_social_chat/core/init/router/app_router.dart';
-import 'package:flutter_social_chat/presentation/blocs/phone_number_sign_in/phone_number_sign_in_cubit.dart';
-import 'package:flutter_social_chat/presentation/blocs/auth_session/auth_session_cubit.dart';
+import 'package:flutter_social_chat/presentation/l10n/app_localizations.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 class AppWidget extends StatelessWidget {
@@ -50,11 +51,21 @@ class AppWidget extends StatelessWidget {
       child: BlocListener<ConnectivityCubit, ConnectivityState>(
         listener: _handleConnectivityChanges,
         child: MaterialApp.router(
-          theme: AppTheme.lightTheme,
           debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme,
           routerConfig: appRouter.router,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
+
+          // ✅ Localization setup
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [
+            Locale('en'), // Add other supported locales here
+          ],
+
           builder: (context, child) => _buildAppWithStreamChat(context, child, botToastBuilder),
         ),
       ),
@@ -65,7 +76,7 @@ class AppWidget extends StatelessWidget {
   void _handleConnectivityChanges(BuildContext context, ConnectivityState state) {
     if (!state.isUserConnectedToTheInternet) {
       _showConnectivityToast(context, true);
-    } else if (state.isUserConnectedToTheInternet) {
+    } else {
       BotToast.cleanAll();
     }
   }
@@ -76,7 +87,7 @@ class AppWidget extends StatelessWidget {
       final localizations = AppLocalizations.of(context);
 
       BotToast.showText(
-        text: localizations?.connectionFailed ?? '',
+        text: localizations?.connectionFailed ?? 'Connection failed',
         duration: const Duration(seconds: 30),
         clickClose: true,
       );
@@ -86,10 +97,8 @@ class AppWidget extends StatelessWidget {
   /// Builds the app with StreamChat integration and toast capabilities
   Widget _buildAppWithStreamChat(BuildContext context, Widget? child, TransitionBuilder botToastBuilder) {
     final client = getIt<StreamChatClient>();
-
     child = StreamChat(client: client, child: child);
     child = botToastBuilder(context, child);
-
-    return child;
+    return child!;
   }
 }
