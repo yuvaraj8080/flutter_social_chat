@@ -33,6 +33,8 @@
 			<array>
 				<string>com.googleusercontent.apps.719778291935-i21bkdcd96jb4r5opc01scmgc8qinr50</string>
 				<string>app-1-800611353162-ios-b00480743c9edf1d2b1cb3</string>
+				<string>app-1-1096416031468-ios-36a387c14e5c57bd18ebc9</string> <!-- ✅ Add this -->
+
 			</array>
 		</dict>
 		<dict/>
